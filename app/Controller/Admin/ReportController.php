@@ -4,6 +4,7 @@
 
 	use Natasya\NataApp\App\Controller;
 	use Natasya\NataApp\App\Request;
+	use Natasya\NataApp\App\View;
 	use Natasya\NataApp\Model\Participant;
 	use Natasya\NataApp\Model\Training;
 	use Natasya\NataApp\Model\TrainingField;
@@ -14,12 +15,47 @@
 		{
 			$this->app();
 
-			$this->view(
-				'Admin/Reports/index',
-				[
-					'title' => 'Laporan',
-				]
-			);
+			View::render('Admin/Report/index', [
+
+				'title' => 'Laporan',
+
+				'reports' => [
+
+					[
+						'title' => 'Laporan Peserta',
+						'description' => 'Data seluruh peserta pelatihan beserta status pendaftaran.',
+						'icon' => 'fas fa-user-graduate',
+						'color' => 'primary',
+						'url' => url('/admin/reports/participants'),
+					],
+
+					[
+						'title' => 'Laporan Pelatihan',
+						'description' => 'Data pelatihan yang telah dibuat beserta kuota dan status.',
+						'icon' => 'fas fa-book-open',
+						'color' => 'success',
+						'url' => url('/admin/reports/trainings'),
+					],
+
+					[
+						'title' => 'Laporan Pegawai',
+						'description' => 'Data instruktur atau pegawai pelatihan.',
+						'icon' => 'fas fa-user-tie',
+						'color' => 'info',
+						'url' => url('/admin/reports/employees'),
+					],
+
+					[
+						'title' => 'Laporan Penjadwalan',
+						'description' => 'Seluruh jadwal pelaksanaan pelatihan.',
+						'icon' => 'fas fa-calendar-alt',
+						'color' => 'warning',
+						'url' => url('/admin/reports/schedules'),
+					],
+
+				],
+
+			]);
 		}
 
 		public function participants(): void
