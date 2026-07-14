@@ -46,8 +46,8 @@ jobs:
                         --optimize-autoloader
 
                       echo ""
-                      echo "🗄️ Run Database"
-#                      php database/reset.php
+             
+
 
                       echo ""
                       echo "📂 Copy Public Files"
