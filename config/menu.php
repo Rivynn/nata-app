@@ -67,7 +67,11 @@
 			'roles' => ['admin'],
 
 			'children' => [
-
+				[
+					'title' => 'Cetak Laporan',
+					'icon' => 'fas fa-print',
+					'url' => '/admin/reports',
+				],
 
 
 				[
