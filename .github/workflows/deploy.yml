@@ -7,15 +7,16 @@ on:
 
 jobs:
     deploy:
+        name: Deploy to Production
         runs-on: ubuntu-latest
 
         steps:
-            - name: Checkout
+            - name: Checkout Repository
               uses: actions/checkout@v4
 
             - name: Deploy via SSH
-              uses: apple boy/ssh-action@v1.2.0
-              
+              uses: appleboy/ssh-action@v1.2.2
+
               with:
                   host: ${{ secrets.SSH_HOST }}
                   username: ${{ secrets.SSH_USERNAME }}
@@ -23,9 +24,45 @@ jobs:
                   port: ${{ secrets.SSH_PORT }}
 
                   script: |
+                      set -e
+
+                      echo "=================================="
+                      echo "🚀 Deploy Nata App"
+                      echo "=================================="
+
                       cd ${{ secrets.APP_PATH }}
 
+                      echo ""
+                      echo "📥 Update Repository"
                       git fetch origin
                       git reset --hard origin/main
 
-                      composer install --no-dev --optimize-autoloader
+                      echo ""
+                      echo "📦 Install Composer"
+                      composer install \
+                        --no-dev \
+                        --prefer-dist \
+                        --no-interaction \
+                        --optimize-autoloader
+
+                      echo ""
+             
+
+
+                      echo ""
+                      echo "📂 Copy Public Files"
+
+                      cp -rf public/assets /home/u855axyw/public_html/
+
+                      if [ -f public/.htaccess ]; then
+                        cp public/.htaccess \
+                          /home/u855axyw/public_html/.htaccess
+                      fi
+
+                      echo ""
+                      echo "🔐 Set Permissions"
+
+
+
+                      echo ""
+                      echo "✅ Deploy Success"
