@@ -47,15 +47,12 @@ jobs:
 
                       echo ""
                       echo "🗄️ Run Database"
-                      php database/reset.php
+#                      php database/reset.php
 
                       echo ""
                       echo "📂 Copy Public Files"
 
                       cp -rf public/assets /home/u855axyw/public_html/
-
-                      cp public/index.php \
-                        /home/u855axyw/public_html/index.php
 
                       if [ -f public/.htaccess ]; then
                         cp public/.htaccess \
@@ -65,7 +62,7 @@ jobs:
                       echo ""
                       echo "🔐 Set Permissions"
 
-                     
+
 
                       echo ""
                       echo "✅ Deploy Success"
