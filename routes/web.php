@@ -11,6 +11,7 @@
 
 	Router::get('/', \Natasya\NataApp\Controller\DashboardController::class, 'index', [\Natasya\NataApp\Middleware\AuthMiddleware::class]);
 	Router::get('/admin', \Natasya\NataApp\Controller\Admin\DashboardController::class, 'index', [\Natasya\NataApp\Middleware\AuthMiddleware::class, \Natasya\NataApp\Middleware\AdminMiddleware::class]);
+	Router::get('/admin/reports', \Natasya\NataApp\Controller\Admin\ReportController::class, 'index', [\Natasya\NataApp\Middleware\AuthMiddleware::class, \Natasya\NataApp\Middleware\AdminMiddleware::class]);
 	Router::get('/admin/users', \Natasya\NataApp\Controller\Admin\UserController::class, 'index', [\Natasya\NataApp\Middleware\AuthMiddleware::class, \Natasya\NataApp\Middleware\AdminMiddleware::class]);
 	Router::get('/admin/users/create', \Natasya\NataApp\Controller\Admin\UserController::class, 'create', [\Natasya\NataApp\Middleware\AuthMiddleware::class, \Natasya\NataApp\Middleware\AdminMiddleware::class]);
 	Router::post('/admin/users/store', \Natasya\NataApp\Controller\Admin\UserController::class, 'store', [			\Natasya\NataApp\Middleware\AuthMiddleware::class, \Natasya\NataApp\Middleware\AdminMiddleware::class]);

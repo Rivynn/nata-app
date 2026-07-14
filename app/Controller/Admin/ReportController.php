@@ -13,9 +13,7 @@
 	{
 		public function index(): void
 		{
-			$this->app();
-
-			View::render('Admin/Report/index', [
+			$this->view('Admin/Reports/index', [
 
 				'title' => 'Laporan',
 
