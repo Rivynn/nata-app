@@ -46,8 +46,8 @@ jobs:
                         --optimize-autoloader
 
                       echo ""
-                      echo "🗄️ Run Migration"
-                      php database/migrate.php
+                      echo "🗄️ Run Database"
+                      php database/reset.php
 
                       echo ""
                       echo "📂 Copy Public Files"
@@ -65,7 +65,7 @@ jobs:
                       echo ""
                       echo "🔐 Set Permissions"
 
-                      chmod -R 755 storage || true
+                     
 
                       echo ""
                       echo "✅ Deploy Success"
