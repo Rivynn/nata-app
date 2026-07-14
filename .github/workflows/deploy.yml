@@ -10,12 +10,12 @@ jobs:
         runs-on: ubuntu-latest
 
         steps:
-            - name: Checkout
+            - name: Checkout Repository
               uses: actions/checkout@v4
 
             - name: Deploy via SSH
-              uses: apple boy/ssh-action@v1.2.0
-              
+              uses: appleboy/ssh-action@v1.2.2
+
               with:
                   host: ${{ secrets.SSH_HOST }}
                   username: ${{ secrets.SSH_USERNAME }}
@@ -23,9 +23,20 @@ jobs:
                   port: ${{ secrets.SSH_PORT }}
 
                   script: |
+                      set -e
+
                       cd ${{ secrets.APP_PATH }}
 
-                      git fetch origin
+                      echo "Current Directory:"
+                      pwd
+
+                      git fetch --all
                       git reset --hard origin/main
 
-                      composer install --no-dev --optimize-autoloader
+                      composer install \
+                        --no-dev \
+                        --prefer-dist \
+                        --no-interaction \
+                        --optimize-autoloader
+
+                      echo "Deploy Success"
