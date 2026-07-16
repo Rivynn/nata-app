@@ -41,25 +41,25 @@
                         <?= ucfirst(user()['role']) ?>
 
                     </p>
+					<?php if (auth()->user()['status'] === 'active'): ?>
 
-                    <?php if (user()['is_active']): ?>
+						<span class="badge badge-success">
+        Aktif
+    </span>
 
-                        <span class="badge badge-success">
+					<?php elseif (auth()->user()['status'] === 'inactive'): ?>
 
-                    Akun Aktif
+						<span class="badge badge-secondary">
+        Tidak Aktif
+    </span>
 
-                </span>
+					<?php elseif (auth()->user()['status'] === 'banned'): ?>
 
-                    <?php else: ?>
+						<span class="badge badge-danger">
+        Diblokir
+    </span>
 
-                        <span class="badge badge-danger">
-
-                    Akun Nonaktif
-
-                </span>
-
-                    <?php endif; ?>
-
+					<?php endif; ?>
                 </div>
 
             </div>
@@ -152,21 +152,23 @@
 
 							<td>
 
-								<?php if(auth()->user()['is_active']): ?>
+								<?php if (user()['status'] === 'active'): ?>
 
 									<span class="badge badge-success">
+        Aktif
+    </span>
 
-                                        Aktif
+								<?php elseif (user()['status'] === 'inactive'): ?>
 
-                                    </span>
+									<span class="badge badge-secondary">
+        Tidak Aktif
+    </span>
 
-								<?php else: ?>
+								<?php elseif (user()['status'] === 'banned'): ?>
 
 									<span class="badge badge-danger">
-
-                                        Nonaktif
-
-                                    </span>
+        Diblokir
+    </span>
 
 								<?php endif; ?>
 

@@ -492,7 +492,12 @@
 	Router::get('/peserta/registrations/create', \Natasya\NataApp\Controller\Peserta\RegistrationController::class, 'create', [\Natasya\NataApp\Middleware\AuthMiddleware::class, \Natasya\NataApp\Middleware\PesertaMiddleware::class,]);
 	Router::post('/peserta/registrations', \Natasya\NataApp\Controller\Peserta\RegistrationController::class, 'store', [\Natasya\NataApp\Middleware\AuthMiddleware::class, \Natasya\NataApp\Middleware\PesertaMiddleware::class,]);
 	Router::get('/peserta/status', \Natasya\NataApp\Controller\Peserta\RegistrationController::class, 'status', [\Natasya\NataApp\Middleware\AuthMiddleware::class, \Natasya\NataApp\Middleware\PesertaMiddleware::class,]);
-
+	Router::get('/peserta/trainings/show', \Natasya\NataApp\Controller\Peserta\TrainingController::class, 'show',
+		[
+			\Natasya\NataApp\Middleware\AuthMiddleware::class,
+			\Natasya\NataApp\Middleware\PesertaMiddleware::class,
+		]
+	);
 	/*
 |--------------------------------------------------------------------------
 | Sertifikat Peserta

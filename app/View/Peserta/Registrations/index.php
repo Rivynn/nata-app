@@ -47,6 +47,134 @@
 
 	</div>
 
+	<div class="card shadow border-0 mb-4">
+
+		<div class="card-body">
+
+			<form method="GET">
+
+				<div class="form-row align-items-end">
+
+					<div class="col-lg-5 mb-3">
+
+						<label class="font-weight-bold">
+
+							Cari Pelatihan
+
+						</label>
+
+						<div class="input-group">
+
+							<div class="input-group-prepend">
+
+							<span class="input-group-text">
+
+								<i class="fas fa-search"></i>
+
+							</span>
+
+							</div>
+
+							<input
+								type="text"
+								name="keyword"
+								class="form-control"
+								placeholder="Nama pelatihan..."
+
+								value="<?= htmlspecialchars($_GET['keyword'] ?? '') ?>">
+
+						</div>
+
+					</div>
+
+					<div class="col-lg-3 mb-3">
+
+						<label class="font-weight-bold">
+
+							Kategori
+
+						</label>
+
+						<select
+							name="field"
+							class="form-control">
+
+							<option value="">
+
+								Semua Kategori
+
+							</option>
+
+							<?php foreach($fields as $field): ?>
+
+								<option
+									value="<?= $field['id'] ?>"
+									<?= (($_GET['field'] ?? '') == $field['id']) ? 'selected' : '' ?>>
+
+									<?= $field['name'] ?>
+
+								</option>
+
+							<?php endforeach; ?>
+
+						</select>
+
+					</div>
+
+					<div class="col-lg-2 mb-3">
+
+						<label class="font-weight-bold">
+
+							Urutkan
+
+						</label>
+
+						<select
+							name="sort"
+							class="form-control">
+
+							<option value="latest">
+
+								Terbaru
+
+							</option>
+
+							<option value="quota">
+
+								Kuota
+
+							</option>
+
+							<option value="name">
+
+								Nama A-Z
+
+							</option>
+
+						</select>
+
+					</div>
+
+					<div class="col-lg-2 mb-3">
+
+						<button
+							class="btn btn-primary btn-block">
+
+							<i class="fas fa-search mr-1"></i>
+
+							Cari
+
+						</button>
+
+					</div>
+
+				</div>
+
+			</form>
+
+		</div>
+
+	</div>
 	<?php if(!$profileCompleted): ?>
 
 		<div class="card shadow border-left-warning">
@@ -238,6 +366,29 @@
 										</td>
 
 									</tr>
+									<tr>
+
+										<td>
+
+											<i class="fas fa-chalkboard-teacher text-success"></i>
+
+										</td>
+
+										<td>
+
+											<?= htmlspecialchars($training['trainer_name'] ?? '-') ?>
+
+											<br>
+
+											<small class="text-muted">
+
+												<?= htmlspecialchars($training['institution'] ?? '') ?>
+
+											</small>
+
+										</td>
+
+									</tr>
 
 									<tr>
 
@@ -260,21 +411,41 @@
 									</tr>
 
 								</table>
-
 								<div class="mt-auto">
 
-									<a
-										href="<?= url('/peserta/registrations/create?id=' . $training['id']) ?>"
-										class="btn btn-primary btn-block">
+									<div class="row">
 
-										<i class="fas fa-paper-plane mr-2"></i>
+										<div class="col-5">
 
-										Daftar Sekarang
+											<a
+												href="<?= url('/peserta/trainings/show?id=' . $training['id']) ?>"
+												class="btn btn-outline-secondary btn-block">
 
-									</a>
+												<i class="fas fa-eye mr-1"></i>
+
+												Detail
+
+											</a>
+
+										</div>
+
+										<div class="col-7">
+
+											<a
+												href="<?= url('/peserta/registrations/create?id=' . $training['id']) ?>"
+												class="btn btn-primary btn-block">
+
+												<i class="fas fa-paper-plane mr-2"></i>
+
+												Daftar
+
+											</a>
+
+										</div>
+
+									</div>
 
 								</div>
-
 							</div>
 
 						</div>

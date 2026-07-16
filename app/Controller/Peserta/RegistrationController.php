@@ -13,21 +13,41 @@
 	{
 		public function index(): void
 		{
-			$training = new Training();
-			$participant = (new Participant())->findByUserId(auth()->id());
+			$participant = (new Participant())
+				->findByUserId(auth()->id());
 
-			$profile = (new ParticipantProfile())->findByParticipantId($participant['id']);
+			$profile = (new ParticipantProfile())
+				->findByParticipantId($participant['id']);
+
+			$trainingModel = new Training();
+
+			$filters = [
+
+				'keyword' => Request::get('keyword'),
+
+				'field' => Request::get('field'),
+
+				'sort' => Request::get('sort'),
+
+			];
+
 			$this->view(
 				'Peserta/Registrations/index',
 				[
+
 					'title' => 'Daftar Pelatihan',
 
-					'trainings' => $training->opened(),
+					'filters' => $filters,
+
+					'fields' => $trainingModel->fields(),
+
+					'trainings' => $trainingModel->opened($filters),
+
 					'profileCompleted' => (bool) ($profile['is_completed'] ?? false),
+
 				]
 			);
 		}
-
 		/**
 		 * Status pendaftaran.
 		 */

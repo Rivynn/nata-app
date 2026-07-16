@@ -181,7 +181,7 @@
 
 			<div class="row">
 
-				<?php foreach ($fields as $field): ?>
+				<?php foreach (array_slice($fields, 0, 3) as $field): ?>
 
 					<div class="col-lg-4 mb-4">
 
@@ -213,7 +213,7 @@
 								</p>
 
 								<a
-									href="<?= url('/peserta/registrations/create?id=' . $field['id']) ?>"
+									href="<?= url('/peserta/registrations?field=' . $field['id']) ?>"
 									class="btn btn-<?= htmlspecialchars($field['color'] ?: 'primary') ?>">
 
 									<i class="fas fa-arrow-right mr-2"></i>
@@ -231,7 +231,6 @@
 				<?php endforeach; ?>
 
 			</div>
-
 		</div>
 
 	</div>

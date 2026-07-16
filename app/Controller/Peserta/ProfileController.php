@@ -87,8 +87,9 @@
 
 				'religion' => Request::post('religion'),
 
-				'marital_status' => Request::post('marital_status'),
-
+				'marital_status' => trim(Request::post('marital_status')) !== ''
+					? trim(Request::post('marital_status'))
+					: null,
 				'province' => trim(Request::post('province')),
 
 				'city' => trim(Request::post('city')),

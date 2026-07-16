@@ -1,3 +1,11 @@
+DROP TABLE IF EXISTS announcements;
+DROP TABLE IF EXISTS assessment_scores;
+DROP TABLE IF EXISTS assessment_items;
+DROP TABLE IF EXISTS assessments;
+DROP TABLE IF EXISTS attendances;
+DROP TABLE IF EXISTS training_materials;
+DROP TABLE IF EXISTS training_schedules;
+DROP TABLE IF EXISTS training_batches;
 DROP TABLE IF EXISTS participant_profiles;
 DROP TABLE IF EXISTS schedules;
 DROP TABLE IF EXISTS trainers;
@@ -27,7 +35,8 @@ CREATE TABLE users
     (
         'admin',
         'pegawai',
-        'peserta'
+        'peserta',
+        'pelatih'
     )
     NOT NULL
     DEFAULT 'peserta',
