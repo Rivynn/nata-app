@@ -6,7 +6,7 @@
 
 	class User extends Model
 	{
-		public function findByUsername(string $username): ?array
+		public function findByUsername(string $username): ?arrayn
 		{
 			return $this->fetch(
 				"

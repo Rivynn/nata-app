@@ -249,63 +249,63 @@
 
 			<?php endif; ?>
 
-			<div class="card shadow">
-
-				<div class="card-header bg-white">
-
-					<h6 class="m-0 font-weight-bold text-primary">
-
-						Aksi
-
-					</h6>
-
-				</div>
-
-				<div class="card-body">
-
-
-					<div class="btn-group">
-                        <?php if ($participant['certificate_id']): ?>
-
-                            <a
-                                    href="<?= url('/pegawai/certificates/show?id='.$participant['certificate_id']) ?>"
-                                    class="btn btn-primary">
-
-                                <i class="fas fa-eye mr-2"></i>
-
-                                Lihat Sertifikat
-
-                            </a>
-
-                        <?php else: ?>
-
-                            <a
-                                    href="<?= url('/pegawai/certificates/create?id='.$participant['registration_id']) ?>"
-                                    class="btn btn-success">
-
-                                <i class="fas fa-award mr-2"></i>
-
-                                Terbitkan Sertifikat
-
-                            </a>
-
-                        <?php endif; ?>
-
-						<a
-							href="<?= url('/pegawai/participants') ?>"
-							class="btn btn-secondary">
-
-							<i class="fas fa-arrow-left mr-2"></i>
-
-							Kembali
-
-						</a>
-
-					</div>
-
-				</div>
-
-			</div>
+<!--			<div class="card shadow">-->
+<!---->
+<!--				<div class="card-header bg-white">-->
+<!---->
+<!--					<h6 class="m-0 font-weight-bold text-primary">-->
+<!---->
+<!--						Aksi-->
+<!---->
+<!--					</h6>-->
+<!---->
+<!--				</div>-->
+<!---->
+<!--				<div class="card-body">-->
+<!---->
+<!---->
+<!--					<div class="btn-group">-->
+<!--                        --><?php //if ($participant['certificate_id']): ?>
+<!---->
+<!--                            <a-->
+<!--                                    href="--><?php //= url('/pegawai/certificates/show?id='.$participant['certificate_id']) ?><!--"-->
+<!--                                    class="btn btn-primary">-->
+<!---->
+<!--                                <i class="fas fa-eye mr-2"></i>-->
+<!---->
+<!--                                Lihat Sertifikat-->
+<!---->
+<!--                            </a>-->
+<!---->
+<!--                        --><?php //else: ?>
+<!---->
+<!--                            <a-->
+<!--                                    href="--><?php //= url('/pegawai/certificates/create?id='.$participant['registration_id']) ?><!--"-->
+<!--                                    class="btn btn-success">-->
+<!---->
+<!--                                <i class="fas fa-award mr-2"></i>-->
+<!---->
+<!--                                Terbitkan Sertifikat-->
+<!---->
+<!--                            </a>-->
+<!---->
+<!--                        --><?php //endif; ?>
+<!---->
+<!--						<a-->
+<!--							href="--><?php //= url('/pegawai/participants') ?><!--"-->
+<!--							class="btn btn-secondary">-->
+<!---->
+<!--							<i class="fas fa-arrow-left mr-2"></i>-->
+<!---->
+<!--							Kembali-->
+<!---->
+<!--						</a>-->
+<!---->
+<!--					</div>-->
+<!---->
+<!--				</div>-->
+<!---->
+<!--			</div>-->
 
 		</div>
 

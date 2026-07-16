@@ -207,6 +207,31 @@
 			ORDER BY tf.name
 		");
 		}
+		public function countActive(): array
+		{
+			return $this->fetchAll("
+			SELECT
+
+				tf.id,
+
+				tf.name,
+
+				tf.icon,
+
+				tf.color,
+
+				COUNT(t.id) AS active
+
+			FROM training_fields tf
+
+			LEFT JOIN trainers t
+				ON t.training_field_id = tf.id
+
+			GROUP BY tf.id
+
+			ORDER BY tf.name
+		");
+		}
 		public function activeList(): array
 		{
 			return $this->fetchAll("

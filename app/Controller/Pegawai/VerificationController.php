@@ -49,6 +49,8 @@
 				$this->redirect('/pegawai/verifications');
 			}
 
+
+
 			$this->view(
 				'Pegawai/Verifications/show',
 				[

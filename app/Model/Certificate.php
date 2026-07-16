@@ -142,6 +142,29 @@
 				]) !== null;
 		}
 
+		public function existsByNumber(string $number): bool
+		{
+			$result = $this->fetch("
+            SELECT id
+            FROM certificates
+            WHERE certificate_number = ?
+            LIMIT 1
+        ", [$number]);
+
+			return !empty($result);
+		}
+		public function existsByRegistration(int $registrationId): bool
+		{
+			$result = $this->fetch("
+        SELECT id
+        FROM certificates
+        WHERE registration_id = ?
+        LIMIT 1
+    ", [$registrationId]);
+
+			return !empty($result);
+		}
+
 		public function findByRegistration(int $registrationId): ?array
 		{
 			return $this->fetch("
