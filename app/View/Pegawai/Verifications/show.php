@@ -281,7 +281,7 @@
 						<input
 							type="hidden"
 							name="id"
-							value="<?= $registration['id'] ?>">
+							value="<?= $registration['registration_id'] ?>">
 
 						<div class="form-group">
 

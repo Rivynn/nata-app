@@ -25,6 +25,8 @@
 					'total' => $trainer->count(),
 
 					'fields' => $trainer->countByField(),
+					'active' => '10',
+					'inactive' => '1'
 				]
 			);
 		}

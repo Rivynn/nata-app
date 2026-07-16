@@ -19,7 +19,7 @@
 		 */
 		private bool $email;
 
-		private WhatsAppService $whatsappService;
+		private WhatsappService $whatsappService;
 
 		private EmailService $emailService;
 
@@ -31,7 +31,7 @@
 
 			$this->email = config('notification.email', false);
 
-			$this->whatsappService = new WhatsAppService();
+			$this->whatsappService = new WhatsappService();
 
 			$this->emailService = new EmailService();
 		}

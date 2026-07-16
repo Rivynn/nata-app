@@ -43,7 +43,20 @@
 
 			$registrationId = (int) Request::post('registration_id');
 
+			if ($certificate->existsByRegistration($registrationId)) {
+
+				$_SESSION['error'] = 'Peserta sudah memiliki sertifikat.';
+
+				$this->redirect('/pegawai/participants');
+			}
+
 			$number = trim(Request::post('number'));
+
+			if ($certificate->existsByNumber($number)) {
+				$_SESSION['error'] = 'Nomor sertifikat sudah digunakan.';
+
+				$this->redirect('/pegawai/certificates/create?id=' . $registrationId);
+			}
 
 			$issuedAt = Request::post('issued_at');
 
