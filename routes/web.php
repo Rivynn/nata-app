@@ -469,6 +469,26 @@
 	Router::get('/peserta', \Natasya\NataApp\Controller\Peserta\DashboardController::class, 'index', [\Natasya\NataApp\Middleware\AuthMiddleware::class, \Natasya\NataApp\Middleware\PesertaMiddleware::class]);
 	Router::get('/peserta/registrations', \Natasya\NataApp\Controller\Peserta\RegistrationController::class, 'index', [\Natasya\NataApp\Middleware\AuthMiddleware::class, \Natasya\NataApp\Middleware\PesertaMiddleware::class,]);
 
+	Router::get(
+		'/peserta/profile',
+		\Natasya\NataApp\Controller\Peserta\ProfileController::class,
+		'index',
+		[
+			\Natasya\NataApp\Middleware\AuthMiddleware::class,
+			\Natasya\NataApp\Middleware\PesertaMiddleware::class,
+		]
+	);
+
+	Router::post(
+		'/peserta/profile',
+		\Natasya\NataApp\Controller\Peserta\ProfileController::class,
+		'update',
+		[
+			\Natasya\NataApp\Middleware\AuthMiddleware::class,
+			\Natasya\NataApp\Middleware\PesertaMiddleware::class,
+		]
+	);
+
 	Router::get('/peserta/registrations/create', \Natasya\NataApp\Controller\Peserta\RegistrationController::class, 'create', [\Natasya\NataApp\Middleware\AuthMiddleware::class, \Natasya\NataApp\Middleware\PesertaMiddleware::class,]);
 	Router::post('/peserta/registrations', \Natasya\NataApp\Controller\Peserta\RegistrationController::class, 'store', [\Natasya\NataApp\Middleware\AuthMiddleware::class, \Natasya\NataApp\Middleware\PesertaMiddleware::class,]);
 	Router::get('/peserta/status', \Natasya\NataApp\Controller\Peserta\RegistrationController::class, 'status', [\Natasya\NataApp\Middleware\AuthMiddleware::class, \Natasya\NataApp\Middleware\PesertaMiddleware::class,]);

@@ -137,10 +137,10 @@
 		],
 
 		/*
-		|--------------------------------------------------------------------------
-		| Peserta
-		|--------------------------------------------------------------------------
-		*/
+	|--------------------------------------------------------------------------
+	| Peserta
+	|--------------------------------------------------------------------------
+	*/
 
 		[
 			'title' => 'Dashboard',
@@ -152,22 +152,35 @@
 		[
 			'title' => 'Daftar Pelatihan',
 			'url'   => '/peserta/registrations',
-			'icon'  => 'fas fa-fw fa-file-alt',
+			'icon'  => 'fas fa-fw fa-clipboard-list',
+			'roles' => ['peserta'],
+		],
+
+		[
+			'title' => 'Pelatihan Saya',
+			'url'   => '/peserta/trainings',
+			'icon'  => 'fas fa-fw fa-graduation-cap',
 			'roles' => ['peserta'],
 		],
 
 		[
 			'title' => 'Status Pendaftaran',
 			'url'   => '/peserta/status',
-			'icon'  => 'fas fa-fw fa-info-circle',
+			'icon'  => 'fas fa-fw fa-hourglass-half',
 			'roles' => ['peserta'],
 		],
 
 		[
-			'title' => 'Cetak Sertifikat',
-			'url'   => '/peserta/certificates',
-			'icon'  => 'fas fa-fw fa-print',
+			'title' => 'Riwayat Pelatihan',
+			'url'   => '/peserta/history',
+			'icon'  => 'fas fa-fw fa-history',
 			'roles' => ['peserta'],
 		],
 
+		[
+			'title' => 'Sertifikat',
+			'url'   => '/peserta/certificates',
+			'icon'  => 'fas fa-fw fa-certificate',
+			'roles' => ['peserta'],
+		],
 	];

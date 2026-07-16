@@ -1,4 +1,5 @@
-DROP TABLE IF EXISTS schedule;
+DROP TABLE IF EXISTS participant_profiles;
+DROP TABLE IF EXISTS schedules;
 DROP TABLE IF EXISTS trainers;
 DROP TABLE IF EXISTS employees;
 DROP TABLE IF EXISTS certificates;

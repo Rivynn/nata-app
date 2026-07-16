@@ -5,6 +5,7 @@
 	use Natasya\NataApp\App\Controller;
 	use Natasya\NataApp\App\Request;
 	use Natasya\NataApp\Model\Participant;
+	use Natasya\NataApp\Model\ParticipantProfile;
 	use Natasya\NataApp\Model\Registration;
 	use Natasya\NataApp\Model\Training;
 
@@ -13,13 +14,16 @@
 		public function index(): void
 		{
 			$training = new Training();
+			$participant = (new Participant())->findByUserId(auth()->id());
 
+			$profile = (new ParticipantProfile())->findByParticipantId($participant['id']);
 			$this->view(
 				'Peserta/Registrations/index',
 				[
 					'title' => 'Daftar Pelatihan',
 
 					'trainings' => $training->opened(),
+					'profileCompleted' => (bool) ($profile['is_completed'] ?? false),
 				]
 			);
 		}
@@ -55,21 +59,7 @@
 
 			if (!$training) {
 
-				$_SESSION['error'] = 'Pelatihan tidak ditemukan.';
-
-				$this->redirect('/peserta/registrations');
-			}
-
-			$registration = new Registration();
-
-			if (
-				$registration->exists(
-					auth()->id(),
-					$id
-				)
-			) {
-
-				$_SESSION['error'] = 'Anda sudah terdaftar pada pelatihan ini.';
+				error('Pelatihan tidak ditemukan.');
 
 				$this->redirect('/peserta/registrations');
 			}
@@ -80,14 +70,75 @@
 				auth()->id()
 			);
 
+			if (!$participant) {
+
+				error('Data peserta tidak ditemukan.');
+
+				$this->redirect('/peserta');
+			}
+
+			/*
+			|--------------------------------------------------------------------------
+			| Pastikan Profil Sudah Lengkap
+			|--------------------------------------------------------------------------
+			*/
+
+			$profileModel = new ParticipantProfile();
+
+			$profile = $profileModel->findByParticipantId(
+				$participant['id']
+			);
+
+			if (
+				!$profile
+				|| !(bool) ($profile['is_completed'] ?? false)
+			) {
+
+				error(
+					'Silakan lengkapi profil peserta terlebih dahulu sebelum mendaftar pelatihan.'
+				);
+
+				$this->redirect('/peserta/profile');
+			}
+
+			/*
+			|--------------------------------------------------------------------------
+			| Cek Sudah Pernah Daftar
+			|--------------------------------------------------------------------------
+			*/
+
+			$registrationModel = new Registration();
+
+			if (
+				$registrationModel->exists(
+					auth()->id(),
+					$id
+				)
+			) {
+
+				error(
+					'Anda sudah terdaftar pada pelatihan ini.'
+				);
+
+				$this->redirect('/peserta/registrations');
+			}
+
+			/*
+			|--------------------------------------------------------------------------
+			| View
+			|--------------------------------------------------------------------------
+			*/
+
 			$this->view(
 				'Peserta/Registrations/create',
 				[
-					'title'       => 'Daftar Pelatihan',
+					'title' => 'Daftar Pelatihan',
 
-					'training'    => $training,
+					'training' => $training,
 
 					'participant' => $participant,
+
+					'profile' => $profile,
 				]
 			);
 		}

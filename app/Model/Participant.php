@@ -261,4 +261,50 @@
 
 			return $this->fetchAll($sql, $params);
 		}
+		/**
+		 * Profile peserta.
+		 */
+		/**
+		 * Profile peserta.
+		 */
+		public function profile(
+			int $userId
+		): ?array
+		{
+			return $this->fetch("
+		SELECT
+
+			pp.*
+
+		FROM participant_profiles pp
+
+		INNER JOIN participants p
+			ON p.id = pp.participant_id
+
+		WHERE p.user_id = ?
+
+		LIMIT 1
+	", [
+
+				$userId
+
+			]);
+		}
+
+		/**
+		 * Apakah profile sudah lengkap.
+		 */
+		public function profileCompleted(
+			int $userId
+		): bool
+		{
+			$profile = $this->profile($userId);
+
+			return $profile !== null
+				&& (bool) $profile['is_completed'];
+		}
+
+		/**
+		 * Apakah profile sudah lengkap.
+		 */
 	}

@@ -1,8 +1,11 @@
 <?php
 
+	use Faker\Factory;
 	use Natasya\NataApp\App\Database;
 
 	$db = Database::connection();
+
+	$faker = Factory::create('id_ID');
 
 	/*
 	|--------------------------------------------------------------------------
@@ -44,6 +47,17 @@
     )
 ");
 
+	$positions = [
+		'Instruktur',
+		'Staff Pelatihan',
+		'Koordinator Pelatihan',
+		'Analis Pelatihan',
+		'Pengelola Program',
+		'Fasilitator',
+		'Administrator Pelatihan',
+		'Pembimbing Teknis',
+	];
+
 	foreach ($users as $index => $user) {
 
 		$field = $fields[$index % count($fields)];
@@ -54,14 +68,13 @@
 
 			$field['id'],
 
-			'0812345678' . str_pad($index + 1, 2, '0', STR_PAD_LEFT),
+			$faker->phoneNumber(),
 
-			'Instruktur',
+			$faker->randomElement($positions),
 
-			'Kabupaten Ngawi'
+			$faker->address(),
 
 		]);
-
 	}
 
 	echo "Employee Seeder Success." . PHP_EOL;
