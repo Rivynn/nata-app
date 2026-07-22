@@ -246,7 +246,7 @@
 
 	if (!function_exists('user')) {
 
-		function user(): ?array
+		function user(): ?\Natasya\NataApp\DTO\AuthUser
 		{
 			return auth()->user();
 		}
@@ -300,12 +300,12 @@
 				return NULL;
 			}
 
-			if (empty($user['avatar'])) {
+			if (empty($user->avatar)) {
 				return NULL;
 			}
 
 			return asset(
-				'uploads/avatars/' . $user['avatar']
+				'uploads/avatars/' . $user->avatar
 			);
 		}
 

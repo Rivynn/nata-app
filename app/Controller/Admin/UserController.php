@@ -10,160 +10,137 @@
 	{
 		public function index(): void
 		{
-			$user = new User();
+			$this->view('Admin/Users/index', [
 
-			$this->view(
-				'Admin/Users/index',
-				[
-					'title'        => 'Kelola User',
+				'title' => 'Kelola User',
 
-					'users'        => $user->all(),
+				'users' => User::query()
+					->latest()
+					->get(),
 
-					'total'        => $user->count(),
+				'total' => User::query()->count(),
 
-					'admins'       => $user->countByRole('admin'),
+				'admins' => User::query()
+					->where('role', 'admin')
+					->count(),
 
-					'employees'    => $user->countByRole('pegawai'),
+				'employees' => User::query()
+					->where('role', 'pegawai')
+					->count(),
 
-					'participants' => $user->countByRole('peserta'),
-				]
-			);
+				'participants' => User::query()
+					->where('role', 'peserta')
+					->count(),
+
+			]);
 		}
 
 		public function show(): void
 		{
-			$id = (int) Request::get('id');
+			$user = User::query()
+				->findOrFail(Request::get('id'));
 
-			$user = new User();
+			$this->view('Admin/Users/show', [
 
-			$data = $user->findById($id);
+				'title' => 'Detail User',
 
-			if (!$data) {
+				'user' => $user,
 
-				$_SESSION['error'] = 'User tidak ditemukan.';
-
-				$this->redirect('/admin/users');
-
-			}
-
-			$this->view(
-				'Admin/Users/show',
-				[
-					'title' => 'Detail User',
-
-					'user'  => $data,
-				]
-			);
+			]);
 		}
 
 		public function create(): void
 		{
-			$this->view(
-				'Admin/Users/create',
-				[
-					'title' => 'Tambah User',
-				]
-			);
+			$this->view('Admin/Users/create', [
+
+				'title' => 'Tambah User',
+
+			]);
 		}
 
 		public function store(): void
 		{
-			$user = new User();
+			User::query()->create([
 
-			$user->create([
-
-				'name'     => Request::post('name'),
+				'name' => Request::post('name'),
 
 				'username' => Request::post('username'),
 
-				'email'    => Request::post('email'),
+				'email' => Request::post('email'),
 
 				'password' => password_hash(
 					Request::post('password'),
 					PASSWORD_BCRYPT
 				),
 
-				'role'     => Request::post('role'),
+				'role' => Request::post('role'),
 
 			]);
 
-			$_SESSION['success'] = 'User berhasil ditambahkan.';
+			success('User berhasil ditambahkan.');
 
-			$this->redirect('/admin/users');
+			redirect('/admin/users');
 		}
 
 		public function edit(): void
 		{
-			$id = (int) Request::get('id');
+			$user = User::query()
+				->findOrFail(Request::get('id'));
 
-			$user = new User();
+			$this->view('Admin/Users/edit', [
 
-			$data = $user->findById($id);
+				'title' => 'Edit User',
 
-			if (!$data) {
+				'user' => $user,
 
-				$_SESSION['error'] = 'User tidak ditemukan.';
-
-				$this->redirect('/admin/users');
-
-			}
-
-			$this->view(
-				'Admin/Users/edit',
-				[
-					'title' => 'Edit User',
-
-					'user'  => $data,
-				]
-			);
+			]);
 		}
 
 		public function update(): void
 		{
-			$id = (int) Request::post('id');
+			$user = User::query()
+				->findOrFail(Request::post('id'));
 
-			$user = new User();
+			$user->update([
 
-			$user->updateProfile(
-				$id,
-				[
-					'name'  => Request::post('name'),
+				'name' => Request::post('name'),
 
-					'email' => Request::post('email'),
-				]
-			);
+				'email' => Request::post('email'),
 
-			$_SESSION['success'] = 'User berhasil diperbarui.';
+			]);
 
-			$this->redirect('/admin/users');
+			success('User berhasil diperbarui.');
+
+			redirect('/admin/users');
 		}
 
 		public function resetPassword(): void
 		{
-			$id = (int) Request::post('id');
+			$user = User::query()
+				->findOrFail(Request::post('id'));
 
-			$user = new User();
+			$user->update([
 
-			$user->updatePassword(
-				$id,
-				password_hash('password123', PASSWORD_BCRYPT)
-			);
+				'password' => password_hash(
+					'password123',
+					PASSWORD_BCRYPT
+				),
 
-			$_SESSION['success'] = 'Password berhasil direset menjadi password123.';
+			]);
 
-			$this->redirect('/admin/users');
+			success('Password berhasil direset.');
+
+			redirect('/admin/users');
 		}
 
 		public function delete(): void
 		{
-			$id = (int) Request::post('id');
+			User::query()
+				->findOrFail(Request::post('id'))
+				->delete();
 
-			$user = new User();
+			success('User berhasil dihapus.');
 
-			$user->delete($id);
-
-			$_SESSION['success'] = 'User berhasil dihapus.';
-
-			$this->redirect('/admin/users');
+			redirect('/admin/users');
 		}
 	}

@@ -9,24 +9,39 @@
 
 	class ProfileController extends Controller
 	{
+
+
 		public function index(): void
 		{
+			$user = User::findOrFail(auth()->id());
+
 			$this->view(
 				'Profile/index',
 				[
-					'title' => 'Profil Saya'
+					'title' => 'Profil Saya',
+					'user' => $user,
 				]
 			);
 		}
+
 		public function edit(): void
 		{
+			$user = User::findOrFail(auth()->id());
+
+			$participant = Participant::firstOrCreate([
+				'user_id' => $user->id,
+			]);
+
 			$this->view(
 				'Profile/edit',
 				[
-					'title' => 'Ubah Profil'
+					'title' => 'Ubah Profil',
+					'user' => $user,
+					'participant' => $participant,
 				]
 			);
 		}
+
 		public function update(): void
 		{
 			$name = trim(Request::post('name'));
@@ -35,16 +50,24 @@
 
 			$phone = trim(Request::post('phone'));
 
-			$userModel = new User();
+			$user = User::findOrFail(auth()->id());
 
-			if ($userModel->emailExists($email, auth()->id())) {
+			/*
+			|--------------------------------------------------------------------------
+			| Validasi Email
+			|--------------------------------------------------------------------------
+			*/
 
-				$_SESSION['error'] = 'Email sudah digunakan oleh pengguna lain.';
+			$exists = User::where('email', $email)
+				->whereKeyNot($user->id)
+				->exists();
 
-				$this->redirect('/profile/edit');
+			if ($exists) {
+
+				error('Email sudah digunakan oleh pengguna lain.');
+
+				redirect('/profile/edit');
 			}
-
-			$participant = new Participant();
 
 			/*
 			|--------------------------------------------------------------------------
@@ -52,13 +75,10 @@
 			|--------------------------------------------------------------------------
 			*/
 
-			$userModel->updateProfile(
-				auth()->id(),
-				[
-					'name'  => $name,
-					'email' => $email,
-				]
-			);
+			$user->update([
+				'name' => $name,
+				'email' => $email,
+			]);
 
 			/*
 			|--------------------------------------------------------------------------
@@ -66,12 +86,13 @@
 			|--------------------------------------------------------------------------
 			*/
 
-			$participant->updateProfile(
-				auth()->id(),
-				[
-					'phone' => $phone,
-				]
-			);
+			$participant = Participant::firstOrCreate([
+				'user_id' => $user->id,
+			]);
+
+			$participant->update([
+				'phone' => $phone,
+			]);
 
 			/*
 			|--------------------------------------------------------------------------
@@ -102,31 +123,29 @@
 
 				if (!in_array($extension, $allowed, true)) {
 
-					$_SESSION['error'] = 'Format avatar harus JPG, JPEG, PNG atau WEBP.';
+					error(
+						'Format avatar harus JPG, JPEG, PNG atau WEBP.'
+					);
 
-					$this->redirect('/profile/edit');
+					redirect('/profile/edit');
 				}
-
-				/*
-				|--------------------------------------------------------------------------
-				| Maksimal 2 MB
-				|--------------------------------------------------------------------------
-				*/
 
 				if ($file['size'] > 2 * 1024 * 1024) {
 
-					$_SESSION['error'] = 'Ukuran avatar maksimal 2 MB.';
+					error(
+						'Ukuran avatar maksimal 2 MB.'
+					);
 
-					$this->redirect('/profile/edit');
+					redirect('/profile/edit');
 				}
 
-				$directory = public_path('assets/uploads/avatars/');
+				$directory = public_path(
+					'assets/uploads/avatars/'
+				);
 
 				if (!is_dir($directory)) {
 
-					if (!mkdir($directory,
-							0755,
-							true) && !is_dir($directory)) {
+					if (!mkdir($directory, 0755, true) && !is_dir($directory)) {
 						throw new \RuntimeException(sprintf('Directory "%s" was not created', $directory));
 					}
 
@@ -138,11 +157,9 @@
 				|--------------------------------------------------------------------------
 				*/
 
-				if ($oldAvatar = $userModel->avatar(auth()->id())) {
+				if ($user->avatar) {
 
-					$oldFile = public_path(
-						'assets/uploads/avatars/' . $oldAvatar
-					);
+					$oldFile = $directory . $user->avatar;
 
 					if (file_exists($oldFile)) {
 
@@ -158,71 +175,87 @@
 				|--------------------------------------------------------------------------
 				*/
 
-				$filename = 'user-' . auth()->id() . '.' . $extension;
+				$filename = 'user-' . $user->id . '.' . $extension;
 
 				move_uploaded_file(
 					$file['tmp_name'],
 					$directory . $filename
 				);
 
-				$userModel->updateAvatar(
-					auth()->id(),
-					$filename
-				);
+				$user->update([
+					'avatar' => $filename,
+				]);
 			}
 
 			auth()->refresh();
 
-			$_SESSION['success'] = 'Profil berhasil diperbarui.';
+			success(
+				'Profil berhasil diperbarui.'
+			);
 
-			$this->redirect('/profile');
+			redirect('/profile');
 		}
+
 		public function password(): void
 		{
 			$this->view(
 				'Profile/password',
 				[
-					'title' => 'Ubah Password'
+					'title' => 'Ubah Password',
 				]
 			);
 		}
+
 		public function updatePassword(): void
 		{
 			$currentPassword = Request::post('current_password');
+
 			$newPassword = Request::post('password');
+
 			$confirmation = Request::post('password_confirmation');
 
-			$user = auth()->user();
+			$user = User::findOrFail(auth()->id());
 
-			if (!password_verify($currentPassword, $user['password'])) {
+			if (!password_verify(
+				$currentPassword,
+				$user->password
+			)) {
 
-				$_SESSION['error'] = 'Password lama tidak sesuai.';
+				error(
+					'Password lama tidak sesuai.'
+				);
 
 				redirect('/profile/password');
 			}
 
 			if ($newPassword !== $confirmation) {
 
-				$_SESSION['error'] = 'Konfirmasi password tidak sama.';
+				error(
+					'Konfirmasi password tidak sama.'
+				);
 
 				redirect('/profile/password');
 			}
 
 			if (strlen($newPassword) < 6) {
 
-				$_SESSION['error'] = 'Password minimal 6 karakter.';
+				error(
+					'Password minimal 6 karakter.'
+				);
 
 				redirect('/profile/password');
 			}
 
-			$userModel = new User();
+			$user->update([
+				'password' => password_hash(
+					$newPassword,
+					PASSWORD_DEFAULT
+				),
+			]);
 
-			$userModel->updatePassword(
-				$user['id'],
-				password_hash($newPassword, PASSWORD_DEFAULT)
+			success(
+				'Password berhasil diubah.'
 			);
-
-			$_SESSION['success'] = 'Password berhasil diubah.';
 
 			redirect('/profile/password');
 		}

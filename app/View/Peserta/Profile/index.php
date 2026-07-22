@@ -124,7 +124,7 @@
 							<input
 								type="text"
 								class="form-control"
-								value="<?= user()['name'] ?>"
+								value="<?= user()->name ?>"
 								readonly>
 
 						</div>
@@ -140,7 +140,7 @@
 							<input
 								type="text"
 								class="form-control"
-								value="<?= user()['username'] ?>"
+								value="<?= user()->username ?>"
 								readonly>
 
 						</div>
@@ -156,7 +156,7 @@
 							<input
 								type="email"
 								class="form-control"
-								value="<?= user()['email'] ?>"
+								value="<?= user()->email ?>"
 								readonly>
 
 						</div>
@@ -252,8 +252,10 @@
 								type="date"
 								name="birth_date"
 								class="form-control"
-								value="<?= $participant['birth_date'] ?? '' ?>">
-
+								value="<?= !empty($participant['birth_date'])
+									? date('Y-m-d', strtotime($participant['birth_date']))
+									: ''
+								?>">
 						</div>
 
 					</div>
@@ -872,7 +874,7 @@
 								</div>
 
 								<a
-									href="<?= asset('uploads/participants/ktp/' . $profile['ktp_file']) ?>"
+									href="<?= asset( $profile['ktp_file']) ?>"
 									target="_blank"
 									class="btn btn-outline-success btn-sm btn-block mb-2">
 
@@ -927,7 +929,7 @@
 								<div class="text-center mb-3">
 
 									<img
-										src="<?= asset('uploads/participants/photos/' . $profile['photo']) ?>"
+										src="<?= asset( $profile['photo']) ?>"
 										class="img-thumbnail"
 										style="max-height:160px;">
 
@@ -947,121 +949,7 @@
 
 					<!-- CV -->
 
-					<div class="col-lg-4 mb-4">
 
-						<div class="border rounded p-3 h-100">
-
-							<div class="text-center mb-3">
-
-								<div class="mb-2">
-
-									<i class="fas fa-file-pdf fa-3x text-danger"></i>
-
-								</div>
-
-								<h6 class="font-weight-bold mb-1">
-
-									Curriculum Vitae
-
-								</h6>
-
-								<small class="text-muted">
-
-									PDF / DOC / DOCX • Opsional
-
-								</small>
-
-							</div>
-
-							<?php if(!empty($profile['cv_file'])): ?>
-
-								<div class="alert alert-success py-2 small">
-
-									<i class="fas fa-check-circle mr-1"></i>
-
-									CV telah diunggah
-
-								</div>
-
-								<a
-									href="<?= asset('uploads/participants/cv/' . $profile['cv_file']) ?>"
-									target="_blank"
-									class="btn btn-outline-danger btn-sm btn-block mb-2">
-
-									<i class="fas fa-download mr-1"></i>
-
-									Lihat CV
-
-								</a>
-
-							<?php endif; ?>
-
-							<input
-								type="file"
-								name="cv_file"
-								class="form-control-file"
-								accept=".pdf,.doc,.docx">
-
-						</div>
-
-					</div>
-
-					<!-- Ijazah -->
-
-					<div class="col-lg-4 mb-4">
-
-						<div class="border rounded p-3 h-100">
-
-							<div class="text-center mb-3">
-
-								<i class="fas fa-graduation-cap fa-3x text-info mb-2"></i>
-
-								<h6 class="font-weight-bold">
-
-									Ijazah Terakhir
-
-								</h6>
-
-								<small class="text-muted">
-
-									PDF / JPG / PNG • Maks. 5 MB
-
-								</small>
-
-							</div>
-
-							<?php if(!empty($profile['certificate_file'])): ?>
-
-								<div class="alert alert-success py-2 small">
-
-									<i class="fas fa-check-circle mr-1"></i>
-
-									Ijazah telah diunggah
-
-								</div>
-
-								<a
-									target="_blank"
-									href="<?= asset('uploads/participants/certificates/' . $profile['certificate_file']) ?>"
-									class="btn btn-outline-info btn-sm btn-block mb-2">
-
-									<i class="fas fa-eye mr-1"></i>
-
-									Lihat Ijazah
-
-								</a>
-
-							<?php endif; ?>
-
-							<input
-								type="file"
-								name="certificate_file"
-								class="form-control-file"
-								accept=".pdf,.jpg,.jpeg,.png">
-
-						</div>
-
-					</div>
 				</div>
 
 			</div>

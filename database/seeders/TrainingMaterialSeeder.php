@@ -1,99 +1,104 @@
 <?php
 
-	use Natasya\NataApp\App\Database;
+	namespace Database\Seeders;
 
-	$db = Database::connection();
+	use Faker\Factory;
+	use Natasya\NataApp\Model\TrainingMaterial;
+	use Natasya\NataApp\Model\TrainingSchedule;
 
-	$schedules = $db->query("
-    SELECT id
-    FROM training_schedules
-    ORDER BY id
-")->fetchAll(PDO::FETCH_ASSOC);
+	class TrainingMaterialSeeder extends Seeder
+	{
+		public function run(): void
+		{
+			$faker = Factory::create('id_ID');
 
-	$stmt = $db->prepare("
-INSERT INTO training_materials
-(
-    schedule_id,
-    title,
-    description,
-    file
-)
-VALUES
-(
-    ?, ?, ?, ?
-)
-");
+			$schedules = TrainingSchedule::with('training.trainingField')->get();
 
-	$materials = [
+			foreach ($schedules as $schedule) {
 
-		[
-			'Orientasi Peserta',
-			'Pengenalan pelatihan, tata tertib, dan tujuan pembelajaran.',
-		],
+				$field = $schedule->training->trainingField->name ?? '';
 
-		[
-			'Dasar-Dasar Materi',
-			'Materi dasar yang wajib dipahami oleh seluruh peserta.',
-		],
+				$materials = [
 
-		[
-			'Konsep Inti',
-			'Penjelasan konsep utama sesuai bidang pelatihan.',
-		],
+					[
+						'title' => 'Modul ' . $schedule->topic,
+						'type'  => 'document',
+					],
 
-		[
-			'Pendalaman Materi',
-			'Pendalaman teori beserta contoh penerapan.',
-		],
+					[
+						'title' => 'Slide Presentasi ' . $schedule->topic,
+						'type'  => 'document',
+					],
 
-		[
-			'Praktik Dasar',
-			'Praktik awal menggunakan studi kasus sederhana.',
-		],
+					[
+						'title' => 'Video Pembelajaran ' . $schedule->topic,
+						'type'  => 'video',
+					],
 
-		[
-			'Praktik Lanjutan',
-			'Latihan lanjutan untuk meningkatkan kompetensi peserta.',
-		],
+				];
 
-		[
-			'Studi Kasus',
-			'Penyelesaian kasus nyata berdasarkan materi yang dipelajari.',
-		],
+				// Tambahkan referensi online untuk bidang tertentu
+				if (in_array($field, [
+					'Web Programming',
+					'Mobile Programming',
+					'Digital Marketing',
+					'Microsoft Office',
+					'Teknik Komputer',
+				])) {
 
-		[
-			'Workshop',
-			'Sesi workshop dan diskusi kelompok.',
-		],
+					$materials[] = [
+						'title' => 'Referensi Online',
+						'type'  => 'link',
+					];
 
-		[
-			'Review Materi',
-			'Rangkuman seluruh materi sebelum evaluasi.',
-		],
+				}
 
-		[
-			'Evaluasi Akhir',
-			'Materi persiapan evaluasi dan penugasan akhir.',
-		],
+				$sort = 1;
 
-	];
+				foreach ($materials as $material) {
 
-	foreach ($schedules as $index => $schedule) {
+					$file = null;
+					$url = null;
 
-		$material = $materials[$index % count($materials)];
+					switch ($material['type']) {
 
-		$stmt->execute([
+						case 'document':
+							$file = $faker->randomElement([
+								'materials/module.pdf',
+								'materials/slide.pdf',
+							]);
+							break;
 
-			$schedule['id'],
+						case 'video':
+							$file = 'materials/video.mp4';
+							break;
 
-			$material[0],
+						case 'archive':
+							$file = 'materials/archive.zip';
+							break;
 
-			$material[1],
+						case 'link':
+							$url = $faker->randomElement([
+								'https://developer.mozilla.org/',
+								'https://laravel.com/docs',
+								'https://flutter.dev/docs',
+								'https://support.microsoft.com/',
+								'https://www.canva.com/learn/',
+								'https://www.youtube.com/',
+							]);
+							break;
+					}
 
-			null
-
-		]);
-
+					TrainingMaterial::create([
+						'training_schedule_id' => $schedule->id,
+						'title'                => $material['title'],
+						'description'          => $faker->sentence(12),
+						'type'                 => $material['type'],
+						'file'                 => $file,
+						'external_url'         => $url,
+						'sort_order'           => $sort++,
+					]);
+				}
+			}
+		}
 	}
-
-	echo "Training Material Seeder Success." . PHP_EOL;

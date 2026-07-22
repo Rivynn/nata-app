@@ -1,238 +1,105 @@
 <?php
 
-	use Natasya\NataApp\App\Database;
+	namespace Database\Seeders;
 
-	$db = Database::connection();
+	use Faker\Factory;
+	use Natasya\NataApp\Model\Trainer;
+	use Natasya\NataApp\Model\TrainingField;
+	use Natasya\NataApp\Model\User;
 
-	$userStmt = $db->prepare("
-	INSERT INTO users
-	(
-		name,
-		username,
-		email,
-		password,
-		role,
-		status
-	)
-	VALUES
-	(
-		?,?,?,?,?,?
-	)
-");
+	class TrainerSeeder extends Seeder
+	{
+		public function run(): void
+		{
+			$faker = Factory::create('id_ID');
 
-	$trainerStmt = $db->prepare("
-	INSERT INTO trainers
-	(
-		user_id,
-		training_field_id,
-		employee_number,
-		phone,
-		email,
-		institution,
-		expertise,
-		biography,
-		status
-	)
-	VALUES
-	(
-		?,?,?,?,?,?,?,?,?
-	)
-");
-
-	$password = password_hash('password', PASSWORD_DEFAULT);
-
-	$data = [
-
-		[
-			'training_field_id' => 1,
-			'name' => 'Natasya Deviana, S.Kom',
-			'username' => 'pelatih001',
-			'email' => 'pelatih001@diskop.go.id',
-			'employee_number' => 'TRN-001',
-			'phone' => '081234567890',
-			'institution' => 'DISKOP UKM',
-			'expertise' => 'Web Programming',
-			'biography' => 'Instruktur Web Programming.'
-		],
-
-		[
-			'training_field_id' => 2,
-			'name' => 'Michee Puding, S.Ds',
-			'username' => 'pelatih002',
-			'email' => 'pelatih002@diskop.go.id',
-			'employee_number' => 'TRN-002',
-			'phone' => '081234567891',
-			'institution' => 'Universitas Lambung Mangkurat',
-			'expertise' => 'Desain Grafis',
-			'biography' => 'Instruktur Desain Grafis.'
-		],
-
-		[
-			'training_field_id' => 3,
-			'name' => 'Devi Andriani, S.M',
-			'username' => 'pelatih003',
-			'email' => 'pelatih003@diskop.go.id',
-			'employee_number' => 'TRN-003',
-			'phone' => '081234567892',
-			'institution' => 'DISKOP UKM',
-			'expertise' => 'Digital Marketing',
-			'biography' => 'Trainer Digital Marketing.'
-		],
-
-		[
-			'training_field_id' => 4,
-			'name' => 'Tasya Pramesti, S.A.P',
-			'username' => 'pelatih004',
-			'email' => 'pelatih004@diskop.go.id',
-			'employee_number' => 'TRN-004',
-			'phone' => '081234567893',
-			'institution' => 'Universitas Terbuka',
-			'expertise' => 'Administrasi Perkantoran',
-			'biography' => 'Instruktur Administrasi Perkantoran.'
-		],
-
-		[
-			'training_field_id' => 5,
-			'name' => 'Ahmad Fauzan, S.Ak',
-			'username' => 'pelatih005',
-			'email' => 'pelatih005@diskop.go.id',
-			'employee_number' => 'TRN-005',
-			'phone' => '081234567894',
-			'institution' => 'Politeknik Negeri Banjarmasin',
-			'expertise' => 'Akuntansi',
-			'biography' => 'Instruktur Akuntansi.'
-		],
-
-		[
-			'training_field_id' => 6,
-			'name' => 'Siti Rahmawati',
-			'username' => 'pelatih006',
-			'email' => 'pelatih006@diskop.go.id',
-			'employee_number' => 'TRN-006',
-			'phone' => '081234567895',
-			'institution' => 'BLK Banjarbaru',
-			'expertise' => 'Menjahit',
-			'biography' => 'Trainer Tata Busana.'
-		],
-
-		[
-			'training_field_id' => 7,
-			'name' => 'Rizky Hidayat',
-			'username' => 'pelatih007',
-			'email' => 'pelatih007@diskop.go.id',
-			'employee_number' => 'TRN-007',
-			'phone' => '081234567896',
-			'institution' => 'SMK Pariwisata',
-			'expertise' => 'Tata Boga',
-			'biography' => 'Instruktur Tata Boga.'
-		],
-
-		[
-			'training_field_id' => 11,
-			'name' => 'Dimas Saputra',
-			'username' => 'pelatih008',
-			'email' => 'pelatih008@diskop.go.id',
-			'employee_number' => 'TRN-008',
-			'phone' => '081234567897',
-			'institution' => 'Honda Training Center',
-			'expertise' => 'Otomotif',
-			'biography' => 'Trainer Otomotif.'
-		],
-
-		[
-			'training_field_id' => 13,
-			'name' => 'Budi Santoso',
-			'username' => 'pelatih009',
-			'email' => 'pelatih009@diskop.go.id',
-			'employee_number' => 'TRN-009',
-			'phone' => '081234567898',
-			'institution' => 'PT United Tractors',
-			'expertise' => 'Operator Forklift',
-			'biography' => 'Trainer Operator Forklift.'
-		],
-
-		[
-			'training_field_id' => 14,
-			'name' => 'Agus Setiawan',
-			'username' => 'pelatih010',
-			'email' => 'pelatih010@diskop.go.id',
-			'employee_number' => 'TRN-010',
-			'phone' => '081234567899',
-			'institution' => 'POLDA Kalimantan Selatan',
-			'expertise' => 'Security Management',
-			'biography' => 'Instruktur Gada Pratama dan Keamanan.'
-		],
-
-	];
-
-	$db->beginTransaction();
-
-	try {
-
-		foreach ($data as $trainer) {
+			$institutions = [
+				'DISKOPUMTK Kota Banjarbaru',
+				'Universitas Lambung Mangkurat',
+				'Poliban',
+				'SMKN 1 Banjarbaru',
+				'Balai Latihan Kerja',
+				'PT Telkom Indonesia',
+				'PT Indocement Tunggal Prakarsa',
+				'Freelance Professional',
+			];
 
 			/*
 			|--------------------------------------------------------------------------
-			| Users
+			| Akun bawaan
 			|--------------------------------------------------------------------------
 			*/
 
-			$userStmt->execute([
+			$user = User::where('username', 'pelatih')->first();
 
-				$trainer['name'],
+			if ($user && ! Trainer::where('user_id', $user->id)->exists()) {
 
-				$trainer['username'],
+				$field = TrainingField::inRandomOrder()->first();
 
-				$trainer['email'],
+				Trainer::create([
+					'user_id' => $user->id,
+					'training_field_id' => $field->id,
+					'employee_number' => 'TRN0001',
+					'phone' => $faker->phoneNumber(),
+					'email' => 'pelatih@example.com',
+					'institution' => 'DISKOPUMTK Kota Banjarbaru',
+					'expertise' => $field->name,
+					'specialization' => $field->name,
+					'experience_year' => 10,
+					'biography' => $faker->paragraph(3),
+					'avatar' => null,
+					'status' => 'active',
+				]);
 
-				$password,
-
-				'pelatih',
-
-				'active',
-
-			]);
-
-			$userId = (int) $db->lastInsertId();
+			}
 
 			/*
 			|--------------------------------------------------------------------------
-			| Trainers
+			| Generate pelatih tambahan
 			|--------------------------------------------------------------------------
 			*/
 
-			$trainerStmt->execute([
+			for ($i = 2; $i <= 12; $i++) {
 
-				$userId,
+				$field = TrainingField::inRandomOrder()->first();
 
-				$trainer['training_field_id'],
+				$user = User::create([
+					'name' => $faker->name(),
+					'username' => sprintf('pelatih%03d', $i),
+					'email' => "pelatih{$i}@example.com",
+					'avatar' => null,
+					'password' => password_hash('password', PASSWORD_DEFAULT),
+					'role' => 'pelatih',
+					'status' => $faker->randomElement([
+						'active',
+						'active',
+						'active',
+						'inactive',
+					]),
+					'last_login_at' => $faker->optional(0.8)
+						->dateTimeBetween('-6 months'),
+				]);
 
-				$trainer['employee_number'],
+				Trainer::create([
+					'user_id' => $user->id,
+					'training_field_id' => $field->id,
+					'employee_number' => sprintf('TRN%04d', $i),
+					'phone' => $faker->phoneNumber(),
+					'email' => $user->email,
+					'institution' => $faker->randomElement($institutions),
+					'expertise' => $field->name,
+					'specialization' => $field->name,
+					'experience_year' => $faker->numberBetween(2, 20),
+					'biography' => $faker->paragraph(rand(2, 4)),
+					'avatar' => null,
+					'status' => $faker->randomElement([
+						'active',
+						'active',
+						'active',
+						'inactive',
+					]),
+				]);
 
-				$trainer['phone'],
-
-				$trainer['email'],
-
-				$trainer['institution'],
-
-				$trainer['expertise'],
-
-				$trainer['biography'],
-
-				'active',
-
-			]);
-
+			}
 		}
-
-		$db->commit();
-
-		echo "Trainer Seeder Success.";
-
-	} catch (Throwable $e) {
-
-		$db->rollBack();
-
-		throw $e;
-
 	}

@@ -1,38 +1,75 @@
 <div class="container-fluid">
 
-	<!-- Header -->
+	<!-- Hero -->
 
 	<div class="card shadow border-0 mb-4">
 
-		<div class="card-header bg-white py-3">
+		<div class="card-body">
 
-			<div class="d-flex justify-content-between align-items-center">
+			<div class="row align-items-center">
 
-				<div>
+				<div class="col-lg-8">
 
-					<h4 class="font-weight-bold text-primary mb-1">
+					<span class="badge badge-primary px-3 py-2 mb-3">
+
+						Master Data
+
+					</span>
+
+					<h3 class="font-weight-bold text-gray-800 mb-2">
 
 						Data Pegawai
 
-					</h4>
+					</h3>
 
-					<p class="text-muted mb-0">
+					<p class="text-muted mb-4">
 
-						Kelola seluruh data pegawai yang bertugas sebagai instruktur pelatihan.
+						Kelola seluruh data pegawai yang menggunakan sistem pelatihan.
+						Data pegawai digunakan sebagai akun internal aplikasi.
 
 					</p>
 
+					<a
+						href="<?= url('/admin/employees/create') ?>"
+						class="btn btn-primary">
+
+						<i class="fas fa-user-plus mr-2"></i>
+
+						Tambah Pegawai
+
+					</a>
+
 				</div>
 
-				<a
-					href="<?= url('/admin/employees/create') ?>"
-					class="btn btn-primary">
+				<div class="col-lg-4">
 
-					<i class="fas fa-plus-circle mr-2"></i>
+					<div class="card border-left-primary shadow-sm">
 
-					Tambah Pegawai
+						<div class="card-body">
 
-				</a>
+							<small class="text-muted">
+
+								Total Pegawai
+
+							</small>
+
+							<h2 class="font-weight-bold mb-2">
+
+								<?= $total ?>
+
+							</h2>
+
+							<div class="small text-muted">
+
+								Terdaftar pada sistem
+
+							</div>
+
+						</div>
+
+					</div>
+
+				</div>
 
 			</div>
 
@@ -44,7 +81,7 @@
 
 	<div class="row">
 
-		<div class="col-lg-3 col-md-6 mb-4">
+		<div class="col-xl-3 col-md-6 mb-4">
 
 			<div class="card border-left-primary shadow h-100">
 
@@ -60,7 +97,7 @@
 
 							</div>
 
-							<h2 class="font-weight-bold mb-0">
+							<h2 class="font-weight-bold mt-2">
 
 								<?= $total ?>
 
@@ -68,7 +105,7 @@
 
 						</div>
 
-						<i class="fas fa-users fa-2x text-gray-300"></i>
+						<i class="fas fa-users fa-3x text-gray-300"></i>
 
 					</div>
 
@@ -78,35 +115,31 @@
 
 		</div>
 
-		<?php foreach($fields as $field): ?>
+		<div class="col-xl-3 col-md-6 mb-4">
 
-			<div class="col-lg-3 col-md-6 mb-4">
+			<div class="card border-left-success shadow h-100">
 
-				<div class="card border-left-success shadow h-100">
+				<div class="card-body">
 
-					<div class="card-body">
+					<div class="d-flex justify-content-between align-items-center">
 
-						<div class="d-flex justify-content-between align-items-center">
+						<div>
 
-							<div>
+							<div class="text-xs text-success font-weight-bold text-uppercase">
 
-								<div class="text-xs text-success font-weight-bold text-uppercase">
-
-									<?= $field['name'] ?>
-
-								</div>
-
-								<h2 class="font-weight-bold mb-0">
-
-									<?= $field['total'] ?>
-
-								</h2>
+								Pegawai Aktif
 
 							</div>
 
-							<i class="fas fa-user-tie fa-2x text-gray-300"></i>
+							<h2 class="font-weight-bold mt-2">
+
+								<?= $employees->where('user.status','active')->count() ?>
+
+							</h2>
 
 						</div>
+
+						<i class="fas fa-user-check fa-3x text-gray-300"></i>
 
 					</div>
 
@@ -114,14 +147,83 @@
 
 			</div>
 
-		<?php endforeach; ?>
+		</div>
+
+		<div class="col-xl-3 col-md-6 mb-4">
+
+			<div class="card border-left-warning shadow h-100">
+
+				<div class="card-body">
+
+					<div class="d-flex justify-content-between align-items-center">
+
+						<div>
+
+							<div class="text-xs text-warning font-weight-bold text-uppercase">
+
+								Nonaktif
+
+							</div>
+
+							<h2 class="font-weight-bold mt-2">
+
+								<?= $employees->where('user.status','inactive')->count() ?>
+
+							</h2>
+
+						</div>
+
+						<i class="fas fa-user-clock fa-3x text-gray-300"></i>
+
+					</div>
+
+				</div>
+
+			</div>
+
+		</div>
+
+		<div class="col-xl-3 col-md-6 mb-4">
+
+			<div class="card border-left-danger shadow h-100">
+
+				<div class="card-body">
+
+					<div class="d-flex justify-content-between align-items-center">
+
+						<div>
+
+							<div class="text-xs text-danger font-weight-bold text-uppercase">
+
+								Diblokir
+
+							</div>
+
+							<h2 class="font-weight-bold mt-2">
+
+								<?= $employees->where('user.status','banned')->count() ?>
+
+							</h2>
+
+						</div>
+
+						<i class="fas fa-user-slash fa-3x text-gray-300"></i>
+
+					</div>
+
+				</div>
+
+			</div>
+
+		</div>
+
 	</div>
 
 	<!-- Table -->
 
-	<div class="card shadow">
+	<div class="card shadow border-0">
 
-		<div class="card-header bg-white">
+		<div class="card-header bg-white py-3">
 
 			<div class="d-flex justify-content-between align-items-center">
 
@@ -135,7 +237,7 @@
 
 					<small class="text-muted">
 
-						Seluruh pegawai yang terdaftar pada sistem.
+						Seluruh akun pegawai yang terdaftar.
 
 					</small>
 
@@ -143,33 +245,42 @@
 
 				<span class="badge badge-primary px-3 py-2">
 
-                    <?= count($employees) ?> Pegawai
+					<?= $employees->count() ?> Pegawai
 
-                </span>
+				</span>
 
 			</div>
 
 		</div>
 
 		<div class="card-body">
-
-			<?php if(empty($employees)): ?>
+			<?php if($employees->isEmpty()): ?>
 
 				<div class="text-center py-5">
 
-					<i class="fas fa-user-tie fa-5x text-gray-300 mb-3"></i>
+					<i class="fas fa-users fa-5x text-gray-300 mb-3"></i>
 
-					<h5 class="font-weight-bold">
+					<h4 class="font-weight-bold">
 
 						Belum Ada Pegawai
 
-					</h5>
+					</h4>
 
-					<p class="text-muted">
+					<p class="text-muted mb-4">
 
-						Silahkan tambahkan pegawai terlebih dahulu.
+						Data pegawai masih kosong. Tambahkan pegawai pertama untuk mulai menggunakan sistem.
 
 					</p>
+
+					<a
+						href="<?= url('/admin/employees/create') ?>"
+						class="btn btn-primary">
+
+						<i class="fas fa-plus-circle mr-2"></i>
+
+						Tambah Pegawai
+
+					</a>
 
 				</div>
 
@@ -185,7 +296,7 @@
 
 						<tr>
 
-							<th width="60">
+							<th width="70">
 
 								#
 
@@ -199,19 +310,20 @@
 
 							<th>
 
-								Kontak
+								Nomor Pegawai
+
+							</th>
+
+
+							<th>
+
+								Jabatan
 
 							</th>
 
 							<th>
 
-								Bidang
-
-							</th>
-
-							<th width="170">
-
-								Bergabung
+								Kontak
 
 							</th>
 
@@ -221,7 +333,7 @@
 
 							</th>
 
-							<th width="160">
+							<th width="170">
 
 								Aksi
 
@@ -233,13 +345,13 @@
 
 						<tbody>
 
-						<?php foreach($employees as $i => $employee): ?>
+						<?php foreach($employees as $index => $employee): ?>
 
 							<tr>
 
 								<td>
 
-									<?= $i + 1 ?>
+									<?= $index + 1 ?>
 
 								</td>
 
@@ -247,46 +359,33 @@
 
 									<div class="d-flex align-items-center">
 
-										<?php if(!empty($employee['avatar'])): ?>
+										<div
+											class="rounded-circle bg-primary text-white d-flex align-items-center justify-content-center mr-3"
+											style="width:48px;height:48px;font-weight:700;">
 
-											<img
-												src="<?= avatar($employee) ?>"
-												class="rounded-circle shadow mr-3"
-												width="50"
-												height="50"
-												style="object-fit:cover;">
+											<?= e($employee->user->getInitials()) ?>
 
-										<?php else: ?>
-
-											<div class="avatar-circle mr-3">
-
-												<?= initials($employee['name']) ?>
-
-											</div>
-
-										<?php endif; ?>
+										</div>
 
 										<div>
 
 											<div class="font-weight-bold">
 
-												<?= $employee['name'] ?>
+												<?= e($employee->user->name) ?>
 
 											</div>
 
-											<small class="text-muted">
+											<div class="text-muted small">
 
-												@<?= $employee['username'] ?>
+												@<?= e($employee->user->username) ?>
 
-											</small>
+											</div>
 
-											<br>
+											<div class="text-muted small">
 
-											<small class="text-muted">
+												<?= e($employee->user->email) ?>
 
-												EMP-<?= str_pad($employee['id'],4,'0',STR_PAD_LEFT) ?>
-
-											</small>
+											</div>
 
 										</div>
 
@@ -296,82 +395,49 @@
 
 								<td>
 
-									<div>
+									<?= e($employee->employee_number ?: '-') ?>
 
-										<i class="fas fa-envelope text-primary mr-2"></i>
+								</td>
 
-										<?= $employee['email'] ?>
 
-									</div>
 
-									<small class="text-muted">
+								<td>
 
-										<i class="fas fa-phone mr-2"></i>
-
-										<?= $employee['phone'] ?: '-' ?>
-
-									</small>
+									<?= e($employee->getPositionLabel()) ?>
 
 								</td>
 
 								<td>
 
-									<strong>
-
-										<?= $employee['field_name'] ?>
-
-									</strong>
-
-									<br>
-
-									<small class="text-muted">
-
-										<?= $employee['position'] ?: '-' ?>
-
-									</small>
+									<?= e($employee->phone ?: '-') ?>
 
 								</td>
 
 								<td>
 
-									<?= date(
-										'd M Y',
-										strtotime($employee['created_at'])
-									) ?>
-
-								</td>
-
-								<td>
-
-									<?php if($employee['status'] == 'active'): ?>
+									<?php if($employee->user->isActive()): ?>
 
 										<span class="badge badge-success px-3 py-2">
 
-                <i class="fas fa-check-circle mr-1"></i>
+								Aktif
 
-                Aktif
+							</span>
 
-            </span>
-
-									<?php elseif($employee['status'] == 'inactive'): ?>
+									<?php elseif($employee->user->isInactive()): ?>
 
 										<span class="badge badge-warning px-3 py-2">
 
-                <i class="fas fa-pause-circle mr-1"></i>
+								Nonaktif
 
-                Nonaktif
-
-            </span>
+							</span>
 
 									<?php else: ?>
 
 										<span class="badge badge-danger px-3 py-2">
 
-                <i class="fas fa-ban mr-1"></i>
+								Diblokir
 
-                Diblokir
-
-            </span>
+							</span>
 
 									<?php endif; ?>
 
@@ -379,11 +445,11 @@
 
 								<td>
 
-									<div class="btn-group shadow-sm">
+									<div class="btn-group">
 
 										<a
-											href="<?= url('/admin/employees/show?id='.$employee['id']) ?>"
-											class="btn btn-outline-primary btn-sm"
+											href="<?= url('/admin/employees/show?id=' . $employee->id) ?>"
+											class="btn btn-outline-info btn-sm"
 											title="Detail">
 
 											<i class="fas fa-eye"></i>
@@ -391,7 +457,7 @@
 										</a>
 
 										<a
-											href="<?= url('/admin/employees/edit?id='.$employee['id']) ?>"
+											href="<?= url('/admin/employees/edit?id=' . $employee->id) ?>"
 											class="btn btn-outline-warning btn-sm"
 											title="Edit">
 
@@ -407,7 +473,7 @@
 											<input
 												type="hidden"
 												name="id"
-												value="<?= $employee['id'] ?>">
+												value="<?= $employee->id ?>">
 
 											<button
 												type="submit"
@@ -429,6 +495,7 @@
 						<?php endforeach; ?>
 
 						</tbody>
+
 					</table>
 
 				</div>
@@ -438,5 +505,183 @@
 		</div>
 
 	</div>
+	<style>
 
+		.card{
+			border:none;
+			border-radius:14px;
+		}
+
+		.card-header{
+			background:#fff;
+			border-bottom:1px solid #edf2f7;
+		}
+
+		.border-left-primary{
+			border-left:4px solid #4e73df!important;
+		}
+
+		.border-left-success{
+			border-left:4px solid #1cc88a!important;
+		}
+
+		.border-left-warning{
+			border-left:4px solid #f6c23e!important;
+		}
+
+		.border-left-danger{
+			border-left:4px solid #e74a3b!important;
+		}
+
+		.table thead th{
+
+			border-top:none;
+
+			font-size:12px;
+
+			text-transform:uppercase;
+
+			letter-spacing:.6px;
+
+			font-weight:700;
+
+			color:#6c757d;
+
+		}
+
+		.table td{
+
+			vertical-align:middle;
+
+		}
+
+		.table tbody tr{
+
+			transition:.2s ease;
+
+		}
+
+		.table tbody tr:hover{
+
+			background:#f8f9fc;
+
+			transform:scale(1.002);
+
+		}
+
+		.btn-group .btn{
+
+			border-radius:8px!important;
+
+			margin-right:3px;
+
+		}
+
+		.badge{
+
+			font-size:11px;
+
+			font-weight:600;
+
+		}
+
+		.rounded-circle{
+
+			font-size:16px;
+
+		}
+
+		.card{
+
+			transition:.25s;
+
+		}
+
+		.card:hover{
+
+			box-shadow:0 .5rem 1rem rgba(0,0,0,.08)!important;
+
+		}
+
+		.dataTables_wrapper .dataTables_filter input{
+
+			border-radius:8px;
+
+			border:1px solid #dee2e6;
+
+			padding:.45rem .75rem;
+
+			margin-left:.5rem;
+
+		}
+
+		.dataTables_wrapper .dataTables_length select{
+
+			border-radius:8px;
+
+		}
+
+		.page-item.active .page-link{
+
+			background:#4e73df;
+
+			border-color:#4e73df;
+
+		}
+
+		.page-link{
+
+			border-radius:8px!important;
+
+			margin:0 2px;
+
+		}
+
+	</style>
+
+	<script>
+
+		$(function(){
+
+			$('#employeesTable').DataTable({
+
+				pageLength:10,
+
+				order:[[1,'asc']],
+
+				responsive:true,
+
+				autoWidth:false,
+
+				language:{
+
+					search:"Pencarian :",
+
+					lengthMenu:"Tampilkan _MENU_ data",
+
+					info:"Menampilkan _START_ - _END_ dari _TOTAL_ pegawai",
+
+					infoEmpty:"Tidak ada data",
+
+					zeroRecords:"Data tidak ditemukan",
+
+					paginate:{
+
+						first:"Awal",
+
+						last:"Akhir",
+
+						next:"›",
+
+						previous:"‹"
+
+					}
+
+				}
+
+			});
+
+		});
+
+	</script>
 </div>

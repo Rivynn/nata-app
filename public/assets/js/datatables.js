@@ -61,7 +61,7 @@ $(function () {
     $('#usersTable').DataTable(defaultOptions);
     $('#employeesTable').DataTable(defaultOptions);
     $('#trainingFieldsTable').DataTable(defaultOptions);
-    $('#trainingTable').DataTable(defaultOptions);
+    //$('#trainingTable').DataTable(defaultOptions);
 
     // $('#verificationTable').DataTable(defaultOptions);
     //

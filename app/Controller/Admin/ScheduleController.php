@@ -7,128 +7,250 @@
 	use Natasya\NataApp\Model\Schedule;
 	use Natasya\NataApp\Model\Trainer;
 	use Natasya\NataApp\Model\Training;
+	use Natasya\NataApp\Model\TrainingSchedule;
 
 	class ScheduleController extends Controller
 	{
 		public function index(): void
 		{
-			$this->app();
 
-			$schedule = new Schedule();
+
+			$schedules = TrainingSchedule::query()
+
+				->with([
+					'training.trainingField',
+					'training.trainer.user'
+				])
+
+				->orderBy(
+					'schedule_date'
+				)
+
+				->get();
+
+
 
 			$this->view(
 				'Admin/Schedules/index',
 				[
-					'title' => 'Penjadwalan',
+					'title' => 'Jadwal Pelatihan',
 
-					'schedules' => $schedule->all(),
-
-					'total' => $schedule->count(),
-
-					'draft' => $schedule->draft(),
-
-					'ongoing' => $schedule->ongoing(),
-
-					'completed' => $schedule->completed(),
+					'schedules' => $schedules
 				]
 			);
+
+
 		}
 
-		public function create(): void
+
+
+
+
+		public function training(): void
 		{
-			$this->app();
 
-			$training = new Training();
 
-			$trainer = new Trainer();
+			$training = Training::query()
+
+				->with([
+					'schedules'
+				])
+
+				->find(
+					(int) Request::get('id')
+				);
+
+
+
+			if(!$training){
+
+
+				error(
+					'Pelatihan tidak ditemukan.'
+				);
+
+
+				redirect(
+					'/admin/trainings'
+				);
+
+			}
+
+
+
 
 			$this->view(
-				'Admin/Schedules/create',
+				'Admin/Schedules/training',
 				[
-					'title' => 'Tambah Jadwal',
+					'title'=>'Jadwal '.$training->name,
 
-					'trainings' => $training->all(),
-
-					'trainers' => $trainer->activeList(),
+					'training'=>$training
 				]
 			);
+
+
 		}
 
-		public function store(): void
-		{
-			$schedule = new Schedule();
 
-			$schedule->create(
-				Request::all()
+
+
+
+		public function edit():void
+		{
+
+
+			$schedule = TrainingSchedule::find(
+				(int) Request::get('id')
 			);
 
-			$this->redirect('/admin/schedules');
-		}
 
-		public function show(): void
-		{
-			$this->app();
 
-			$schedule = new Schedule();
+			if(!$schedule){
 
-			$this->view(
-				'Admin/Schedules/show',
-				[
-					'title' => 'Detail Jadwal',
 
-					'schedule' => $schedule->find(
-						(int) Request::get('id')
-					),
-				]
-			);
-		}
+				error(
+					'Jadwal tidak ditemukan.'
+				);
 
-		public function edit(): void
-		{
-			$this->app();
 
-			$schedule = new Schedule();
+				redirect(
+					'/admin/schedules'
+				);
 
-			$training = new Training();
 
-			$trainer = new Trainer();
+			}
+
+
+
 
 			$this->view(
 				'Admin/Schedules/edit',
 				[
-					'title' => 'Edit Jadwal',
+					'title'=>'Edit Jadwal',
 
-					'schedule' => $schedule->find(
-						(int) Request::get('id')
-					),
-
-					'trainings' => $training->all(),
-
-					'trainers' => $trainer->activeList(),
+					'schedule'=>$schedule
 				]
 			);
+
+
 		}
 
-		public function update(): void
+
+
+
+
+		public function update():void
 		{
-			$schedule = new Schedule();
 
-			$schedule->update(
-				(int) Request::post('id'),
-				Request::all()
-			);
 
-			$this->redirect('/admin/schedules');
-		}
-
-		public function delete(): void
-		{
-			$schedule = new Schedule();
-
-			$schedule->delete(
+			$schedule = TrainingSchedule::find(
 				(int) Request::post('id')
 			);
 
-			$this->redirect('/admin/schedules');
+
+
+			if(!$schedule){
+
+
+				error(
+					'Jadwal tidak ditemukan.'
+				);
+
+
+				redirect(
+					'/admin/schedules'
+				);
+
+
+			}
+
+
+
+			$schedule->update([
+
+
+				'topic'=>Request::post('topic'),
+
+
+				'description'=>Request::post('description'),
+
+
+				'schedule_date'=>Request::post('schedule_date'),
+
+
+				'start_time'=>Request::post('start_time'),
+
+
+				'end_time'=>Request::post('end_time'),
+
+
+				'room'=>Request::post('room'),
+
+
+			]);
+
+
+
+			success(
+				'Jadwal berhasil diperbarui.'
+			);
+
+
+
+			redirect(
+				'/admin/schedules'
+			);
+
+
+		}
+
+
+
+
+
+		public function delete():void
+		{
+
+
+			$schedule = TrainingSchedule::find(
+				(int) Request::post('id')
+			);
+
+
+
+			if(!$schedule){
+
+
+				error(
+					'Jadwal tidak ditemukan.'
+				);
+
+
+				redirect(
+					'/admin/schedules'
+				);
+
+
+			}
+
+
+
+
+			$schedule->delete();
+
+
+
+			success(
+				'Jadwal berhasil dihapus.'
+			);
+
+
+
+			redirect(
+				'/admin/schedules'
+			);
+
+
+
 		}
 	}

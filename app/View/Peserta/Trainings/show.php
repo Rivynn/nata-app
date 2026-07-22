@@ -1,6 +1,19 @@
-<div class="container-fluid">
+<?php
 
-	<!-- Header -->
+	/** @var \App\Models\Registration $registration */
+	/** @var \App\Models\Training $training */
+
+	$field = $training->trainingField;
+
+	$trainer = $training->trainer;
+
+	$schedule = $training->schedules
+		->sortBy('schedule_date')
+		->first();
+
+?>
+
+<div class="container-fluid">
 
 	<div class="card shadow border-0 mb-4">
 
@@ -10,23 +23,23 @@
 
 				<div>
 
-                    <span class="badge badge-<?= $training['color'] ?> mb-3">
+                    <span class="badge badge-<?= $field?->color ?? 'primary' ?> mb-3">
 
-                        <i class="<?= $training['icon'] ?> mr-1"></i>
+                        <i class="<?= $field?->icon ?? 'fas fa-book-open' ?> mr-1"></i>
 
-                        <?= $training['field_name'] ?>
+                        <?= e($field?->name ?? '-') ?>
 
                     </span>
 
 					<h2 class="font-weight-bold mb-2">
 
-						<?= htmlspecialchars($training['name']) ?>
+						<?= e($training->name) ?>
 
 					</h2>
 
 					<p class="text-muted mb-0">
 
-						<?= htmlspecialchars($training['description']) ?>
+						<?= nl2br(e($training->description)) ?>
 
 					</p>
 
@@ -34,9 +47,27 @@
 
 				<div class="text-right mt-3 mt-lg-0">
 
-                    <span class="badge badge-success px-3 py-2">
+					<?php
 
-                        Pendaftaran Dibuka
+						$badge = match ($registration->status) {
+
+							'approved' => 'success',
+
+							'completed' => 'primary',
+
+							'pending' => 'warning',
+
+							'rejected' => 'danger',
+
+							default => 'secondary',
+
+						};
+
+					?>
+
+					<span class="badge badge-<?= $badge ?> px-3 py-2">
+
+                        <?= ucfirst($registration->status) ?>
 
                     </span>
 
@@ -50,11 +81,7 @@
 
 	<div class="row">
 
-		<!-- LEFT -->
-
 		<div class="col-lg-8">
-
-			<!-- Informasi -->
 
 			<div class="card shadow mb-4">
 
@@ -76,47 +103,103 @@
 
 						<tr>
 
-							<th width="220">Bidang</th>
+							<th width="220">
 
-							<td><?= $training['field_name'] ?></td>
+								Bidang
 
-						</tr>
-
-						<tr>
-
-							<th>Durasi</th>
-
-							<td><?= $training['duration'] ?> Hari</td>
-
-						</tr>
-
-						<tr>
-
-							<th>Lokasi</th>
-
-							<td><?= $training['location'] ?></td>
-
-						</tr>
-
-						<tr>
-
-							<th>Kuota</th>
-
-							<td><?= $training['quota'] ?> Peserta</td>
-
-						</tr>
-
-						<tr>
-
-							<th>Pendaftaran</th>
+							</th>
 
 							<td>
 
-								<?= date('d M Y', strtotime($training['registration_open'])) ?>
+								<?= e($field?->name ?? '-') ?>
+
+							</td>
+
+						</tr>
+
+						<tr>
+
+							<th>
+
+								Durasi
+
+							</th>
+
+							<td>
+
+								<?= $training->duration ?> Hari
+
+							</td>
+
+						</tr>
+
+						<tr>
+
+							<th>
+
+								Lokasi
+
+							</th>
+
+							<td>
+
+								<?= e($training->location ?: '-') ?>
+
+							</td>
+
+						</tr>
+
+						<tr>
+
+							<th>
+
+								Kuota
+
+							</th>
+
+							<td>
+
+								<?= $training->quota ?> Peserta
+
+							</td>
+
+						</tr>
+
+						<tr>
+
+							<th>
+
+								Pendaftaran
+
+							</th>
+
+							<td>
+
+								<?= $training->registration_open?->format('d M Y') ?? '-' ?>
 
 								-
 
-								<?= date('d M Y', strtotime($training['registration_close'])) ?>
+								<?= $training->registration_close?->format('d M Y') ?? '-' ?>
+
+							</td>
+
+						</tr>
+
+						<tr>
+
+							<th>
+
+								Status Pelatihan
+
+							</th>
+
+							<td>
+
+                                <span class="badge badge-info">
+
+                                    <?= ucfirst($training->status) ?>
+
+                                </span>
 
 							</td>
 
@@ -127,7 +210,6 @@
 				</div>
 
 			</div>
-
 			<!-- Pelatih -->
 
 			<div class="card shadow mb-4">
@@ -138,7 +220,7 @@
 
 						<i class="fas fa-chalkboard-teacher mr-2"></i>
 
-						Pelatih
+						Informasi Pelatih
 
 					</h5>
 
@@ -147,26 +229,27 @@
 				<div class="card-body">
 
 					<div class="media">
-						<?php if (!empty($training['trainer_avatar'])): ?>
+
+						<?php if ($trainer?->user?->avatar_url): ?>
 
 							<img
-								src="<?= asset('uploads/trainers/' . $training['trainer_avatar']) ?>"
-								class="rounded-circle mr-4"
+								src="<?= asset($trainer->user->avatar_url) ?>"
+								class="rounded-circle mr-4 shadow"
 								width="90"
 								height="90"
-								style="object-fit: cover;">
+								style="object-fit:cover;">
 
 						<?php else: ?>
 
 							<div
 								class="avatar-circle mr-4"
 								style="
-            width:90px;
-            height:90px;
-            font-size:32px;
-        ">
+                                    width:90px;
+                                    height:90px;
+                                    font-size:30px;
+                                ">
 
-								<?= initials($training['trainer_name']) ?>
+								<?= initials($trainer?->getDisplayName() ?? 'T') ?>
 
 							</div>
 
@@ -174,23 +257,35 @@
 
 						<div class="media-body">
 
-							<h5 class="font-weight-bold mb-1">
+							<h4 class="font-weight-bold mb-1">
 
-								<?= $training['trainer_name'] ?>
+								<?= e($trainer?->getDisplayName() ?? '-') ?>
 
-							</h5>
+							</h4>
 
-							<div class="text-muted mb-2">
+							<?php if ($trainer?->institution): ?>
 
-								<?= $training['institution'] ?>
+								<div class="text-muted mb-2">
 
-							</div>
+									<i class="fas fa-building mr-2"></i>
 
-							<span class="badge badge-info">
+									<?= e($trainer->institution) ?>
 
-                                <?= $training['expertise'] ?>
+								</div>
 
-                            </span>
+							<?php endif; ?>
+
+							<?php if ($trainer?->trainingField): ?>
+
+								<span class="badge badge-info">
+
+                                    <i class="fas fa-award mr-1"></i>
+
+                                    <?= e($trainer->trainingField->name) ?>
+
+                                </span>
+
+							<?php endif; ?>
 
 						</div>
 
@@ -218,19 +313,97 @@
 
 				<div class="card-body">
 
-					<ul class="mb-0">
+					<div class="row">
 
-						<li>Materi teori sesuai bidang pelatihan.</li>
+						<div class="col-md-6 mb-3">
 
-						<li>Praktik langsung bersama instruktur.</li>
+							<div class="border rounded p-3 h-100">
 
-						<li>Pengerjaan studi kasus.</li>
+								<i class="fas fa-book-open text-primary fa-lg mb-3"></i>
 
-						<li>Evaluasi akhir pelatihan.</li>
+								<h6 class="font-weight-bold">
 
-						<li>Sertifikat bagi peserta yang lulus.</li>
+									Materi Teori
 
-					</ul>
+								</h6>
+
+								<p class="text-muted small mb-0">
+
+									Memahami konsep dasar dan teori sesuai bidang pelatihan.
+
+								</p>
+
+							</div>
+
+						</div>
+
+						<div class="col-md-6 mb-3">
+
+							<div class="border rounded p-3 h-100">
+
+								<i class="fas fa-laptop-code text-success fa-lg mb-3"></i>
+
+								<h6 class="font-weight-bold">
+
+									Praktik Langsung
+
+								</h6>
+
+								<p class="text-muted small mb-0">
+
+									Praktik bersama instruktur menggunakan studi kasus nyata.
+
+								</p>
+
+							</div>
+
+						</div>
+
+						<div class="col-md-6 mb-3">
+
+							<div class="border rounded p-3 h-100">
+
+								<i class="fas fa-users text-warning fa-lg mb-3"></i>
+
+								<h6 class="font-weight-bold">
+
+									Diskusi Kelompok
+
+								</h6>
+
+								<p class="text-muted small mb-0">
+
+									Kolaborasi dan penyelesaian kasus secara berkelompok.
+
+								</p>
+
+							</div>
+
+						</div>
+
+						<div class="col-md-6 mb-3">
+
+							<div class="border rounded p-3 h-100">
+
+								<i class="fas fa-certificate text-info fa-lg mb-3"></i>
+
+								<h6 class="font-weight-bold">
+
+									Sertifikat
+
+								</h6>
+
+								<p class="text-muted small mb-0">
+
+									Sertifikat diberikan kepada peserta yang dinyatakan lulus.
+
+								</p>
+
+							</div>
+
+						</div>
+
+					</div>
 
 				</div>
 
@@ -246,7 +419,7 @@
 
 						<i class="fas fa-clipboard-check mr-2"></i>
 
-						Persyaratan
+						Persyaratan Peserta
 
 					</h5>
 
@@ -254,17 +427,47 @@
 
 				<div class="card-body">
 
-					<ul class="mb-0">
+					<ul class="list-unstyled mb-0">
 
-						<li>Profil peserta telah lengkap.</li>
+						<li class="mb-3">
 
-						<li>Mengunggah KTP.</li>
+							<i class="fas fa-check-circle text-success mr-2"></i>
 
-						<li>Mengunggah Pas Foto.</li>
+							Profil peserta telah lengkap.
 
-						<li>Mengunggah Ijazah terakhir.</li>
+						</li>
 
-						<li>Mengikuti seluruh jadwal pelatihan.</li>
+						<li class="mb-3">
+
+							<i class="fas fa-check-circle text-success mr-2"></i>
+
+							Membawa identitas diri saat pelatihan berlangsung.
+
+						</li>
+
+						<li class="mb-3">
+
+							<i class="fas fa-check-circle text-success mr-2"></i>
+
+							Mengikuti seluruh jadwal pelatihan sesuai ketentuan.
+
+						</li>
+
+						<li class="mb-3">
+
+							<i class="fas fa-check-circle text-success mr-2"></i>
+
+							Menjaga ketertiban selama kegiatan berlangsung.
+
+						</li>
+
+						<li>
+
+							<i class="fas fa-check-circle text-success mr-2"></i>
+
+							Mengikuti evaluasi akhir pelatihan.
+
+						</li>
 
 					</ul>
 
@@ -273,7 +476,6 @@
 			</div>
 
 		</div>
-
 		<!-- RIGHT -->
 
 		<div class="col-lg-4">
@@ -284,6 +486,8 @@
 
 					<h5 class="mb-0">
 
+						<i class="fas fa-clipboard-list mr-2"></i>
+
 						Ringkasan
 
 					</h5>
@@ -292,15 +496,39 @@
 
 				<div class="card-body">
 
-					<table class="table table-sm table-borderless">
+					<table class="table table-sm table-borderless mb-3">
+
+						<tbody>
 
 						<tr>
 
-							<td>Batch</td>
+							<td>Status Peserta</td>
 
 							<td class="text-right">
 
-								<?= $training['batch_name'] ?: '-' ?>
+								<?php
+
+									$badge = match ($registration->status) {
+
+										'approved' => 'success',
+
+										'completed' => 'primary',
+
+										'pending' => 'warning',
+
+										'rejected' => 'danger',
+
+										default => 'secondary',
+
+									};
+
+								?>
+
+								<span class="badge badge-<?= $badge ?>">
+
+                                        <?= ucfirst($registration->status) ?>
+
+                                    </span>
 
 							</td>
 
@@ -312,7 +540,7 @@
 
 							<td class="text-right">
 
-								<?= $training['room'] ?: '-' ?>
+								<?= e($schedule?->room ?? '-') ?>
 
 							</td>
 
@@ -320,13 +548,11 @@
 
 						<tr>
 
-							<td>Mulai</td>
+							<td>Tanggal</td>
 
 							<td class="text-right">
 
-								<?= $training['start_date']
-									? date('d M Y', strtotime($training['start_date']))
-									: '-' ?>
+								<?= $schedule?->schedule_date?->format('d M Y') ?? '-' ?>
 
 							</td>
 
@@ -334,63 +560,83 @@
 
 						<tr>
 
-							<td>Selesai</td>
+							<td>Jam</td>
 
 							<td class="text-right">
 
-								<?= $training['end_date']
-									? date('d M Y', strtotime($training['end_date']))
-									: '-' ?>
+								<?php if ($schedule): ?>
+
+									<?= substr($schedule->start_time, 0, 5) ?>
+
+									-
+
+									<?= substr($schedule->end_time, 0, 5) ?>
+
+								<?php else: ?>
+
+									-
+
+								<?php endif; ?>
 
 							</td>
 
 						</tr>
+
+						<tr>
+
+							<td>Lokasi</td>
+
+							<td class="text-right">
+
+								<?= e($training->location ?: '-') ?>
+
+							</td>
+
+						</tr>
+
+						</tbody>
 
 					</table>
 
 					<hr>
 
-					<?php if(!$profileCompleted): ?>
+					<?php if ($registration->score): ?>
+
+						<div class="alert alert-light border mb-3">
+
+							<div class="small text-muted">
+
+								Nilai Akhir
+
+							</div>
+
+							<h3 class="font-weight-bold mb-0 text-primary">
+
+								<?= $registration->score->final_score ?>
+
+							</h3>
+
+						</div>
+
+					<?php endif; ?>
+
+					<?php if ($registration->certificate): ?>
 
 						<a
-							href="<?= url('/peserta/profile') ?>"
-							class="btn btn-warning btn-lg btn-block">
+							href="<?= url('/peserta/certificates/show?id=' . $registration->certificate->id) ?>"
+							class="btn btn-success btn-lg btn-block">
 
-							<i class="fas fa-user-edit mr-2"></i>
+							<i class="fas fa-certificate mr-2"></i>
 
-							Lengkapi Biodata
-
-						</a>
-
-					<?php elseif($alreadyRegistered): ?>
-
-						<button
-							class="btn btn-success btn-lg btn-block"
-							disabled>
-
-							<i class="fas fa-check-circle mr-2"></i>
-
-							Sudah Terdaftar
-
-						</button>
-
-					<?php else: ?>
-
-						<a
-							href="<?= url('/peserta/registrations/create?id=' . $training['id']) ?>"
-							class="btn btn-primary btn-lg btn-block">
-
-							<i class="fas fa-paper-plane mr-2"></i>
-
-							Daftar Sekarang
+							Lihat Sertifikat
 
 						</a>
 
 					<?php endif; ?>
 
 					<a
-						href="<?= url('/peserta/registrations') ?>"
-						class="btn btn-light btn-block mt-2">
+						href="<?= url('/peserta/trainings') ?>"
+						class="btn btn-outline-secondary btn-block <?= $registration->certificate ? 'mt-2' : '' ?>">
 
 						<i class="fas fa-arrow-left mr-2"></i>
 

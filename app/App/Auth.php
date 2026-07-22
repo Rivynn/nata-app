@@ -2,6 +2,7 @@
 
 	namespace Natasya\NataApp\App;
 
+	use Natasya\NataApp\DTO\AuthUser;
 	use Natasya\NataApp\Model\User;
 
 	class Auth
@@ -15,46 +16,46 @@
 
 		public function guest(): bool
 		{
-			return !$this->check();
+			return ! $this->check();
 		}
 
-		public function user(): ?array
+		public function user(): ?AuthUser
 		{
-			return $_SESSION[$this->session] ?? null;
+			if (! isset($_SESSION[$this->session])) {
+				return null;
+			}
+
+			return AuthUser::fromArray($_SESSION[$this->session]);
 		}
 		public function refresh(): void
 		{
-			if (!$this->check()) {
+			if ($this->guest()) {
 				return;
 			}
 
-			$userModel = new User();
+			$user = User::find($this->id());
 
-			$user = $userModel->findById($this->id());
-
-			if (!$user) {
-
+			if (! $user) {
 				$this->logout();
-
 				return;
 			}
 
-			$_SESSION['user'] = $user;
+			$this->login($user);
 		}
 
-		public function id(): int|string|null
+		public function id(): ?int
 		{
-			return $this->user()['id'] ?? null;
+			return $this->user()->id ?? null;
 		}
 
 		public function role(): ?string
 		{
-			return $this->user()['role'] ?? null;
+			return $this->user()->role ?? null;
 		}
 
 		public function hasRole(string|array $roles): bool
 		{
-			if (!$this->check()) {
+			if ($this->guest()) {
 				return false;
 			}
 
@@ -65,15 +66,24 @@
 			);
 		}
 
-		public function login(array $user): void
+		public function login(User $user): void
 		{
-			$_SESSION[$this->session] = $user;
+			session_regenerate_id(true);
+
+			$_SESSION[$this->session] = AuthUser::fromUser($user)
+				->toArray();
 		}
 
 		public function logout(): void
 		{
 			unset($_SESSION[$this->session]);
 
-			session_destroy();
+			if (session_status() === PHP_SESSION_ACTIVE) {
+
+				session_regenerate_id(true);
+
+				session_destroy();
+			}
 		}
 	}
+

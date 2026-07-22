@@ -4,404 +4,634 @@
 	 * Variables
 	 *
 	 * $certificate
+	 * $qrcode
 	 */
 
+
+	$registration = $certificate->registration;
+
+
+	$participant = $registration?->participant;
+
+
+	$user = $participant?->user;
+
+
+	$training = $registration?->training;
+
+
+	$field = $training?->trainingField;
+
+
+	$score = $registration?->score;
+
+
+	$issuer = $certificate->issuer;
+
+
 ?>
+
+
+
 <!DOCTYPE html>
+
 <html lang="id">
+
 
 <head>
 
+
 	<meta charset="UTF-8">
+
 
 	<title>
 
-		Sertifikat - <?= $certificate['name'] ?>
+		Sertifikat - <?= $user?->name ?? '-' ?>
 
 	</title>
 
+
+
 	<style>
 
-        *{
-            margin:0;
-            padding:0;
-            box-sizing:border-box;
-        }
 
-        html,
-        body{
+		*{
 
-            width:100%;
+			margin:0;
 
-            height:100%;
+			padding:0;
 
-            background:#ececec;
+			box-sizing:border-box;
 
-            font-family:"Times New Roman",serif;
+		}
 
-        }
 
-        body{
+		html,
 
-            padding:40px;
+		body{
 
-        }
 
-        .toolbar{
+			width:100%;
 
-            width:100%;
 
-            display:flex;
+			height:100%;
 
-            justify-content:flex-end;
 
-            gap:15px;
+			background:#ececec;
 
-            margin-bottom:25px;
 
-        }
+			font-family:"Times New Roman",serif;
 
-        .btn{
 
-            padding:12px 26px;
+		}
 
-            border-radius:8px;
 
-            text-decoration:none;
+		body{
 
-            color:#fff;
 
-            font-weight:bold;
+			padding:40px;
 
-            transition:.25s;
 
-            display:inline-flex;
+		}
 
-            align-items:center;
 
-            gap:8px;
+		.toolbar{
 
-        }
 
-        .btn:hover{
+			width:100%;
 
-            opacity:.9;
 
-        }
+			display:flex;
 
-        .btn-primary{
 
-            background:#2563eb;
+			justify-content:flex-end;
 
-        }
 
-        .btn-success{
+			gap:15px;
 
-            background:#16a34a;
 
-        }
+			margin-bottom:25px;
 
-        .certificate{
 
-            width:1123px;
+		}
 
-            height:794px;
 
-            margin:auto;
+		.btn{
 
-            position:relative;
 
-            background:white;
+			padding:12px 26px;
 
-            overflow:hidden;
 
-            border:14px solid #caa548;
+			border-radius:8px;
 
-            outline:3px solid #8b6a1d;
 
-            outline-offset:-20px;
+			text-decoration:none;
 
-            box-shadow:0 15px 40px rgba(0,0,0,.25);
 
-        }
+			color:#fff;
 
-        .pattern-top{
 
-            position:absolute;
+			font-weight:bold;
 
-            top:0;
 
-            left:0;
+			transition:.25s;
 
-            width:100%;
 
-            height:12px;
+			display:inline-flex;
 
-            background:#caa548;
 
-        }
+			align-items:center;
 
-        .pattern-bottom{
 
-            position:absolute;
+			gap:8px;
 
-            bottom:0;
 
-            left:0;
+		}
 
-            width:100%;
 
-            height:12px;
+		.btn:hover{
 
-            background:#caa548;
 
-        }
+			opacity:.9;
 
-        .watermark{
 
-            position:absolute;
+		}
 
-            top:50%;
 
-            left:50%;
+		.btn-primary{
 
-            transform:translate(-50%,-50%);
 
-            width:420px;
+			background:#2563eb;
 
-            opacity:.04;
 
-        }
+		}
 
-        .content{
 
-            position:relative;
+		.btn-success{
 
-            z-index:5;
 
-            padding:45px 70px;
+			background:#16a34a;
 
-            height:100%;
 
-        }
+		}
 
-        .header{
 
-            display:flex;
+		.certificate{
 
-            justify-content:space-between;
 
-            align-items:center;
+			width:1123px;
 
-        }
 
-        .logo{
+			height:794px;
 
-            width:95px;
 
-            height:95px;
+			margin:auto;
 
-            object-fit:contain;
 
-        }
+			position:relative;
 
-        .agency{
 
-            text-align:center;
+			background:white;
 
-            flex:1;
 
-        }
+			overflow:hidden;
 
-        .agency h3{
 
-            font-size:18px;
+			border:14px solid #caa548;
 
-            letter-spacing:2px;
 
-        }
+			outline:3px solid #8b6a1d;
 
-        .agency h2{
 
-            font-size:30px;
+			outline-offset:-20px;
 
-            margin-top:6px;
 
-            color:#123c7a;
+			box-shadow:0 15px 40px rgba(0,0,0,.25);
 
-        }
 
-        .agency p{
+		}
 
-            margin-top:6px;
 
-            color:#555;
+		.pattern-top{
 
-            font-size:14px;
 
-        }
+			position:absolute;
 
-        .divider{
 
-            width:100%;
+			top:0;
 
-            border-top:4px solid #caa548;
 
-            border-bottom:1px solid #caa548;
+			left:0;
 
-            margin:25px 0;
 
-        }
+			width:100%;
 
-        .title{
 
-            text-align:center;
+			height:12px;
 
-            font-size:52px;
 
-            color:#123c7a;
+			background:#caa548;
 
-            font-weight:bold;
 
-            letter-spacing:5px;
+		}
 
-        }
 
-        .subtitle{
+		.pattern-bottom{
 
-            margin-top:8px;
 
-            text-align:center;
+			position:absolute;
 
-            color:#666;
 
-            font-size:20px;
+			bottom:0;
 
-            letter-spacing:2px;
 
-        }
+			left:0;
 
-        .recipient{
 
-            margin-top:55px;
+			width:100%;
 
-            text-align:center;
 
-        }
+			height:12px;
 
-        .recipient small{
 
-            display:block;
+			background:#caa548;
 
-            font-size:18px;
 
-            color:#666;
+		}
 
-            margin-bottom:18px;
 
-        }
+		.watermark{
 
-        .recipient h1{
 
-            font-size:50px;
+			position:absolute;
 
-            color:#8b6a1d;
 
-            border-bottom:2px solid #caa548;
+			top:50%;
 
-            display:inline-block;
 
-            padding:0 35px 8px;
+			left:50%;
 
-        }
 
-        .description{
+			transform:translate(-50%,-50%);
 
-            width:82%;
 
-            margin:40px auto;
+			width:420px;
 
-            text-align:center;
 
-            line-height:2;
+			opacity:.04;
 
-            font-size:21px;
 
-            color:#333;
+		}
 
-        }
 
-        .training{
+		.content{
 
-            text-align:center;
 
-            font-size:34px;
+			position:relative;
 
-            font-weight:bold;
 
-            color:#123c7a;
+			z-index:5;
 
-        }
 
-        .field{
+			padding:45px 70px;
 
-            text-align:center;
 
-            margin-top:10px;
+			height:100%;
 
-            color:#666;
 
-            font-size:18px;
+		}
 
-        }
+
+		.header{
+
+
+			display:flex;
+
+
+			justify-content:space-between;
+
+
+			align-items:center;
+
+
+		}
+
+
+		.logo{
+
+
+			width:95px;
+
+
+			height:95px;
+
+
+			object-fit:contain;
+
+
+		}
+
+
+		.agency{
+
+
+			text-align:center;
+
+
+			flex:1;
+
+
+		}
+
+
+		.agency h3{
+
+
+			font-size:18px;
+
+
+			letter-spacing:2px;
+
+
+		}
+
+
+		.agency h2{
+
+
+			font-size:30px;
+
+
+			margin-top:6px;
+
+
+			color:#123c7a;
+
+
+		}
+
+
+		.agency p{
+
+
+			margin-top:6px;
+
+
+			color:#555;
+
+
+			font-size:14px;
+
+
+		}
+
+
+		.divider{
+
+
+			width:100%;
+
+
+			border-top:4px solid #caa548;
+
+
+			border-bottom:1px solid #caa548;
+
+
+			margin:25px 0;
+
+
+		}
+
+
+		.title{
+
+
+			text-align:center;
+
+
+			font-size:52px;
+
+
+			color:#123c7a;
+
+
+			font-weight:bold;
+
+
+			letter-spacing:5px;
+
+
+		}
+
+
+		.subtitle{
+
+
+			margin-top:8px;
+
+
+			text-align:center;
+
+
+			color:#666;
+
+
+			font-size:20px;
+
+
+			letter-spacing:2px;
+
+
+		}
+
+
+		.recipient{
+
+
+			margin-top:55px;
+
+
+			text-align:center;
+
+
+		}
+
+
+		.recipient small{
+
+
+			display:block;
+
+
+			font-size:18px;
+
+
+			color:#666;
+
+
+			margin-bottom:18px;
+
+
+		}
+
+
+		.recipient h1{
+
+
+			font-size:50px;
+
+
+			color:#8b6a1d;
+
+
+			border-bottom:2px solid #caa548;
+
+
+			display:inline-block;
+
+
+			padding:0 35px 8px;
+
+
+		}
+		.description{
+
+			width:82%;
+
+			margin:40px auto;
+
+			text-align:center;
+
+			line-height:2;
+
+			font-size:21px;
+
+			color:#333;
+
+		}
+
+
+		.training{
+
+			text-align:center;
+
+			font-size:34px;
+
+			font-weight:bold;
+
+			color:#123c7a;
+
+		}
+
+
+		.field{
+
+			text-align:center;
+
+			margin-top:10px;
+
+			color:#666;
+
+			font-size:18px;
+
+		}
+
 
 	</style>
 
+
 </head>
+
 
 <body>
 
+
 <div class="toolbar">
 
+
 	<a
-		href="<?= url('/peserta/certificates') ?>"
+		href="<?= url('/pegawai/certificates') ?>"
 		class="btn btn-primary">
 
-		← Kembali
+
+		<i class="fas fa-arrow-left mr-2"></i>
+
+
+		Kembali
+
 
 	</a>
+
+
+
 
 	<a
 		href="javascript:window.print();"
 		class="btn btn-success">
 
+
 		🖨 Cetak / Simpan PDF
+
 
 	</a>
 
+
 </div>
+
+
+
+
 
 <div class="certificate">
 
+
 	<div class="pattern-top"></div>
+
 
 	<div class="pattern-bottom"></div>
 
+
+
+
 	<!-- watermark -->
 
+
 	<img
+
 		src="<?= asset('img/logo.png') ?>"
-		class="watermark">
+
+		class="watermark"
+
+	>
+
+
+
+
 
 	<div class="content">
 
+
+
+
+
 		<div class="header">
 
+
 			<img
+
 				src="<?= asset('img/logo.png') ?>"
-				class="logo">
+
+				class="logo"
+
+			>
+
+
+
+
 
 			<div class="agency">
+
 
 				<h3>
 
@@ -409,11 +639,15 @@
 
 				</h3>
 
+
+
 				<h2>
 
 					DINAS KOPERASI, USAHA MIKRO DAN TENAGA KERJA
 
 				</h2>
+
+
 
 				<p>
 
@@ -421,336 +655,681 @@
 
 				</p>
 
+
 			</div>
 
+
+
+
+
 			<img
+
 				src="<?= asset('img/logo.png') ?>"
-				class="logo">
+
+				class="logo"
+
+			>
+
 
 		</div>
+
+
+
+
 
 		<div class="divider"></div>
 
+
+
+
+
 		<div class="title">
+
 
 			SERTIFIKAT
 
+
 		</div>
+
+
+
+
 
 		<div class="subtitle">
 
+
 			CERTIFICATE OF COMPLETION
 
+
 		</div>
+
+
+
+
 
 		<div class="recipient">
 
+
 			<small>
+
 
 				Diberikan Kepada
 
+
 			</small>
+
+
+
+
 
 			<h1>
 
-				<?= strtoupper($certificate['name']) ?>
+
+				<?= strtoupper(
+
+					$user?->name ?? '-'
+
+				) ?>
+
 
 			</h1>
 
+
 		</div>
+
+
+
+
 
 		<div class="description">
 
+
 			Dengan ini menyatakan bahwa peserta telah berhasil
+
 			menyelesaikan pelatihan yang diselenggarakan oleh
-			<strong>Dinas Koperasi, Usaha Mikro dan Tenaga Kerja Kota Banjarbaru</strong>
+
+
+
+			<strong>
+
+				Dinas Koperasi, Usaha Mikro dan Tenaga Kerja Kota Banjarbaru
+
+			</strong>
+
+
+
 			dengan hasil yang memuaskan.
 
+
 		</div>
+
+
+
+
 
 		<div class="training">
 
-			<?= $certificate['training_name'] ?>
+
+			<?= $training?->name ?? '-' ?>
+
 
 		</div>
+
+
+
+
 
 		<div class="field">
 
-			<?= $certificate['field_name'] ?>
+
+			<?= $field?->name ?? '-' ?>
+
 
 		</div>
+
+
+
+
+
 		<div
+
 			style="
-        margin-top:60px;
-        display:flex;
-        justify-content:space-between;
-        align-items:flex-start;
-">
+
+				margin-top:60px;
+
+				display:flex;
+
+				justify-content:space-between;
+
+				align-items:flex-start;
+
+			"
+
+		>
+
+
+
 
 			<table
+
 				style="
-            width:58%;
-            font-size:18px;
-            border-collapse:collapse;
-        ">
+
+					width:58%;
+
+					font-size:18px;
+
+					border-collapse:collapse;
+
+				"
+
+			>
+
+
 
 				<tr>
+
 
 					<td width="220">
 
+
 						Nomor Sertifikat
 
+
 					</td>
+
+
 
 					<td width="20">
 
+
 						:
+
 
 					</td>
 
+
+
 					<td>
+
 
 						<strong>
 
-							<?= $certificate['certificate_number'] ?>
+
+							<?= $certificate->certificate_number ?>
+
 
 						</strong>
 
+
 					</td>
+
 
 				</tr>
 
+
+
+
+
 				<tr>
 
+
 					<td>
+
 
 						Verification Code
 
+
 					</td>
 
+
+
 					<td>
+
 
 						:
 
+
 					</td>
+
+
 
 					<td>
 
-						<?= $certificate['verification_code'] ?>
+
+						<?= $certificate->verification_code ?>
+
 
 					</td>
+
 
 				</tr>
 
+
+
+
+
 				<tr>
 
+
 					<td>
+
 
 						Tanggal Terbit
 
+
 					</td>
 
+
+
 					<td>
+
 
 						:
 
+
 					</td>
+
+
 
 					<td>
 
-						<?= date(
-							'd F Y',
-							strtotime($certificate['issued_at'])
-						) ?>
+
+						<?= $certificate->issued_at?->format('d F Y') ?>
+
 
 					</td>
 
+
 				</tr>
+
+
+
+
 
 				<tr>
 
+
 					<td>
+
 
 						Disetujui Oleh
 
+
 					</td>
 
+
+
 					<td>
+
 
 						:
 
+
 					</td>
+
+
 
 					<td>
 
-						<?= $certificate['approved_by_name'] ?>
+
+						<?= $issuer?->name ?? 'Pegawai' ?>
+
 
 					</td>
 
+
 				</tr>
+
+
 
 			</table>
 
-			<div
-				style="
-            width:240px;
-            text-align:center;
-        ">
 
-				<img
-					src="<?= asset('images/qrcode-placeholder.png') ?>"
-					style="
-                width:170px;
-                margin-bottom:10px;
-            ">
+
+
+
+			<div
+
+				style="
+
+					width:240px;
+
+					text-align:center;
+
+				"
+
+			>
+
+
 
 				<div
-					style="
-                font-size:13px;
-                color:#777;
-            ">
 
-					Scan QR Code untuk melakukan
-					verifikasi sertifikat.
+					style="
+
+						width:170px;
+
+						margin:auto;
+
+						margin-bottom:10px;
+
+					"
+
+				>
+
+					<?= $qrcode ?>
+
 
 				</div>
 
-			</div>
 
-		</div>
 
-		<div
-			style="
-        margin-top:70px;
-        display:flex;
-        justify-content:space-between;
-        align-items:flex-end;
-">
 
-			<div
-				style="
-            width:300px;
-            text-align:center;
-        ">
 
 				<div
+
 					style="
-                margin-bottom:80px;
-            ">
+
+						font-size:13px;
+
+						color:#777;
+
+					"
+
+				>
+
+
+					Scan QR Code untuk melakukan
+
+					verifikasi sertifikat.
+
+
+				</div>
+
+
+
+			</div>
+
+
+
+
+
+		</div>
+		<div
+
+			style="
+
+				margin-top:70px;
+
+				display:flex;
+
+				justify-content:space-between;
+
+				align-items:flex-end;
+
+			"
+
+		>
+
+
+
+			<div
+
+				style="
+
+					width:300px;
+
+					text-align:center;
+
+				"
+
+			>
+
+
+				<div
+
+					style="
+
+						margin-bottom:80px;
+
+					"
+
+				>
+
 
 					Peserta
 
+
 				</div>
+
+
+
+
 
 				<div
-					style="
-                border-top:1px solid #444;
-                padding-top:8px;
-                font-weight:bold;
-            ">
 
-					<?= $certificate['name'] ?>
+					style="
+
+						border-top:1px solid #444;
+
+						padding-top:8px;
+
+						font-weight:bold;
+
+					"
+
+				>
+
+
+					<?= $user?->name ?? '-' ?>
+
 
 				</div>
+
+
 
 			</div>
 
+
+
+
+
 			<div
+
 				style="
-            width:320px;
-            text-align:center;
-        ">
+
+					width:320px;
+
+					text-align:center;
+
+				"
+
+			>
+
+
 
 				<div>
 
+
 					Banjarbaru,
 
-					<?= date(
-						'd F Y',
-						strtotime($certificate['issued_at'])
-					) ?>
+					<?= $certificate->issued_at?->format('d F Y') ?>
+
 
 				</div>
 
+
+
+
+
 				<div
+
 					style="
-                margin-top:10px;
-            ">
+
+						margin-top:10px;
+
+					"
+
+				>
+
 
 					Kepala Dinas
 
-				</div>
-
-				<div
-					style="
-                height:95px;
-            ">
 
 				</div>
 
+
+
+
+
 				<div
+
 					style="
-                border-top:1px solid #444;
-                padding-top:8px;
-                font-weight:bold;
-            ">
+
+						height:95px;
+
+					"
+
+				>
+
+
+
+				</div>
+
+
+
+
+
+				<div
+
+					style="
+
+						border-top:1px solid #444;
+
+						padding-top:8px;
+
+						font-weight:bold;
+
+					"
+
+				>
+
 
 					<?= strtoupper(
-						$certificate['approved_by_name']
+
+						$issuer?->name ?? 'PEJABAT TERKAIT'
+
 					) ?>
 
+
+
 				</div>
+
+
 
 			</div>
 
+
+
+
 		</div>
+
+
 
 
 
 	</div>
 
+
 </div>
+
+
+
+
 
 <style>
 
-    @media print{
 
-        body{
+	@media print{
 
-            background:white;
 
-            padding:0;
 
-        }
+		body{
 
-        .toolbar{
 
-            display:none;
 
-        }
+			background:white;
 
-        .certificate{
 
-            margin:0;
 
-            width:100%;
+			padding:0;
 
-            height:100vh;
 
-            border:none;
 
-            outline:none;
+		}
 
-            box-shadow:none;
 
-            page-break-after:avoid;
 
-        }
 
-    }
+
+		.toolbar{
+
+
+
+			display:none;
+
+
+
+		}
+
+
+
+
+
+		.certificate{
+
+
+
+			margin:0;
+
+
+
+			width:100%;
+
+
+
+			height:100vh;
+
+
+
+			border:none;
+
+
+
+			outline:none;
+
+
+
+			box-shadow:none;
+
+
+
+			page-break-after:avoid;
+
+
+
+		}
+
+
+
+	}
+
+
 
 </style>
 
+
+
 </body>
+
 
 </html>

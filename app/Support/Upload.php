@@ -148,6 +148,9 @@
 				return null;
 			}
 
-			return $filename;
+			return 'uploads/'
+				. trim($directory, '/')
+				. '/'
+				. $filename;
 		}
 	}

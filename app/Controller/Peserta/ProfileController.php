@@ -8,43 +8,30 @@
 	use Natasya\NataApp\Model\Participant;
 	use Natasya\NataApp\Model\ParticipantProfile;
 	use Natasya\NataApp\Support\Upload;
+	use function Illuminate\Support\now;
 
 	class ProfileController extends Controller
 	{
 		public function index(): void
 		{
-			$participantModel = new Participant();
-			$profileModel     = new ParticipantProfile();
+			$participant = Participant::where('user_id', auth()->id())
+				->with('profile')
+				->firstOrFail();
 
-			$participant = $participantModel->findByUserId(
-				auth()->id()
-			);
-
-			$profile = $profileModel->findByParticipantId(
-				$participant['id']
-			);
-
-			$this->view(
-				'Peserta/Profile/index',
-				[
-					'title'       => 'Biodata Peserta',
-					'participant' => $participant,
-					'profile'     => $profile,
-				]
-			);
+			$this->view('Peserta/Profile/index', [
+				'title'       => 'Biodata Peserta',
+				'participant' => $participant,
+				'profile'     => $participant->profile,
+			]);
 		}
 
 		public function update(): void
 		{
-			$participantModel = new Participant();
-
-			$profileModel = new ParticipantProfile();
-
 			$userId = auth()->id();
 
-			$participant = $participantModel->findByUserId($userId);
+			$participant = Participant::where('user_id', $userId)->first();
 
-			if (!$participant) {
+			if (! $participant) {
 
 				error('Data peserta tidak ditemukan.');
 
@@ -90,6 +77,7 @@
 				'marital_status' => trim(Request::post('marital_status')) !== ''
 					? trim(Request::post('marital_status'))
 					: null,
+
 				'province' => trim(Request::post('province')),
 
 				'city' => trim(Request::post('city')),
@@ -124,41 +112,28 @@
 					Request::post('emergency_contact_phone')
 				),
 
-				/*
-				|--------------------------------------------------------------------------
-				| Dipakai calculateCompleted()
-				|--------------------------------------------------------------------------
-				*/
-
 				'address' => trim(Request::post('address')),
 			];
 
 			/*
 			|--------------------------------------------------------------------------
-			| Update Participants
+			| Update Participant
 			|--------------------------------------------------------------------------
 			*/
 
-			$participantModel->updateProfile(
-
-				$userId,
-
-				$participantData
-
-			);
+			$participant->update($participantData);
 
 			/*
 			|--------------------------------------------------------------------------
-			| Create Profile Jika Belum Ada
+			| Ambil / Buat Profile
 			|--------------------------------------------------------------------------
 			*/
 
-			if (!$profileModel->exists($participant['id'])) {
-
-				$profileModel->create(
-					$participant['id']
-				);
-			}
+			$profile = ParticipantProfile::firstOrCreate(
+				[
+					'participant_id' => $participant->id,
+				]
+			);
 
 			/*
 			|--------------------------------------------------------------------------
@@ -166,13 +141,15 @@
 			|--------------------------------------------------------------------------
 			*/
 
-			$profileModel->update(
+			$profile->update($profileData);
+			$profile->refresh();
 
-				$participant['id'],
-
-				$profileData
-
-			);
+			$profile->update([
+				'is_completed' => $profile->calculateCompleted(),
+				'completed_at' => $profile->calculateCompleted()
+					? now()
+					: null,
+			]);
 
 			/*
 			|--------------------------------------------------------------------------
@@ -182,63 +159,41 @@
 
 			$documents = [];
 
-			if (!empty($_FILES['ktp_file']['name'])) {
+			if (! empty($_FILES['ktp_file']['name'])) {
 
 				$documents['ktp_file'] = Upload::file(
 					$_FILES['ktp_file'],
 					'participants/ktp'
 				);
-
 			}
 
-			if (!empty($_FILES['photo']['name'])) {
+			if (! empty($_FILES['photo']['name'])) {
 
 				$documents['photo'] = Upload::file(
 					$_FILES['photo'],
 					'participants/photos'
 				);
-
 			}
 
-			if (!empty($_FILES['cv_file']['name'])) {
+			if (! empty($_FILES['cv_file']['name'])) {
 
 				$documents['cv_file'] = Upload::file(
 					$_FILES['cv_file'],
 					'participants/cv'
 				);
-
 			}
-			if (!empty($_FILES['ijazah_file']['name'])) {
+
+			if (! empty($_FILES['ijazah_file']['name'])) {
 
 				$documents['ijazah_file'] = Upload::file(
-
 					$_FILES['ijazah_file'],
-
 					'participants/ijazah'
-
 				);
-
 			}
 
-			if (!empty($documents)) {
+			if (! empty($documents)) {
 
-				$documents = array_merge(
-					[
-						'ktp_file' => null,
-						'photo' => null,
-						'cv_file' => null,
-						'ijazah_file' => null
-					],
-					$documents
-				);
-
-				$profileModel->updateDocuments(
-
-					$participant['id'],
-
-					$documents
-
-				);
+				$profile->update($documents);
 			}
 
 			/*
@@ -252,7 +207,7 @@
 				'Peserta memperbarui biodata.',
 				[
 					'user_id' => $userId,
-					'participant_id' => $participant['id'],
+					'participant_id' => $participant->id,
 				]
 			);
 

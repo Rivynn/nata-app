@@ -2,207 +2,65 @@
 
 	namespace Natasya\NataApp\Model;
 
+	use Illuminate\Database\Eloquent\Relations\BelongsTo;
 	use Natasya\NataApp\App\Model;
 
 	class Employee extends Model
 	{
-		public function all(): array
+		protected $table = 'employees';
+
+		protected $fillable = [
+			'user_id',
+			'employee_number',
+			'phone',
+			'position',
+			'department',
+		];
+
+		/*
+		|--------------------------------------------------------------------------
+		| Relationships
+		|--------------------------------------------------------------------------
+		*/
+
+		public function user(): BelongsTo
 		{
-			return $this->fetchAll("
-            SELECT
-
-                e.*,
-
-                u.name,
-
-                u.username,
-
-                u.email,
-
-                u.avatar,
-
-                u.status,
-
-                tf.name AS field_name
-
-            FROM employees e
-
-            INNER JOIN users u
-                ON u.id = e.user_id
-
-            INNER JOIN training_fields tf
-                ON tf.id = e.training_field_id
-
-            ORDER BY u.name ASC
-        ");
+			return $this->belongsTo(User::class);
 		}
 
-		public function find(int $id): ?array
+		/*
+		|--------------------------------------------------------------------------
+		| Helpers
+		|--------------------------------------------------------------------------
+		*/
+
+		public function hasPhone(): bool
 		{
-			return $this->fetch("
-            SELECT
-
-                e.*,
-
-                u.name,
-
-                u.username,
-
-                u.email,
-
-                u.avatar,
-
-                u.status,
-
-                tf.name AS field_name
-
-            FROM employees e
-
-            INNER JOIN users u
-                ON u.id = e.user_id
-
-            INNER JOIN training_fields tf
-                ON tf.id = e.training_field_id
-
-            WHERE e.id = ?
-
-            LIMIT 1
-        ", [
-				$id
-			]);
+			return ! empty($this->phone);
 		}
 
-		public function create(array $data): int
+		public function hasDepartment(): bool
 		{
-			$this->execute("
-            INSERT INTO employees
-            (
-                user_id,
-                training_field_id,
-                phone,
-                position,
-                address
-            )
-            VALUES
-            (
-                ?,?,?,?,?
-            )
-        ", [
-
-				$data['user_id'],
-				$data['training_field_id'],
-				$data['phone'],
-				$data['position'],
-				$data['address'],
-
-			]);
-
-			return (int) $this->db->lastInsertId();
+			return ! empty($this->department);
 		}
 
-		public function update(
-			int $id,
-			array $data
-		): bool
+		public function hasPosition(): bool
 		{
-			return $this->execute("
-            UPDATE employees
-            SET
-
-                training_field_id = ?,
-
-                phone = ?,
-
-                position = ?,
-
-                address = ?
-
-            WHERE id = ?
-        ", [
-
-				$data['training_field_id'],
-				$data['phone'],
-				$data['position'],
-				$data['address'],
-				$id
-
-			]);
+			return ! empty($this->position);
 		}
 
-		public function delete(int $id): bool
+		public function getDisplayName(): string
 		{
-			return $this->execute("
-            DELETE
-            FROM employees
-            WHERE id = ?
-        ", [
-				$id
-			]);
+			return $this->user?->getDisplayName() ?? '-';
 		}
 
-		public function count(): int
+		public function getDepartmentLabel(): string
 		{
-			$result = $this->fetch("
-            SELECT COUNT(*) AS total
-            FROM employees
-        ");
-
-			return (int) $result['total'];
+			return $this->department ?: '-';
 		}
 
-		public function countByField(): array
+		public function getPositionLabel(): string
 		{
-			return $this->fetchAll("
-            SELECT
-
-                tf.id,
-
-                tf.name,
-
-                COUNT(e.id) AS total
-
-            FROM training_fields tf
-
-            LEFT JOIN employees e
-                ON e.training_field_id = tf.id
-
-            GROUP BY tf.id
-
-            ORDER BY tf.name
-        ");
-		}
-
-		public function findByUser(
-			int $userId
-		): ?array
-		{
-			return $this->fetch("
-            SELECT *
-
-            FROM employees
-
-            WHERE user_id = ?
-
-            LIMIT 1
-        ", [
-				$userId
-			]);
-		}
-
-		public function exists(
-			int $userId
-		): bool
-		{
-			return (bool) $this->fetch("
-            SELECT id
-
-            FROM employees
-
-            WHERE user_id = ?
-
-            LIMIT 1
-        ", [
-				$userId
-			]);
+			return $this->position ?: '-';
 		}
 	}

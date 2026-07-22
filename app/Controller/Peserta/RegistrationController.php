@@ -2,163 +2,178 @@
 
 	namespace Natasya\NataApp\Controller\Peserta;
 
+	use Carbon\Carbon;
 	use Natasya\NataApp\App\Controller;
 	use Natasya\NataApp\App\Request;
 	use Natasya\NataApp\Model\Participant;
 	use Natasya\NataApp\Model\ParticipantProfile;
 	use Natasya\NataApp\Model\Registration;
 	use Natasya\NataApp\Model\Training;
+	use Natasya\NataApp\Model\TrainingField;
 
 	class RegistrationController extends Controller
 	{
 		public function index(): void
 		{
-			$participant = (new Participant())
-				->findByUserId(auth()->id());
-
-			$profile = (new ParticipantProfile())
-				->findByParticipantId($participant['id']);
-
-			$trainingModel = new Training();
+			$participant = Participant::with('profile')
+				->where('user_id', auth()->id())
+				->firstOrFail();
 
 			$filters = [
-
-				'keyword' => Request::get('keyword'),
-
+				'keyword' => trim((string) Request::get('keyword')),
 				'field' => Request::get('field'),
-
-				'sort' => Request::get('sort'),
-
+				'sort' => Request::get('sort') ?: 'latest',
 			];
+			$activeRegistration = Registration::with([
+				'training.trainingField',
+			])
+				->where('participant_id', $participant->id)
+				->whereIn('status', [
+					'pending',
+					'approved',
+					'running',
+				])
+				->first();
 
-			$this->view(
-				'Peserta/Registrations/index',
-				[
+			$trainings = Training::with([
+				'trainingField',
+				'trainer.user',
+			])
+				->when($filters['keyword'], function ($query) use ($filters) {
+					$query->where('name', 'like', '%' . $filters['keyword'] . '%');
+				})
+				->when($filters['field'], function ($query) use ($filters) {
+					$query->where('training_field_id', $filters['field']);
+				})
+				->where('status', 'open');
 
-					'title' => 'Daftar Pelatihan',
+			switch ($filters['sort']) {
+				case 'oldest':
+					$trainings->oldest();
+					break;
 
-					'filters' => $filters,
+				case 'name':
+					$trainings->orderBy('name');
+					break;
 
-					'fields' => $trainingModel->fields(),
+				case 'quota':
+					$trainings->orderByDesc('quota');
+					break;
 
-					'trainings' => $trainingModel->opened($filters),
+				default:
+					$trainings->latest();
+					break;
+			}
 
-					'profileCompleted' => (bool) ($profile['is_completed'] ?? false),
-
-				]
-			);
+			$this->view('Peserta/Registrations/index', [
+				'title' => 'Daftar Pelatihan',
+				'filters' => $filters,
+				'fields' => TrainingField::where('is_active', true)
+					->orderBy('name')
+					->get(),
+				'trainings' => $trainings->get(),
+				'activeRegistration' => $activeRegistration,
+				'profileCompleted' => $participant->profile?->isCompleted() ?? false,
+			]);
 		}
 		/**
 		 * Status pendaftaran.
 		 */
 		public function status(): void
 		{
-			$registration = new Registration();
+			$participant = Participant::where(
+				'user_id',
+				auth()->id()
+			)->firstOrFail();
+
+			$registrations = Registration::with([
+				'training.trainingField',
+				'training.trainer.user',
+				'training.schedules',
+				'certificate',
+				'score',
+			])
+				->where('participant_id', $participant->id)
+				->latest()
+				->get();
 
 			$this->view(
 				'Peserta/Registrations/status',
 				[
-
 					'title' => 'Status Pendaftaran',
-
-					'registrations' => $registration->byUser(
-						auth()->id()
-					),
-
+					'registrations' => $registrations,
 				]
 			);
 		}
 
 		public function create(): void
 		{
-			$id = (int) Request::get('id');
+			$training = Training::with([
+				'trainingField',
+				'trainer.user',
+			])->find(Request::get('id'));
 
-			$trainingModel = new Training();
-
-			$training = $trainingModel->find($id);
-
-			if (!$training) {
+			if (! $training) {
 
 				error('Pelatihan tidak ditemukan.');
 
-				$this->redirect('/peserta/registrations');
+				redirect('/peserta/registrations');
 			}
 
-			$participantModel = new Participant();
+			$participant = Participant::with([
+				'user',
+				'profile',
+			])
+				->where('user_id', auth()->id())
+				->first();
 
-			$participant = $participantModel->findByUserId(
-				auth()->id()
-			);
-
-			if (!$participant) {
+			if (! $participant) {
 
 				error('Data peserta tidak ditemukan.');
 
-				$this->redirect('/peserta');
+				redirect('/peserta');
 			}
 
-			/*
-			|--------------------------------------------------------------------------
-			| Pastikan Profil Sudah Lengkap
-			|--------------------------------------------------------------------------
-			*/
-
-			$profileModel = new ParticipantProfile();
-
-			$profile = $profileModel->findByParticipantId(
-				$participant['id']
-			);
-
-			if (
-				!$profile
-				|| !(bool) ($profile['is_completed'] ?? false)
-			) {
+			if (! ($participant->profile?->isCompleted() ?? false)) {
 
 				error(
 					'Silakan lengkapi profil peserta terlebih dahulu sebelum mendaftar pelatihan.'
 				);
 
-				$this->redirect('/peserta/profile');
+				redirect('/peserta/profile');
 			}
 
-			/*
-			|--------------------------------------------------------------------------
-			| Cek Sudah Pernah Daftar
-			|--------------------------------------------------------------------------
-			*/
-
-			$registrationModel = new Registration();
-
-			if (
-				$registrationModel->exists(
-					auth()->id(),
-					$id
+			$alreadyRegistered = Registration::where(
+				'participant_id',
+				$participant->id
+			)
+				->where(
+					'training_id',
+					$training->id
 				)
-			) {
+				->exists();
+
+			if ($alreadyRegistered) {
 
 				error(
 					'Anda sudah terdaftar pada pelatihan ini.'
 				);
 
-				$this->redirect('/peserta/registrations');
+				redirect('/peserta/registrations');
 			}
-
-			/*
-			|--------------------------------------------------------------------------
-			| View
-			|--------------------------------------------------------------------------
-			*/
 
 			$this->view(
 				'Peserta/Registrations/create',
 				[
-					'title' => 'Daftar Pelatihan',
 
-					'training' => $training,
+					'title'       => 'Daftar Pelatihan',
+
+					'training'    => $training,
 
 					'participant' => $participant,
 
-					'profile' => $profile,
+					'profile'     => $participant->profile,
+
 				]
 			);
 		}
@@ -168,58 +183,153 @@
 		 */
 		public function store(): void
 		{
-			$trainingId = (int) Request::post('training_id');
-
-			$motivation = trim(
-				Request::post('motivation')
+			$training = Training::find(
+				(int) Request::post('training_id')
 			);
 
-			$trainingModel = new Training();
+			if (! $training) {
 
-			$training = $trainingModel->find($trainingId);
+				error('Pelatihan tidak ditemukan.');
 
-			if (!$training) {
-
-				$_SESSION['error'] = 'Pelatihan tidak ditemukan.';
-
-				$this->redirect('/peserta/registrations');
+				redirect('/peserta/registrations');
 			}
 
-			$registration = new Registration();
-
-			if (
-				$registration->exists(
-					auth()->id(),
-					$trainingId
+			$participant = Participant::with('profile')
+				->where(
+					'user_id',
+					auth()->id()
 				)
-			) {
-
-				$_SESSION['error'] = 'Anda sudah pernah mendaftar pelatihan tersebut.';
-
-				$this->redirect('/peserta/registrations');
-			}
-
-			$registration->create([
-
-				'user_id' => auth()->id(),
-
-				'training_id' => $trainingId,
-
-				'motivation' => $motivation,
-
-			]);
+				->firstOrFail();
 
 			/*
 			|--------------------------------------------------------------------------
-			| Notification
+			| Agreement
 			|--------------------------------------------------------------------------
 			*/
 
-			// (new NotificationService())
-			//     ->trainingRegistration(...);
+			if (! Request::post('agreement')) {
 
-			$_SESSION['success'] = 'Pendaftaran pelatihan berhasil dikirim.';
+				error(
+					'Anda harus menyetujui pernyataan sebelum mendaftar.'
+				);
 
-			$this->redirect('/peserta/status');
+				redirect(
+					'/peserta/registrations/create?id=' . $training->id
+				);
+			}
+
+			/*
+			|--------------------------------------------------------------------------
+			| Registration Period
+			|--------------------------------------------------------------------------
+			*/
+
+			$today = Carbon::today();
+
+			if (
+				$today->lt($training->registration_open)
+				|| $today->gt($training->registration_close)
+			) {
+
+				error(
+					'Periode pendaftaran pelatihan telah ditutup.'
+				);
+
+
+				redirect(
+					'/peserta/registrations/create?id=' . $training->id
+				);
+			}
+
+			/*
+			|--------------------------------------------------------------------------
+			| Training Status
+			|--------------------------------------------------------------------------
+			*/
+
+			if (! $training->isOpen()) {
+
+				error(
+					'Pelatihan tidak sedang membuka pendaftaran.'
+				);
+
+				redirect('/peserta/registrations');
+			}
+
+			/*
+			|--------------------------------------------------------------------------
+			| Training Quota
+			|--------------------------------------------------------------------------
+			*/
+
+			$registered = Registration::where(
+				'training_id',
+				$training->id
+			)
+				->whereNotIn('status', [
+					'rejected',
+					'cancelled',
+				])
+				->count();
+
+			if ($registered >= $training->quota) {
+
+				error(
+					'Maaf, kuota pelatihan telah penuh.'
+				);
+
+				redirect('/peserta/registrations');
+			}
+
+			/*
+			|--------------------------------------------------------------------------
+			| Duplicate Registration
+			|--------------------------------------------------------------------------
+			*/
+
+			$exists = Registration::where(
+				'participant_id',
+				$participant->id
+			)
+				->where(
+					'training_id',
+					$training->id
+				)
+				->exists();
+
+			if ($exists) {
+
+				error(
+					'Anda sudah pernah mendaftar pelatihan tersebut.'
+				);
+
+				redirect('/peserta/registrations');
+			}
+
+			/*
+			|--------------------------------------------------------------------------
+			| Store Registration
+			|--------------------------------------------------------------------------
+			*/
+
+			Registration::create([
+				'registration_number' => Registration::generateRegistrationNumber(),
+				'participant_id' => $participant->id,
+
+				'training_id' => $training->id,
+
+				'motivation' => trim(
+					Request::post('motivation')
+				),
+
+				'status' => 'pending',
+
+			]);
+
+			success(
+				'Pendaftaran pelatihan berhasil dikirim.'
+			);
+
+			redirect('/peserta/status');
 		}
 	}

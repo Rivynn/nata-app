@@ -2,151 +2,80 @@
 
 	namespace Natasya\NataApp\Model;
 
+	use Illuminate\Database\Eloquent\Relations\HasMany;
 	use Natasya\NataApp\App\Model;
 
 	class TrainingField extends Model
 	{
-		public function all(): array
+		protected $table = 'training_fields';
+
+		protected $fillable = [
+			'name',
+			'slug',
+			'description',
+			'icon',
+			'color',
+			'is_active',
+		];
+
+		protected $casts = [
+			'is_active' => 'boolean',
+		];
+
+		/*
+		|--------------------------------------------------------------------------
+		| Relationships
+		|--------------------------------------------------------------------------
+		*/
+
+		public function trainers(): HasMany
 		{
-			return $this->fetchAll("
-            SELECT *
-            FROM training_fields
-            WHERE is_active = 1
-            ORDER BY name ASC
-        ");
+			return $this->hasMany(Trainer::class);
 		}
 
-		public function find(int $id): ?array
+		public function trainings(): HasMany
 		{
-			return $this->fetch("
-            SELECT *
-            FROM training_fields
-            WHERE id = ?
-            LIMIT 1
-        ", [
-				$id
-			]);
+			return $this->hasMany(Training::class);
 		}
 
-		public function create(array $data): int
+		/*
+		|--------------------------------------------------------------------------
+		| Helpers
+		|--------------------------------------------------------------------------
+		*/
+
+		public function isActive(): bool
 		{
-			$this->execute("
-            INSERT INTO training_fields
-            (
-                name,
-                description,
-                icon,
-                color,
-                is_active
-            )
-            VALUES
-            (
-                ?,?,?,?,?
-            )
-        ", [
-
-				$data['name'],
-
-				$data['description'],
-
-				$data['icon'],
-
-				$data['color'],
-
-				$data['is_active'] ?? 1,
-
-			]);
-
-			return (int) $this->db->lastInsertId();
+			return $this->is_active;
 		}
 
-		public function update(
-			int $id,
-			array $data
-		): bool
+		public function isInactive(): bool
 		{
-			return $this->execute("
-            UPDATE training_fields
-            SET
-
-                name = ?,
-
-                description = ?,
-
-                icon = ?,
-
-                color = ?,
-
-                is_active = ?
-
-            WHERE id = ?
-        ", [
-
-				$data['name'],
-
-				$data['description'],
-
-				$data['icon'],
-
-				$data['color'],
-
-				$data['is_active'],
-
-				$id
-
-			]);
+			return ! $this->is_active;
 		}
 
-		public function delete(int $id): bool
+		public function hasIcon(): bool
 		{
-			return $this->execute("
-            DELETE
-            FROM training_fields
-            WHERE id = ?
-        ", [
-				$id
-			]);
+			return ! empty($this->icon);
 		}
 
-		public function count(): int
+		public function hasColor(): bool
 		{
-			$result = $this->fetch("
-            SELECT COUNT(*) AS total
-            FROM training_fields
-        ");
-
-			return (int) $result['total'];
+			return ! empty($this->color);
 		}
 
-		public function active(): array
+		public function getIcon(): string
 		{
-			return $this->fetchAll("
-            SELECT *
-            FROM training_fields
-            WHERE is_active = 1
-            ORDER BY name ASC
-        ");
+			return $this->icon ?: 'ti ti-category';
 		}
 
-		public function inactive(): array
+		public function getColor(): string
 		{
-			return $this->fetchAll("
-            SELECT *
-            FROM training_fields
-            WHERE is_active = 0
-            ORDER BY name ASC
-        ");
+			return $this->color ?: '#6C757D';
 		}
 
-		public function exists(int $id): bool
+		public function getDescription(): string
 		{
-			return $this->fetch("
-            SELECT id
-            FROM training_fields
-            WHERE id = ?
-            LIMIT 1
-        ", [
-					$id
-				]) !== null;
+			return $this->description ?: '-';
 		}
 	}

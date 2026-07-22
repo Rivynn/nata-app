@@ -1,48 +1,120 @@
 <div class="container-fluid">
 
-	<div class="card shadow border-0 mb-4">
+	<!-- Header -->
+	<div class="d-sm-flex align-items-center justify-content-between mb-4">
 
-		<div class="card-header bg-white py-3">
+		<div>
 
-			<div class="d-flex justify-content-between align-items-center">
+			<h3 class="font-weight-bold text-primary mb-1">
+				Data Peserta
+			</h3>
 
-				<div>
+			<p class="text-muted mb-0">
+				Daftar peserta yang telah disetujui mengikuti pelatihan.
+			</p>
 
-					<h4 class="font-weight-bold text-primary mb-1">
+		</div>
 
-						Data Peserta
+	</div>
 
-					</h4>
+	<!-- Quick Filter -->
+	<div class="card shadow mb-4">
 
-					<p class="text-muted mb-0">
+		<div class="card-body">
 
-						Daftar seluruh peserta yang telah disetujui mengikuti pelatihan.
+			<div class="d-flex flex-wrap">
 
-					</p>
+				<a
+					href="<?= url('/pegawai/participants') ?>"
+					class="btn <?= $selectedTraining === 0 ? 'btn-primary' : 'btn-outline-primary' ?> btn-sm mr-2 mb-2">
 
-				</div>
+					Semua
 
-				<div>
+					<span class="badge badge-light ml-1">
 
-                    <span class="badge badge-primary p-2">
-
-                        <?= count($participants) ?> Peserta
+                        <?= $participants->count() ?>
 
                     </span>
 
-				</div>
+				</a>
+
+				<?php foreach ($trainings as $training): ?>
+
+					<a
+						href="<?= url('/pegawai/participants?training=' . $training->id) ?>"
+						class="btn <?= $selectedTraining == $training->id ? 'btn-primary' : 'btn-outline-primary' ?> btn-sm mr-2 mb-2">
+
+						<?= e($training->name) ?>
+
+						<span class="badge badge-light ml-1">
+
+                            <?= $training->approved_count ?>
+
+                        </span>
+
+					</a>
+
+				<?php endforeach; ?>
 
 			</div>
 
 		</div>
 
+	</div>
+
+	<!-- Search -->
+	<div class="card shadow mb-4">
+
 		<div class="card-body">
 
-			<?php if (empty($participants)): ?>
+			<div class="input-group">
+
+				<div class="input-group-prepend">
+
+                    <span class="input-group-text bg-white">
+
+                        <i class="fas fa-search"></i>
+
+                    </span>
+
+				</div>
+
+				<input
+					type="text"
+					id="participantSearch"
+					class="form-control"
+					placeholder="Cari peserta berdasarkan nama, email, atau pelatihan...">
+
+			</div>
+
+		</div>
+
+	</div>
+	<div class="card shadow mb-4">
+
+		<div class="card-header py-3 d-flex justify-content-between align-items-center">
+
+			<h6 class="m-0 font-weight-bold text-primary">
+
+				Daftar Peserta
+
+			</h6>
+
+			<span class="badge badge-primary">
+
+            <?= $participants->count() ?> Peserta
+
+        </span>
+
+		</div>
+
+		<div class="card-body">
+
+			<?php if ($participants->isEmpty()): ?>
 
 				<div class="text-center py-5">
 
-					<i class="fas fa-users fa-5x text-gray-300 mb-3"></i>
+					<i class="fas fa-users fa-4x text-gray-300 mb-3"></i>
 
 					<h5 class="font-weight-bold">
 
@@ -50,7 +122,7 @@
 
 					</h5>
 
-					<p class="text-muted">
+					<p class="text-muted mb-0">
 
 						Belum terdapat peserta yang telah disetujui.
 
@@ -64,15 +136,15 @@
 
 					<table
 						id="participantsTable"
-						class="table table-hover align-middle">
+						class="table table-hover table-bordered mb-0">
 
 						<thead class="thead-light">
 
 						<tr>
 
-							<th width="70">
+							<th width="60">
 
-								#
+								No
 
 							</th>
 
@@ -84,29 +156,29 @@
 
 							<th>
 
-								Kontak
+								Pelatihan
 
 							</th>
 
 							<th>
 
-								Pelatihan
+								Trainer
 
 							</th>
 
-							<th width="250">
+							<th>
 
-								Verifikasi
-
-							</th>
-
-							<th width="120">
-
-								Status
+								Disetujui Oleh
 
 							</th>
 
-							<th width="100">
+							<th width="170">
+
+								Tanggal Disetujui
+
+							</th>
+
+							<th width="90">
 
 								Aksi
 
@@ -118,7 +190,7 @@
 
 						<tbody>
 
-						<?php foreach($participants as $index => $participant): ?>
+						<?php foreach ($participants as $index => $participant): ?>
 
 							<tr>
 
@@ -130,63 +202,17 @@
 
 								<td>
 
-									<div class="d-flex align-items-center">
+									<strong>
 
-										<?php if(!empty($participant['avatar'])): ?>
+										<?= e($participant->participant->user->name) ?>
 
-											<img
-												src="<?= avatar($participant) ?>"
-												class="rounded-circle shadow mr-3"
-												width="52"
-												height="52"
-												style="object-fit:cover;">
+									</strong>
 
-										<?php else: ?>
-
-											<div
-												class="avatar-circle mr-3">
-
-												<?= initials($participant['name']) ?>
-
-											</div>
-
-										<?php endif; ?>
-
-										<div>
-
-											<div class="font-weight-bold">
-
-												<?= $participant['name'] ?>
-
-											</div>
-
-											<small class="text-muted">
-
-												ID #<?= $participant['user_id'] ?>
-
-											</small>
-
-										</div>
-
-									</div>
-
-								</td>
-
-								<td>
-
-									<div>
-
-										<i class="fas fa-envelope text-primary mr-2"></i>
-
-										<?= $participant['email'] ?>
-
-									</div>
+									<br>
 
 									<small class="text-muted">
 
-										<i class="fas fa-phone mr-2"></i>
-
-										<?= $participant['phone'] ?>
+										<?= e($participant->participant->user->email) ?>
 
 									</small>
 
@@ -196,42 +222,15 @@
 
 									<strong>
 
-										<?= $participant['training_name'] ?>
+										<?= e($participant->training->name) ?>
 
 									</strong>
 
 									<br>
 
-									<span class="badge badge-light">
+									<small class="text-muted">
 
-                                        <?= $participant['field_name'] ?>
-
-                                    </span>
-
-								</td>
-
-								<td>
-
-                                    <span class="badge badge-success">
-
-                                        <i class="fas fa-user-check mr-1"></i>
-
-                                        <?= $participant['approved_by_name'] ?? '-' ?>
-
-                                    </span>
-
-									<br>
-
-									<small class="text-muted mt-2 d-inline-block">
-
-										<i class="far fa-calendar-alt mr-1"></i>
-
-										<?= $participant['approved_at']
-											? date(
-												'd M Y H:i',
-												strtotime($participant['approved_at'])
-											)
-											: '-' ?>
+										<?= e($participant->training->trainingField->name) ?>
 
 									</small>
 
@@ -239,31 +238,31 @@
 
 								<td>
 
-                                    <span class="badge badge-success px-3 py-2">
-
-                                        <i class="fas fa-check-circle mr-1"></i>
-
-                                        Approved
-
-                                    </span>
+									<?= e($participant->training->trainer->user->name ?? '-') ?>
 
 								</td>
 
 								<td>
 
-									<div class="btn-group shadow-sm">
+									<?= e($participant->approver->name ?? '-') ?>
 
-										<a
-											href="<?= url('/pegawai/participants/show?id='.$participant['id']) ?>"
-											class="btn btn-outline-primary btn-sm"
-											data-toggle="tooltip"
-											title="Detail">
+								</td>
 
-											<i class="fas fa-eye"></i>
+								<td>
 
-										</a>
+									<?= $participant->approved_at?->format('d M Y H:i') ?? '-' ?>
 
-									</div>
+								</td>
+
+								<td class="text-center">
+
+									<a
+										href="<?= url('/pegawai/participants/show?id=' . $participant->id) ?>"
+										class="btn btn-sm btn-outline-primary">
+
+										<i class="fas fa-eye"></i>
+
+									</a>
 
 								</td>
 
@@ -282,6 +281,60 @@
 		</div>
 
 	</div>
+	<script>
+
+		$(function () {
+
+			const table = $('#participantsTable').DataTable({
+
+				responsive: true,
+
+				autoWidth: false,
+
+				pageLength: 10,
+
+				order: [
+					[0, 'asc']
+				],
+
+				language: {
+
+					emptyTable: "Belum ada data peserta.",
+
+					zeroRecords: "Peserta tidak ditemukan.",
+
+					info: "Menampilkan _START_ - _END_ dari _TOTAL_ peserta",
+
+					infoEmpty: "Menampilkan 0 peserta",
+
+					lengthMenu: "Tampilkan _MENU_ peserta",
+
+					search: "Cari:",
+
+					paginate: {
+
+						first: "Awal",
+
+						previous: "‹",
+
+						next: "›",
+
+						last: "Akhir"
+
+					}
+
+				}
+
+			});
+
+			$('#participantSearch').on('keyup', function () {
+
+				table.search($(this).val()).draw();
+
+			});
+
+		});
+
+	</script>
 
 </div>
-

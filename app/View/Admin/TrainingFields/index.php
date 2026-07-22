@@ -100,7 +100,7 @@
 
 							<h2 class="font-weight-bold mb-0">
 
-								<?= count(array_filter($fields, fn($item) => $item['is_active'])) ?>
+								<?= $fields->where('is_active', true)->count() ?>
 
 							</h2>
 
@@ -138,7 +138,7 @@
 
 							<h2 class="font-weight-bold mb-0">
 
-								<?= count(array_filter($fields, fn($item) => !$item['is_active'])) ?>
+								<?= $fields->where('is_active', false)->count() ?>
 
 							</h2>
 
@@ -186,7 +186,7 @@
 
 				<span class="badge badge-primary px-3 py-2">
 
-					<?= count($fields) ?> Bidang
+					<?= $fields->count() ?> Bidang
 
 				</span>
 
@@ -196,7 +196,7 @@
 
 		<div class="card-body">
 
-			<?php if(empty($fields)): ?>
+			<?php if ($fields->isEmpty()): ?>
 
 				<div class="text-center py-5">
 
@@ -218,125 +218,88 @@
 
 			<?php else: ?>
 
-				<div class="table-responsive">
+			<div class="table-responsive">
 
-					<table
-						id="trainingFieldsTable"
-						class="table table-hover align-middle">
+				<table
+					id="trainingFieldsTable"
+					class="table table-hover align-middle">
 
-						<thead class="thead-light">
+					<thead class="thead-light">
+
+					<tr>
+
+						<th width="60">#</th>
+
+						<th width="90">Icon</th>
+
+						<th>Nama Bidang</th>
+
+						<th>Deskripsi</th>
+
+
+
+						<th width="120">Status</th>
+
+						<th width="170">Aksi</th>
+
+					</tr>
+
+					</thead>
+
+					<tbody>
+
+					<?php foreach ($fields as $i => $field): ?>
 
 						<tr>
 
-							<th width="60">
+							<td>
 
-								#
+								<?= $i + 1 ?>
 
-							</th>
+							</td>
 
-							<th width="90">
+							<td>
 
-								Icon
+								<div
+									class="rounded-circle bg-light d-flex align-items-center justify-content-center shadow-sm"
+									style="width:55px;height:55px;">
 
-							</th>
+									<i
+										class="<?= e($field->icon) ?> text-<?= e($field->color) ?>"
+										style="font-size:22px;"></i>
 
-							<th>
+								</div>
 
-								Nama Bidang
+							</td>
 
-							</th>
+							<td>
 
-							<th>
+								<div class="font-weight-bold">
 
-								Deskripsi
+									<?= e($field->name) ?>
 
-							</th>
+								</div>
 
-							<th width="120">
+								<small class="text-muted">
 
-								Warna
+									ID #<?= $field->id ?>
 
-							</th>
+								</small>
 
-							<th width="120">
+							</td>
 
-								Status
+							<td>
 
-							</th>
+								<?= e($field->description ?: '-') ?>
 
-							<th width="170">
+							</td>
 
-								Aksi
 
-							</th>
+							<td>
 
-						</tr>
+								<?php if ($field->is_active): ?>
 
-						</thead>
-
-						<tbody>
-
-						<?php foreach($fields as $i => $field): ?>
-
-							<tr>
-
-								<td>
-
-									<?= $i + 1 ?>
-
-								</td>
-
-								<td>
-
-									<div
-										class="rounded-circle bg-light d-flex align-items-center justify-content-center shadow-sm"
-										style="width:55px;height:55px;">
-
-										<i
-											class="<?= $field['icon'] ?> text-<?= $field['color'] ?>"
-											style="font-size:22px;"></i>
-
-									</div>
-
-								</td>
-
-								<td>
-
-									<div class="font-weight-bold">
-
-										<?= $field['name'] ?>
-
-									</div>
-
-									<small class="text-muted">
-
-										ID #<?= $field['id'] ?>
-
-									</small>
-
-								</td>
-
-								<td>
-
-									<?= $field['description'] ?>
-
-								</td>
-
-								<td>
-
-									<span class="badge badge-<?= $field['color'] ?> px-3 py-2">
-
-										<?= ucfirst($field['color']) ?>
-
-									</span>
-
-								</td>
-
-								<td>
-
-									<?php if($field['is_active']): ?>
-
-										<span class="badge badge-success px-3 py-2">
+									<span class="badge badge-success px-3 py-2">
 
 											<i class="fas fa-check-circle mr-1"></i>
 
@@ -344,9 +307,9 @@
 
 										</span>
 
-									<?php else: ?>
+								<?php else: ?>
 
-										<span class="badge badge-danger px-3 py-2">
+									<span class="badge badge-danger px-3 py-2">
 
 											<i class="fas fa-ban mr-1"></i>
 
@@ -354,66 +317,56 @@
 
 										</span>
 
-									<?php endif; ?>
+								<?php endif; ?>
 
-								</td>
+							</td>
 
-								<td>
+							<td>
 
-									<div class="btn-group shadow-sm">
+								<div class="btn-group shadow-sm">
 
-										<a
-											href="<?= url('/admin/training-fields/show?id='.$field['id']) ?>"
-											class="btn btn-outline-primary btn-sm"
-											title="Detail">
+									<a
+										href="<?= url('/admin/training-fields/edit?id=' . $field->id) ?>"
+										class="btn btn-outline-warning btn-sm"
+										title="Edit">
 
-											<i class="fas fa-eye"></i>
+										<i class="fas fa-edit"></i>
 
-										</a>
+									</a>
 
-										<a
-											href="<?= url('/admin/training-fields/edit?id='.$field['id']) ?>"
-											class="btn btn-outline-warning btn-sm"
-											title="Edit">
+									<form
+										method="POST"
+										action="<?= url('/admin/training-fields/delete') ?>"
+										class="d-inline">
 
-											<i class="fas fa-edit"></i>
+										<input
+											type="hidden"
+											name="id"
+											value="<?= $field->id ?>">
 
-										</a>
+										<button
+											type="submit"
+											class="btn btn-outline-danger btn-sm"
+											onclick="return confirm('Yakin ingin menghapus jenis pelatihan ini?')">
 
-										<form
-											method="POST"
-											action="<?= url('/admin/training-fields/delete') ?>"
-											class="d-inline">
+											<i class="fas fa-trash"></i>
 
-											<input
-												type="hidden"
-												name="id"
-												value="<?= $field['id'] ?>">
+										</button>
 
-											<button
-												type="submit"
-												class="btn btn-outline-danger btn-sm"
-												onclick="return confirm('Yakin ingin menghapus jenis pelatihan ini?')">
+									</form>
 
-												<i class="fas fa-trash"></i>
+								</div>
 
-											</button>
+							</td>
 
-										</form>
+						</tr>
 
-									</div>
+					<?php endforeach; ?>
+					</tbody>
 
-								</td>
+				</table>
 
-							</tr>
-
-						<?php endforeach; ?>
-
-						</tbody>
-
-					</table>
-
-				</div>
+			</div>
 
 			<?php endif; ?>
 
@@ -422,3 +375,4 @@
 	</div>
 
 </div>
+

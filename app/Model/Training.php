@@ -2,380 +2,160 @@
 
 	namespace Natasya\NataApp\Model;
 
+	use Illuminate\Database\Eloquent\Relations\BelongsTo;
+	use Illuminate\Database\Eloquent\Relations\HasMany;
+	use Illuminate\Database\Eloquent\Relations\HasManyThrough;
 	use Natasya\NataApp\App\Model;
 
 	class Training extends Model
 	{
-		public function count(): int
+		protected $table = 'trainings';
+
+		protected $fillable = [
+			'training_field_id',
+			'trainer_id',
+			'code',
+			'name',
+			'slug',
+			'thumbnail',
+			'description',
+			'objective',
+			'requirement',
+			'benefit',
+			'quota',
+			'duration',
+			'location',
+			'registration_open',
+			'registration_close',
+			'training_start',
+			'training_end',
+			'status',
+			'published_at',
+			'created_by',
+			'updated_by',
+		];
+
+		protected $casts = [
+			'registration_open' => 'date',
+			'registration_close' => 'date',
+			'training_start' => 'date',
+			'training_end' => 'date',
+			'published_at' => 'datetime',
+		];
+
+		/*
+		|--------------------------------------------------------------------------
+		| Relationships
+		|--------------------------------------------------------------------------
+		*/
+
+		public function trainingField(): BelongsTo
 		{
-			$result = $this->fetch("
-		SELECT COUNT(*) AS total
-		FROM trainings
-	");
-
-			return (int) $result['total'];
-		}
-		public function fields(): array
-		{
-			return $this->fetchAll("
-        SELECT
-            id,
-            name,
-            icon,
-            color
-        FROM training_fields
-        WHERE is_active = 1
-        ORDER BY name
-    ");
-		}
-		public function all(): array
-		{
-			return $this->fetchAll("
-            SELECT
-                t.*,
-                tf.name AS field_name,
-                tf.icon,
-                tf.color
-            FROM trainings t
-            INNER JOIN training_fields tf
-                ON tf.id = t.training_field_id
-            ORDER BY t.created_at DESC
-        ");
-		}
-
-		public function opened(array $filters = []): array
-		{
-			$sql = "
-		SELECT
-
-			t.*,
-
-			tf.name AS field_name,
-			tf.icon,
-			tf.color,
-
-			tb.id AS batch_id,
-			tb.batch_name,
-			tb.code AS batch_code,
-			tb.room,
-			tb.start_date,
-			tb.end_date,
-			tb.max_participants,
-			tb.status AS batch_status,
-
-			tr.id AS trainer_id,
-			tr.avatar AS trainer_avatar,
-			tr.institution,
-			tr.expertise,
-
-			u.name AS trainer_name
-
-		FROM trainings t
-
-		INNER JOIN training_fields tf
-			ON tf.id = t.training_field_id
-
-		LEFT JOIN training_batches tb
-			ON tb.id = (
-				SELECT id
-				FROM training_batches
-				WHERE
-					training_id = t.id
-				AND
-					status = 'registration'
-				ORDER BY start_date ASC
-				LIMIT 1
-			)
-
-		LEFT JOIN trainers tr
-			ON tr.id = tb.trainer_id
-
-		LEFT JOIN users u
-			ON u.id = tr.user_id
-
-		WHERE
-
-			t.status = 'open'
-
-		AND CURDATE() BETWEEN
-			t.registration_open
-		AND
-			t.registration_close
-	";
-
-			$params = [];
-
-			/*
-			|--------------------------------------------------------------------------
-			| Search
-			|--------------------------------------------------------------------------
-			*/
-
-			if (!empty($filters['keyword'])) {
-
-				$sql .= "
-			AND
-			(
-				t.name LIKE ?
-				OR
-				t.description LIKE ?
-			)
-		";
-
-				$params[] = '%' . $filters['keyword'] . '%';
-				$params[] = '%' . $filters['keyword'] . '%';
-			}
-
-			/*
-			|--------------------------------------------------------------------------
-			| Bidang
-			|--------------------------------------------------------------------------
-			*/
-
-			if (!empty($filters['field'])) {
-
-				$sql .= " AND tf.id = ?";
-
-				$params[] = $filters['field'];
-			}
-
-			/*
-			|--------------------------------------------------------------------------
-			| Sorting
-			|--------------------------------------------------------------------------
-			*/
-
-			switch ($filters['sort'] ?? 'latest') {
-
-				case 'name':
-
-					$sql .= " ORDER BY t.name ASC";
-
-					break;
-
-				case 'quota':
-
-					$sql .= " ORDER BY t.quota DESC";
-
-					break;
-
-				case 'duration':
-
-					$sql .= " ORDER BY t.duration ASC";
-
-					break;
-
-				default:
-
-					$sql .= " ORDER BY t.registration_open DESC";
-
-					break;
-			}
-
-			return $this->fetchAll($sql, $params);
+			return $this->belongsTo(TrainingField::class);
 		}
 
-		public function find(int $id): ?array
+		public function trainer(): BelongsTo
 		{
-			return $this->fetch("
-        SELECT
-
-            t.*,
-
-            tf.name AS field_name,
-            tf.icon,
-            tf.color,
-
-            tb.id AS batch_id,
-            tb.batch_name,
-            tb.code,
-            tb.room,
-            tb.start_date,
-            tb.end_date,
-            tb.max_participants,
-            tb.status AS batch_status,
-
-            tr.id AS trainer_id,
-            tr.institution,
-            tr.expertise,
-            tr.avatar AS trainer_avatar,
-            tr.biography,
-
-            u.name AS trainer_name,
-            u.email AS trainer_email
-
-        FROM trainings t
-
-        INNER JOIN training_fields tf
-            ON tf.id = t.training_field_id
-
-        LEFT JOIN training_batches tb
-            ON tb.training_id = t.id
-            AND tb.status IN ('registration','running')
-
-        LEFT JOIN trainers tr
-            ON tr.id = tb.trainer_id
-
-        LEFT JOIN users u
-            ON u.id = tr.user_id
-
-        WHERE t.id = ?
-
-        LIMIT 1
-    ", [
-				$id
-			]);
-		}
-		public function create(array $data): int
-		{
-			$this->execute("
-            INSERT INTO trainings
-            (
-                training_field_id,
-                name,
-                description,
-                quota,
-                duration,
-                location,
-                registration_open,
-                registration_close,
-                status
-            )
-            VALUES
-            (
-                ?,?,?,?,?,?,?,?,?
-            )
-        ", [
-
-				$data['training_field_id'],
-				$data['name'],
-				$data['description'],
-				$data['quota'],
-				$data['duration'],
-				$data['location'],
-				$data['registration_open'],
-				$data['registration_close'],
-				$data['status'],
-
-			]);
-
-			return (int) $this->db->lastInsertId();
+			return $this->belongsTo(Trainer::class);
 		}
 
-		public function update(
-			int $id,
-			array $data
-		): bool
+		public function creator(): BelongsTo
 		{
-			return $this->execute("
-            UPDATE trainings
-            SET
-                training_field_id = ?,
-                name = ?,
-                description = ?,
-                quota = ?,
-                duration = ?,
-                location = ?,
-                registration_open = ?,
-                registration_close = ?,
-                status = ?
-            WHERE id = ?
-        ", [
-
-				$data['training_field_id'],
-				$data['name'],
-				$data['description'],
-				$data['quota'],
-				$data['duration'],
-				$data['location'],
-				$data['registration_open'],
-				$data['registration_close'],
-				$data['status'],
-				$id
-
-			]);
+			return $this->belongsTo(User::class, 'created_by');
 		}
 
-		public function delete(int $id): bool
+		public function updater(): BelongsTo
 		{
-			return $this->execute("
-            DELETE
-            FROM trainings
-            WHERE id = ?
-        ", [
-				$id
-			]);
+			return $this->belongsTo(User::class, 'updated_by');
 		}
-		public function myTrainings(int $userId): array
+
+		public function schedules(): HasMany
 		{
-			return $this->fetchAll("
-        SELECT
+			return $this->hasMany(
+				TrainingSchedule::class,
+				'training_id'
+			);
+		}
+		public function scores(): HasManyThrough
+		{
+			return $this->hasManyThrough(
+				TrainingScore::class,
+				Registration::class,
+				'training_id',
+				'registration_id',
+				'id',
+				'id'
+			);
+		}
 
-            r.id AS registration_id,
-            r.status AS registration_status,
+		public function registrations(): HasMany
+		{
+			return $this->hasMany(Registration::class);
+		}
 
-            t.id,
-            t.name,
-            t.description,
-            t.duration,
-            t.location,
+		public function announcements(): HasMany
+		{
+			return $this->hasMany(TrainingAnnouncement::class);
+		}
 
-            tf.name AS field_name,
-            tf.icon,
-            tf.color,
+		/*
+		|--------------------------------------------------------------------------
+		| Helpers
+		|--------------------------------------------------------------------------
+		*/
 
-            tb.id AS batch_id,
-            tb.code,
-            tb.batch_name,
-            tb.room,
-            tb.start_date,
-            tb.end_date,
-            tb.status AS batch_status,
+		public function isDraft(): bool
+		{
+			return $this->status === 'draft';
+		}
 
-            tr.id AS trainer_id,
-            tr.institution,
-            tr.expertise,
-            tr.avatar AS trainer_avatar,
+		public function isOpen(): bool
+		{
+			return $this->status === 'open';
+		}
 
-            u.name AS trainer_name,
-            u.avatar AS trainer_user_avatar
+		public function isClosed(): bool
+		{
+			return $this->status === 'closed';
+		}
 
-        FROM registrations r
+		public function isRunning(): bool
+		{
+			return $this->status === 'running';
+		}
 
-        INNER JOIN trainings t
-            ON t.id = r.training_id
+		public function isCompleted(): bool
+		{
+			return $this->status === 'completed';
+		}
 
-        INNER JOIN training_fields tf
-            ON tf.id = t.training_field_id
+		public function isCancelled(): bool
+		{
+			return $this->status === 'cancelled';
+		}
 
-        LEFT JOIN training_batches tb
-            ON tb.training_id = t.id
+		public function isPublished(): bool
+		{
+			return $this->published_at !== null;
+		}
 
-        LEFT JOIN trainers tr
-            ON tr.id = tb.trainer_id
+		public function hasThumbnail(): bool
+		{
+			return ! empty($this->thumbnail);
+		}
 
-        LEFT JOIN users u
-            ON u.id = tr.user_id
+		public function getLocation(): string
+		{
+			return $this->location ?: '-';
+		}
 
-        WHERE
+		public function getDurationLabel(): string
+		{
+			return $this->duration . ' Hari';
+		}
 
-            r.user_id = ?
-
-        AND
-
-            r.status IN
-            (
-                'approved',
-                'completed'
-            )
-
-        ORDER BY
-
-            tb.start_date DESC,
-
-            t.name ASC
-    ", [
-				$userId
-			]);
+		public function getQuotaLabel(): string
+		{
+			return $this->quota . ' Peserta';
 		}
 	}

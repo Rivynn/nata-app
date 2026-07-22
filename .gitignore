@@ -17,6 +17,7 @@
 !/storage/uploads/.gitignore
 
 /public/uploads/*
+/public/assets/uploads/*
 !/public/uploads/.gitignore
 
 /public/build/

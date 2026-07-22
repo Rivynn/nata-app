@@ -1,19 +1,29 @@
 <?php
 
-	require dirname(__DIR__) . '/bootstrap/app.php';
+	declare(strict_types=1);
 
-	require __DIR__ . '/seeders/UserSeeder.php';
+	require_once dirname(__DIR__) . '/vendor/autoload.php';
 
-	require __DIR__ . '/seeders/TrainingFieldsSeeder.php';
-	require __DIR__ . '/seeders/EmployeeSeeder.php';
-	require __DIR__ . '/seeders/TrainerSeeder.php';
+	$dotenv = Dotenv\Dotenv::createImmutable(
+		dirname(__DIR__)
+	);
 
-	require __DIR__ . '/seeders/TrainingSeeder.php';
-	require __DIR__ . '/seeders/TrainingBatchesSeeder.php';
-	require __DIR__ . '/seeders/TrainingScheduleSeeder.php';
-	require __DIR__ . '/seeders/TrainingMaterialSeeder.php';
-	require __DIR__ . '/seeders/AnnouncementSeeder.php';
+	$dotenv->safeLoad();
 
-	require __DIR__ . '/seeders/AssessmentItemSeeder.php';
+	use Database\Seeders\DatabaseSeeder;
+	use Natasya\NataApp\App\Database;
 
-	require __DIR__ . '/seeders/ParticipantSeeder.php';
+	Database::boot();
+
+	/*
+	|--------------------------------------------------------------------------
+	| Run Database Seeder
+	|--------------------------------------------------------------------------
+	*/
+
+	echo "Running database seeders..." . PHP_EOL . PHP_EOL;
+
+	(new DatabaseSeeder())->run();
+
+	echo PHP_EOL;
+	echo "Database seeding completed successfully." . PHP_EOL;

@@ -35,7 +35,7 @@
 
 			<h3 class="font-weight-bold text-primary">
 
-				Halo, <?= explode(' ', user()['name'])[0] ?> 👋
+				Halo, <?= explode(' ', user()->name)[0] ?> 👋
 
 			</h3>
 
@@ -62,7 +62,7 @@
 			<?php else: ?>
 
 				<a
-					href="<?= url('/profile') ?>"
+					href="<?= url('peserta/profile') ?>"
 					class="btn btn-warning mr-2">
 
 					<i class="fas fa-user-edit mr-2"></i>
@@ -181,7 +181,7 @@
 
 			<div class="row">
 
-				<?php foreach (array_slice($fields, 0, 3) as $field): ?>
+				<?php foreach ($fields->take(3) as $field): ?>
 
 					<div class="col-lg-4 mb-4">
 

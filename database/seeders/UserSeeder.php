@@ -1,90 +1,77 @@
 <?php
 
-	use Natasya\NataApp\App\Database;
+	namespace Database\Seeders;
 
-	$db = Database::connection();
+	use Faker\Factory;
+	use Natasya\NataApp\Model\User;
 
-	$stmt = $db->prepare("
-    INSERT INTO users
-    (
-        name,
-        username,
-        email,
-        password,
-        role
-    )
-    VALUES
-    (
-        ?,
-        ?,
-        ?,
-        ?,
-        ?
-    )
-");
+	class UserSeeder extends Seeder
+	{
+		public function run(): void
+		{
 
-	/*
-	|--------------------------------------------------------------------------
-	| Administrator
-	|--------------------------------------------------------------------------
-	*/
 
-	$stmt->execute([
+			User::create([
+				'name'     => 'Administrator',
+				'username' => 'admin',
+				'email'    => 'admin@natasyadvn.co-id.id',
+				'avatar'   => null,
+				'password' => password_hash('admin123', PASSWORD_DEFAULT),
+				'role'     => 'admin',
+				'status'   => 'active',
+			]);
 
-		'Administrator',
+			User::create([
+				'name'     => 'Pegawai',
+				'username' => 'pegawai',
+				'email'    => 'pegawai@gmail.com',
+				'avatar'   => null,
+				'password' => password_hash('pegawai123', PASSWORD_DEFAULT),
+				'role'     => 'pegawai',
+				'status'   => 'active',
+			]);
 
-		'admin',
+			User::create([
+				'name'     => 'Pelatih',
+				'username' => 'pelatih',
+				'email'    => 'pelatih@example.com',
+				'avatar'   => null,
+				'password' => password_hash('pelatih123', PASSWORD_DEFAULT),
+				'role'     => 'pelatih',
+				'status'   => 'active',
+			]);
 
-		'admin@diskop.test',
+			User::create([
+				'name'     => 'Peserta',
+				'username' => 'peserta',
+				'email'    => 'peserta@example.com',
+				'avatar'   => null,
+				'password' => password_hash('peserta123', PASSWORD_DEFAULT),
+				'role'     => 'peserta',
+				'status'   => 'active',
+			]);
 
-		password_hash('admin123', PASSWORD_DEFAULT),
+			$faker = Factory::create('id_ID');
 
-		'admin',
+			$roles = [
+				'pegawai',
+				'pelatih',
+				'peserta',
+			];
 
-	]);
+			for ($i = 1; $i <= 50; $i++) {
 
-	/*
-	|--------------------------------------------------------------------------
-	| Pegawai
-	|--------------------------------------------------------------------------
-	*/
+				User::create([
+					'name'     => $faker->name(),
+					'username' => $faker->unique()->userName(),
+					'email'    => $faker->unique()->safeEmail(),
+					'avatar'   => null,
+					'password' => password_hash('password', PASSWORD_DEFAULT),
+					'role'     => $faker->randomElement($roles),
+					'status'   => 'active',
+					'last_login_at' => $faker->optional()->dateTimeBetween('-3 months'),
+				]);
 
-	for ($i = 1; $i <= 10; $i++) {
-
-		$stmt->execute([
-
-			"Pegawai {$i}",
-
-			"pegawai{$i}",
-
-			"pegawai{$i}@diskop.test",
-
-			password_hash('pegawai123', PASSWORD_DEFAULT),
-
-			'pegawai',
-
-		]);
-
+			}
+		}
 	}
-
-	/*
-	|--------------------------------------------------------------------------
-	| Peserta Demo
-	|--------------------------------------------------------------------------
-	*/
-
-	$stmt->execute([
-
-		'Peserta Demo',
-
-		'peserta',
-
-		'peserta@diskop.test',
-
-		password_hash('peserta123', PASSWORD_DEFAULT),
-
-		'peserta',
-
-	]);
-
-	echo "User Seeder Success." . PHP_EOL;

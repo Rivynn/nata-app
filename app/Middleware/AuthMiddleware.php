@@ -8,6 +8,7 @@
 	{
 		public function before(): void
 		{
+
 			if(auth()->guest()){
 
 				redirect('/login');

@@ -1,80 +1,92 @@
 <?php
 
+	namespace Database\Seeders;
+
 	use Faker\Factory;
-	use Natasya\NataApp\App\Database;
+	use Natasya\NataApp\Model\Employee;
+	use Natasya\NataApp\Model\User;
 
-	$db = Database::connection();
+	class EmployeeSeeder extends Seeder
+	{
+		public function run(): void
+		{
+			$faker = Factory::create('id_ID');
 
-	$faker = Factory::create('id_ID');
+			$positions = [
+				'Kepala Bidang',
+				'Kepala Seksi',
+				'Analis Pelatihan',
+				'Staf Administrasi',
+				'Staf Pelayanan',
+				'Operator Sistem',
+				'Verifikator',
+				'Pengelola Data',
+				'Koordinator Pelatihan',
+				'Pengawas',
+			];
 
-	/*
-	|--------------------------------------------------------------------------
-	| Ambil Semua Pegawai
-	|--------------------------------------------------------------------------
-	*/
+			$departments = [
+				'Pelatihan',
+				'Administrasi',
+				'Keuangan',
+				'Pelayanan',
+				'Teknologi Informasi',
+				'SDM',
+			];
 
-	$users = $db->query("
-    SELECT id
-    FROM users
-    WHERE role = 'pegawai'
-    ORDER BY id
-")->fetchAll(PDO::FETCH_ASSOC);
+			/*
+			|--------------------------------------------------------------------------
+			| Pegawai bawaan
+			|--------------------------------------------------------------------------
+			*/
 
-	/*
-	|--------------------------------------------------------------------------
-	| Ambil Semua Bidang Pelatihan
-	|--------------------------------------------------------------------------
-	*/
+			$user = User::where('username', 'pegawai')->first();
 
-	$fields = $db->query("
-    SELECT id
-    FROM training_fields
-    ORDER BY id
-")->fetchAll(PDO::FETCH_ASSOC);
+			if ($user && ! Employee::where('user_id', $user->id)->exists()) {
 
-	$stmt = $db->prepare("
-    INSERT INTO employees
-    (
-        user_id,
-        training_field_id,
-        phone,
-        position,
-        address
-    )
-    VALUES
-    (
-        ?,?,?,?,?
-    )
-");
+				Employee::create([
+					'user_id' => $user->id,
+					'employee_number' => 'EMP0001',
+					'phone' => $faker->phoneNumber(),
+					'position' => 'Administrator Sistem',
+					'department' => 'Teknologi Informasi',
+				]);
 
-	$positions = [
-		'Instruktur',
-		'Staff Pelatihan',
-		'Koordinator Pelatihan',
-		'Analis Pelatihan',
-		'Pengelola Program',
-		'Fasilitator',
-		'Administrator Pelatihan',
-		'Pembimbing Teknis',
-	];
+			}
 
-	foreach ($users as $index => $user) {
+			/*
+			|--------------------------------------------------------------------------
+			| Generate 14 pegawai lagi
+			|--------------------------------------------------------------------------
+			*/
 
-		$field = $fields[$index % count($fields)];
+			for ($i = 2; $i <= 15; $i++) {
 
-		$stmt->execute([
+				$user = User::create([
+					'name' => $faker->name(),
+					'username' => sprintf('pegawai%03d', $i),
+					'email' => "pegawai{$i}@example.com",
+					'avatar' => null,
+					'password' => password_hash('password', PASSWORD_DEFAULT),
+					'role' => 'pegawai',
+					'status' => $faker->randomElement([
+						'active',
+						'active',
+						'active',
+						'inactive',
+					]),
+					'last_login_at' => $faker->optional(0.8)
+						->dateTimeBetween('-3 months'),
+				]);
 
-			$user['id'],
+				Employee::create([
+					'user_id' => $user->id,
+					'employee_number' => sprintf('EMP%04d', $i),
+					'phone' => $faker->phoneNumber(),
+					'position' => $faker->randomElement($positions),
+					'department' => $faker->randomElement($departments),
+				]);
 
-			$field['id'],
-
-			$faker->phoneNumber(),
-
-			$faker->randomElement($positions),
-
-			$faker->address(),
-
-		]);
+			}
+		}
 	}
-
-	echo "Employee Seeder Success." . PHP_EOL;

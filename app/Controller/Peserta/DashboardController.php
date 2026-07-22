@@ -13,41 +13,26 @@
 	{
 		public function index(): void
 		{
-			$participant = new Participant();
+			$user = auth()->user();
+			$participant = Participant::with([ 'user', ])->where('user_id', $user->id)->first();
+			$fields = TrainingField::where('is_active', true) ->orderBy('name') ->get();
+			$registrations = Registration::with([ 'training', ]) ->where('participant_id', $participant?->id) ->latest() ->get();
+			$certificates = Certificate::with([ 'registration.training', ])
+				->whereHas('registration', function ($query) use ($participant) {
+					$query->where('participant_id', $participant?->id);
+				}) ->latest()->get();
+			$profile = $participant?->profile;
 
-			$field = new TrainingField();
+			$profileCompleted = $profile?->isCompleted() ?? false;
 
-			$registration = new Registration();
-
-			$training = new Training();
-
-			$certificate = new Certificate();
-
-			$userId = auth()->id();
-
-			$profile = $participant->profile($userId);
-
-			$registrations = $registration->byUser($userId);
-
-			$certificates = $certificate->byUser($userId);
-
-			$this->view(
-				'Dashboard/peserta',
-				[
-					'title' => 'Dashboard',
-
-					'fields' => $field->active(),
-
-					'participant' => $participant->findByUserId($userId),
-
-					'profile' => $profile,
-
-					'profileCompleted' => $participant->profileCompleted($userId),
-
-					'registrations' => $registrations,
-
-					'certificates' => $certificates,
-				]
-			);
+			$this->view('Dashboard/peserta', [
+				'title' => 'Dashboard',
+				'fields' => $fields,
+				'participant' => $participant,
+				'profile' => $participant,
+				'profileCompleted' => $profileCompleted,
+				'registrations' => $registrations,
+				'certificates' => $certificates,
+				]);
 		}
 	}
