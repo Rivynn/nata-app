@@ -1,19 +1,70 @@
 <?php
 
-	require dirname(__DIR__) . '/vendor/autoload.php';
+	declare(strict_types=1);
 
+	require_once dirname(__DIR__) . '/vendor/autoload.php';
+
+
+	$dotenv = Dotenv\Dotenv::createImmutable(
+		dirname(__DIR__)
+	);
+
+	$dotenv->safeLoad();
+
+
+	use Database\Migrations\Migration;
 	use Natasya\NataApp\App\Database;
 
-	$db = Database::connection();
+	Database::boot();
 
-	foreach (glob(__DIR__ . '/migrations/*.sql') as $file) {
+	/*
+	|--------------------------------------------------------------------------
+	| Load Base Migration
+	|--------------------------------------------------------------------------
+	*/
 
-		echo "Running " . basename($file) . PHP_EOL;
+	require_once __DIR__ . '/migrations/Migration.php';
 
-		$sql = file_get_contents($file);
+	/*
+	|--------------------------------------------------------------------------
+	| Load All Migration Files
+	|--------------------------------------------------------------------------
+	*/
 
-		$db->exec($sql);
+	$files = glob(__DIR__ . '/migrations/*.php');
 
+	sort($files);
+
+	foreach ($files as $file) {
+
+		if (basename($file) === 'Migration.php') {
+			continue;
+		}
+
+		require_once $file;
 	}
 
-	echo PHP_EOL . "Migration Success." . PHP_EOL;
+	/*
+	|--------------------------------------------------------------------------
+	| Execute Migrations
+	|--------------------------------------------------------------------------
+	*/
+
+	foreach (get_declared_classes() as $class) {
+
+		if (!is_subclass_of($class, Migration::class)) {
+			continue;
+		}
+
+		echo "Migrating: {$class}" . PHP_EOL;
+
+		/** @var Migration $migration */
+		$migration = new $class();
+
+		$migration->up();
+
+		echo "Migrated: {$class}" . PHP_EOL;
+	}
+
+	echo PHP_EOL;
+	echo "All migrations completed successfully." . PHP_EOL;

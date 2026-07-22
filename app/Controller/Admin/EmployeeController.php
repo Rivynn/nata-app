@@ -2,6 +2,7 @@
 
 	namespace Natasya\NataApp\Controller\Admin;
 
+	use Illuminate\Support\Facades\DB;
 	use Natasya\NataApp\App\Controller;
 	use Natasya\NataApp\App\Request;
 	use Natasya\NataApp\Model\Employee;
@@ -12,68 +13,186 @@
 	{
 		public function index(): void
 		{
-			$employee = new Employee();
+			$this->view('Admin/Employees/index', [
 
-			$this->view(
-				'Admin/Employees/index',
-				[
-					'title' => 'Data Pegawai',
+				'title' => 'Data Pegawai',
 
-					'employees' => $employee->all(),
+				'employees' => Employee::query()
+					->with('user')
+					->latest()
+					->get(),
 
-					'total' => $employee->count(),
+				'total' => Employee::query()->count(),
 
-					'fields' => $employee->countByField(),
-				]
-			);
+			]);
 		}
 
 		public function show(): void
 		{
-			$id = (int) Request::get('id');
+			$employee = Employee::query()
+				->with('user')
+				->findOrFail(Request::get('id'));
 
-			$employee = new Employee();
+			$this->view('Admin/Employees/show', [
 
-			$data = $employee->find($id);
+				'title' => 'Detail Pegawai',
 
-			if (!$data) {
+				'employee' => $employee,
 
-				$_SESSION['error'] = 'Pegawai tidak ditemukan.';
-
-				$this->redirect('/admin/employees');
-			}
-
-			$this->view(
-				'Admin/Employees/show',
-				[
-					'title' => 'Detail Pegawai',
-
-					'employee' => $data,
-				]
-			);
+			]);
 		}
 
 		public function create(): void
 		{
-			$field = new TrainingField();
+			$this->view('Admin/Employees/create', [
 
-			$this->view(
-				'Admin/Employees/create',
-				[
-					'title' => 'Tambah Pegawai',
+				'title' => 'Tambah Pegawai',
 
-					'fields' => $field->all(),
-				]
-			);
+			]);
 		}
 
 		public function store(): void
 		{
-			$user = new User();
+			$name = trim(Request::post('name'));
+			$username = trim(Request::post('username'));
+			$email = trim(Request::post('email'));
+			$password = Request::post('password');
+			$passwordConfirmation = Request::post('password_confirmation');
 
-			$employee = new Employee();
+			$employeeNumber = trim(Request::post('employee_number'));
+			$phone = trim(Request::post('phone'));
+			$department = trim(Request::post('department'));
+			$position = trim(Request::post('position'));
 
-			$userId = $user->create([
+			/*
+			|--------------------------------------------------------------------------
+			| Validation
+			|--------------------------------------------------------------------------
+			*/
+
+			if (
+				$name === '' ||
+				$username === '' ||
+				$email === '' ||
+				$password === ''
+			) {
+				error('Semua field wajib harus diisi.');
+				redirect('/admin/employees/create');
+			}
+
+			if (! filter_var($email, FILTER_VALIDATE_EMAIL)) {
+				error('Format email tidak valid.');
+				redirect('/admin/employees/create');
+			}
+
+			if (strlen($password) < 8) {
+				error('Password minimal 8 karakter.');
+				redirect('/admin/employees/create');
+			}
+
+			if ($password !== $passwordConfirmation) {
+				error('Konfirmasi password tidak sesuai.');
+				redirect('/admin/employees/create');
+			}
+
+			if (User::query()->where('username', $username)->exists()) {
+				error('Username sudah digunakan.');
+				redirect('/admin/employees/create');
+			}
+
+			if (User::query()->where('email', $email)->exists()) {
+				error('Email sudah digunakan.');
+				redirect('/admin/employees/create');
+			}
+
+			if (
+				$employeeNumber !== '' &&
+				Employee::query()
+					->where('employee_number', $employeeNumber)
+					->exists()
+			) {
+				error('Nomor pegawai sudah digunakan.');
+				redirect('/admin/employees/create');
+			}
+
+			/*
+			|--------------------------------------------------------------------------
+			| Transaction
+			|--------------------------------------------------------------------------
+			*/
+
+			DB::beginTransaction();
+
+			try {
+
+				$user = User::query()->create([
+
+					'name' => $name,
+
+					'username' => $username,
+
+					'email' => $email,
+
+					'password' => password_hash($password, PASSWORD_BCRYPT),
+
+					'role' => 'pegawai',
+
+					'status' => 'active',
+
+				]);
+
+				Employee::query()->create([
+
+					'user_id' => $user->id,
+
+					'employee_number' => $employeeNumber ?: null,
+
+					'phone' => $phone ?: null,
+
+					'department' => $department ?: null,
+
+					'position' => $position ?: null,
+
+				]);
+
+				DB::commit();
+
+				success('Pegawai berhasil ditambahkan.');
+
+				redirect('/admin/employees');
+
+			} catch (\Throwable $e) {
+
+				DB::rollBack();
+
+				error('Terjadi kesalahan saat menyimpan data.');
+
+				redirect('/admin/employees/create');
+			}
+		}
+
+		public function edit(): void
+		{
+			$employee = Employee::query()
+				->with('user')
+				->findOrFail(Request::get('id'));
+
+			$this->view('Admin/Employees/edit', [
+
+				'title' => 'Edit Pegawai',
+
+				'employee' => $employee,
+
+			]);
+		}
+
+		public function update(): void
+		{
+			$employee = Employee::query()
+				->with('user')
+				->findOrFail(Request::post('id'));
+
+			$employee->user->update([
 
 				'name' => Request::post('name'),
 
@@ -81,146 +200,43 @@
 
 				'email' => Request::post('email'),
 
-				'password' => password_hash(
-					Request::post('password'),
-					PASSWORD_BCRYPT
-				),
-
-				'role' => 'pegawai',
-
 				'status' => Request::post('status'),
 
 			]);
 
-			$employee->create([
+			$employee->update([
 
-				'user_id' => $userId,
-
-				'training_field_id' => Request::post('training_field_id'),
+				'employee_number' => Request::post('employee_number'),
 
 				'phone' => Request::post('phone'),
 
 				'position' => Request::post('position'),
 
-				'address' => Request::post('address'),
+				'department' => Request::post('department'),
 
 			]);
 
-			$_SESSION['success'] = 'Pegawai berhasil ditambahkan.';
+			success('Pegawai berhasil diperbarui.');
 
-			$this->redirect('/admin/employees');
-		}
-
-		public function edit(): void
-		{
-			$id = (int) Request::get('id');
-
-			$employee = new Employee();
-
-			$field = new TrainingField();
-
-			$data = $employee->find($id);
-
-			if (!$data) {
-
-				$_SESSION['error'] = 'Pegawai tidak ditemukan.';
-
-				$this->redirect('/admin/employees');
-			}
-
-			$this->view(
-				'Admin/Employees/edit',
-				[
-					'title' => 'Edit Pegawai',
-
-					'employee' => $data,
-
-					'fields' => $field->all(),
-				]
-			);
-		}
-
-		public function update(): void
-		{
-			$user = new User();
-
-			$employee = new Employee();
-
-			$id = (int) Request::post('id');
-
-			$data = $employee->find($id);
-
-			if (!$data) {
-
-				$_SESSION['error'] = 'Pegawai tidak ditemukan.';
-
-				$this->redirect('/admin/employees');
-			}
-
-			$user->update(
-				$data['user_id'],
-				[
-					'name' => Request::post('name'),
-
-					'username' => Request::post('username'),
-
-					'email' => Request::post('email'),
-
-					'role' => 'pegawai',
-				]
-			);
-
-			$employee->update(
-				$id,
-				[
-					'training_field_id' => Request::post('training_field_id'),
-
-					'phone' => Request::post('phone'),
-
-					'position' => Request::post('position'),
-
-					'address' => Request::post('address'),
-				]
-			);
-
-			$_SESSION['success'] = 'Pegawai berhasil diperbarui.';
-
-			$this->redirect('/admin/employees');
+			redirect('/admin/employees');
 		}
 
 		public function delete(): void
 		{
-			$id = (int) Request::post('id');
+			$employee = Employee::query()
+				->with('user')
+				->findOrFail(Request::post('id'));
 
-			$employee = new Employee();
+			$user = $employee->user;
 
-			$data = $employee->find($id);
+			$employee->delete();
 
-			if (!$data) {
-
-				$_SESSION['error'] = 'Pegawai tidak ditemukan.';
-
-				$this->redirect('/admin/employees');
+			if ($user) {
+				$user->delete();
 			}
 
-			/*
-			|--------------------------------------------------------------------------
-			| Hapus Profil Pegawai
-			|--------------------------------------------------------------------------
-			*/
+			success('Pegawai berhasil dihapus.');
 
-			$employee->delete($id);
-
-			/*
-			|--------------------------------------------------------------------------
-			| Hapus User
-			|--------------------------------------------------------------------------
-			*/
-
-			(new User())->delete($data['user_id']);
-
-			$_SESSION['success'] = 'Pegawai berhasil dihapus.';
-
-			$this->redirect('/admin/employees');
+			redirect('/admin/employees');
 		}
 	}

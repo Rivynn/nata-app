@@ -1,154 +1,105 @@
 <?php
 
-	use Natasya\NataApp\App\Database;
+	namespace Database\Seeders;
 
-	$db = Database::connection();
+	use Faker\Factory;
+	use Natasya\NataApp\Model\Trainer;
+	use Natasya\NataApp\Model\TrainingField;
+	use Natasya\NataApp\Model\User;
 
-	$stmt = $db->prepare("
-INSERT INTO trainers
-(
-    training_field_id,
-    name,
-    phone,
-    email,
-    institution,
-    expertise,
-    status
-)
-VALUES
-(
-    ?, ?, ?, ?, ?, ?, ?
-)
-");
+	class TrainerSeeder extends Seeder
+	{
+		public function run(): void
+		{
+			$faker = Factory::create('id_ID');
 
-	$data = [
+			$institutions = [
+				'DISKOPUMTK Kota Banjarbaru',
+				'Universitas Lambung Mangkurat',
+				'Poliban',
+				'SMKN 1 Banjarbaru',
+				'Balai Latihan Kerja',
+				'PT Telkom Indonesia',
+				'PT Indocement Tunggal Prakarsa',
+				'Freelance Professional',
+			];
 
-		[
-			1,
-			'Natasya Deviana, S.Kom',
-			'081234567890',
-			'tasya.deviana@diskop.go.id',
-			'DISKOP UKM',
-			'Web Programming',
-			'active'
-		],
+			/*
+			|--------------------------------------------------------------------------
+			| Akun bawaan
+			|--------------------------------------------------------------------------
+			*/
 
-		[
-			1,
-			'Michee Puding',
-			'081234567891',
-			'nata.devi@ulm.ac.id',
-			'Universitas Lambung Mangkurat',
-			'Web Development',
-			'active'
-		],
+			$user = User::where('username', 'pelatih')->first();
 
-		[
-			1,
-			'Natasya',
-			'081234567892',
-			'deviana.tasya@gmail.com',
-			'DISKOP UKM',
-			'Database Administration',
-			'active'
-		],
+			if ($user && ! Trainer::where('user_id', $user->id)->exists()) {
 
-		[
-			1,
-			'Deviana',
-			'081234567893',
-			'devi.nata@gmail.com',
-			'Kominfo',
-			'Networking',
-			'active'
-		],
+				$field = TrainingField::inRandomOrder()->first();
 
-		[
-			1,
-			'Tasya',
-			'081234567894',
-			'tasya.nata@gmail.com',
-			'Politeknik Negeri Banjarmasin',
-			'Cyber Security',
-			'active'
-		],
+				Trainer::create([
+					'user_id' => $user->id,
+					'training_field_id' => $field->id,
+					'employee_number' => 'TRN0001',
+					'phone' => $faker->phoneNumber(),
+					'email' => 'pelatih@example.com',
+					'institution' => 'DISKOPUMTK Kota Banjarbaru',
+					'expertise' => $field->name,
+					'specialization' => $field->name,
+					'experience_year' => 10,
+					'biography' => $faker->paragraph(3),
+					'avatar' => null,
+					'status' => 'active',
+				]);
 
-		[
-			2,
-			'Devi',
-			'081234567895',
-			'devi.tasya@gmail.com',
-			'PT United Tractors',
-			'Operator Excavator',
-			'active'
-		],
+			}
 
-		[
-			2,
-			'Nata Deviana',
-			'081234567896',
-			'nata.deviana@gmail.com',
-			'PT PAMA Persada',
-			'Operator Bulldozer',
-			'active'
-		],
+			/*
+			|--------------------------------------------------------------------------
+			| Generate pelatih tambahan
+			|--------------------------------------------------------------------------
+			*/
 
-		[
-			2,
-			'Deviana',
-			'081234567897',
-			'deviana.devi@gmail.com',
-			'PT Adaro Indonesia',
-			'Heavy Equipment Maintenance',
-			'active'
-		],
+			for ($i = 2; $i <= 12; $i++) {
 
-		[
-			3,
-			'Tasya Puding',
-			'081234567898',
-			'tasya.devi@gmail.com',
-			'POLDA KALSEL',
-			'Security Awareness',
-			'active'
-		],
+				$field = TrainingField::inRandomOrder()->first();
 
-		[
-			3,
-			'Nata Michee',
-			'081234567899',
-			'nata.tasya@gmail.com',
-			'BNSP',
-			'Security Management',
-			'active'
-		],
+				$user = User::create([
+					'name' => $faker->name(),
+					'username' => sprintf('pelatih%03d', $i),
+					'email' => "pelatih{$i}@example.com",
+					'avatar' => null,
+					'password' => password_hash('password', PASSWORD_DEFAULT),
+					'role' => 'pelatih',
+					'status' => $faker->randomElement([
+						'active',
+						'active',
+						'active',
+						'inactive',
+					]),
+					'last_login_at' => $faker->optional(0.8)
+						->dateTimeBetween('-6 months'),
+				]);
 
-		[
-			3,
-			'Natasyaa',
-			'081234567900',
-			'deviana.nata@gmail.com',
-			'Basarnas',
-			'Emergency Response',
-			'active'
-		],
+				Trainer::create([
+					'user_id' => $user->id,
+					'training_field_id' => $field->id,
+					'employee_number' => sprintf('TRN%04d', $i),
+					'phone' => $faker->phoneNumber(),
+					'email' => $user->email,
+					'institution' => $faker->randomElement($institutions),
+					'expertise' => $field->name,
+					'specialization' => $field->name,
+					'experience_year' => $faker->numberBetween(2, 20),
+					'biography' => $faker->paragraph(rand(2, 4)),
+					'avatar' => null,
+					'status' => $faker->randomElement([
+						'active',
+						'active',
+						'active',
+						'inactive',
+					]),
+				]);
 
-		[
-			3,
-			'Deviana 10',
-			'081234567901',
-			'devi.deviana@gmail.com',
-			'DISKOP UKM',
-			'Public Safety',
-			'active'
-		],
-
-	];
-
-	foreach ($data as $row) {
-
-		$stmt->execute($row);
-
+			}
+		}
 	}
-
-	echo "Trainer Seeder Success.";

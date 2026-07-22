@@ -1,3 +1,30 @@
+<?php
+
+	$hasRegistration = !empty($registrations);
+
+	$hasTraining = false;
+
+	foreach ($registrations as $registration) {
+
+		if (
+			in_array(
+				$registration['status'],
+				[
+					'approved',
+					'completed'
+				]
+			)
+		) {
+			$hasTraining = true;
+			break;
+		}
+
+	}
+
+	$hasCertificate = !empty($certificates);
+
+?>
+
 <div class="container-fluid">
 
 	<!-- Welcome -->
@@ -8,7 +35,7 @@
 
 			<h3 class="font-weight-bold text-primary">
 
-				Halo, <?= explode(' ', user()['name'])[0] ?> 👋
+				Halo, <?= explode(' ', user()->name)[0] ?> 👋
 
 			</h3>
 
@@ -16,19 +43,35 @@
 
 				Selamat datang di
 				<strong><?= app_name() ?></strong>.
-				Silakan pilih pelatihan sesuai minat dan pantau status pendaftaran Anda.
+				Lengkapi profil Anda terlebih dahulu, kemudian pilih pelatihan sesuai minat dan pantau proses pendaftaran hingga memperoleh sertifikat.
 
 			</p>
 
-			<a
-				href="<?= url('/peserta/registrations') ?>"
-				class="btn btn-primary mr-2">
+			<?php if($profileCompleted): ?>
 
-				<i class="fas fa-plus-circle mr-2"></i>
+				<a
+					href="<?= url('/peserta/registrations') ?>"
+					class="btn btn-primary mr-2">
 
-				Daftar Pelatihan
+					<i class="fas fa-plus-circle mr-2"></i>
 
-			</a>
+					Daftar Pelatihan
+
+				</a>
+
+			<?php else: ?>
+
+				<a
+					href="<?= url('peserta/profile') ?>"
+					class="btn btn-warning mr-2">
+
+					<i class="fas fa-user-edit mr-2"></i>
+
+					Lengkapi Profil
+
+				</a>
+
+			<?php endif; ?>
 
 			<a
 				href="<?= url('/peserta/status') ?>"
@@ -44,100 +87,76 @@
 
 	</div>
 
-	<!-- Statistik -->
+	<!-- Status Profil -->
 
-	<div class="row">
+	<div class="card <?= $profileCompleted ? 'border-left-success' : 'border-left-warning' ?> shadow mb-4">
 
-		<div class="col-lg-3 mb-4">
+		<div class="card-body">
 
-			<div class="card border-left-primary shadow h-100">
+			<div class="row align-items-center">
 
-				<div class="card-body">
+				<div class="col-lg-9">
 
-					<div class="text-xs text-primary text-uppercase">
+					<div class="d-flex">
 
-						Total Pelatihan
+						<div class="mr-4">
 
-					</div>
+							<div
+								class="rounded-circle bg-<?= $profileCompleted ? 'success' : 'warning' ?> text-white d-flex align-items-center justify-content-center"
+								style="width:70px;height:70px;">
 
-					<div class="h3 font-weight-bold">
+								<i class="fas <?= $profileCompleted ? 'fa-check-circle' : 'fa-user-edit' ?> fa-2x"></i>
 
-						15
+							</div>
 
-					</div>
+						</div>
 
-				</div>
+						<div>
 
-			</div>
+							<h5 class="font-weight-bold text-<?= $profileCompleted ? 'success' : 'warning' ?> mb-2">
 
-		</div>
+								<?= $profileCompleted ? 'Profil Anda Sudah Lengkap' : 'Lengkapi Profil Anda' ?>
 
-		<div class="col-lg-3 mb-4">
+							</h5>
 
-			<div class="card border-left-warning shadow h-100">
+							<p class="text-muted mb-2">
 
-				<div class="card-body">
+								<?php if ($profileCompleted): ?>
 
-					<div class="text-xs text-warning text-uppercase">
+									Data profil Anda telah lengkap dan siap digunakan untuk mengikuti seluruh proses pelatihan.
 
-						Menunggu
+								<?php else: ?>
 
-					</div>
+									Sebelum mengikuti pelatihan, Anda wajib melengkapi data diri seperti NIK, alamat, pendidikan terakhir, pekerjaan, dan informasi lainnya.
 
-					<div class="h3 font-weight-bold">
+								<?php endif; ?>
 
-						1
+							</p>
 
-					</div>
+							<span class="badge badge-<?= $profileCompleted ? 'success' : 'warning' ?> px-3 py-2">
 
-				</div>
+							<i class="fas <?= $profileCompleted ? 'fa-check-circle' : 'fa-exclamation-circle' ?> mr-1"></i>
 
-			</div>
+							<?= $profileCompleted ? 'Profil Lengkap' : 'Profil Belum Lengkap' ?>
 
-		</div>
+						</span>
 
-		<div class="col-lg-3 mb-4">
-
-			<div class="card border-left-success shadow h-100">
-
-				<div class="card-body">
-
-					<div class="text-xs text-success text-uppercase">
-
-						Disetujui
-
-					</div>
-
-					<div class="h3 font-weight-bold">
-
-						2
+						</div>
 
 					</div>
 
 				</div>
 
-			</div>
+				<div class="col-lg-3 text-lg-right mt-3 mt-lg-0">
+					<a
+						href="<?= url('/peserta/profile') ?>"
+						class="btn btn-<?= $profileCompleted ? 'success' : 'warning' ?> btn-lg">
 
-		</div>
+						<i class="fas <?= $profileCompleted ? 'fa-id-card' : 'fa-user-edit' ?> mr-2"></i>
 
-		<div class="col-lg-3 mb-4">
+						<?= $profileCompleted ? 'Lihat Biodata' : 'Lengkapi Biodata' ?>
 
-			<div class="card border-left-info shadow h-100">
-
-				<div class="card-body">
-
-					<div class="text-xs text-info text-uppercase">
-
-						Sertifikat
-
-					</div>
-
-					<div class="h3 font-weight-bold">
-
-						1
-
-					</div>
-
+					</a>
 				</div>
 
 			</div>
@@ -145,8 +164,6 @@
 		</div>
 
 	</div>
-
-	<!-- Pelatihan -->
 
 	<div class="card shadow mb-4">
 
@@ -164,112 +181,177 @@
 
 			<div class="row">
 
-				<div class="col-lg-4 mb-4">
+				<?php foreach ($fields->take(3) as $field): ?>
 
-					<div class="card h-100 border-0 shadow-sm">
+					<div class="col-lg-4 mb-4">
 
-						<div class="card-body text-center">
+						<div class="card h-100 border-0 shadow-sm">
 
-							<i class="fas fa-laptop fa-3x text-primary mb-3"></i>
+							<div class="card-body text-center">
 
-							<h5 class="font-weight-bold">
+								<div
+									class="rounded-circle bg-<?= htmlspecialchars($field['color'] ?: 'primary') ?> text-white d-inline-flex align-items-center justify-content-center mb-3"
+									style="width:75px;height:75px;">
 
-								Komputer
+									<i class="<?= htmlspecialchars($field['icon'] ?: 'fas fa-book-open') ?> fa-2x"></i>
 
-							</h5>
+								</div>
 
-							<p class="text-muted">
+								<h5 class="font-weight-bold">
 
-								Microsoft Office, Web, Desain Grafis.
+									<?= htmlspecialchars($field['name']) ?>
 
-							</p>
+								</h5>
 
-							<a
-								href="<?= url('/peserta/registrations') ?>"
-								class="btn btn-primary btn-sm">
+								<p class="text-muted mb-4">
 
-								Daftar
+									<?= htmlspecialchars(
+										$field['description']
+											?: 'Lihat seluruh pelatihan pada kategori ini.'
+									) ?>
 
-							</a>
+								</p>
 
-						</div>
+								<a
+									href="<?= url('/peserta/registrations?field=' . $field['id']) ?>"
+									class="btn btn-<?= htmlspecialchars($field['color'] ?: 'primary') ?>">
 
-					</div>
+									<i class="fas fa-arrow-right mr-2"></i>
 
-				</div>
+									Lihat Pelatihan
 
-				<div class="col-lg-4 mb-4">
+								</a>
 
-					<div class="card h-100 border-0 shadow-sm">
-
-						<div class="card-body text-center">
-
-							<i class="fas fa-truck-moving fa-3x text-success mb-3"></i>
-
-							<h5 class="font-weight-bold">
-
-								Alat Berat
-
-							</h5>
-
-							<p class="text-muted">
-
-								Forklift, Excavator dan Operator.
-
-							</p>
-
-							<a
-								href="<?= url('/peserta/registrations') ?>"
-								class="btn btn-success btn-sm">
-
-								Daftar
-
-							</a>
+							</div>
 
 						</div>
 
 					</div>
 
-				</div>
+				<?php endforeach; ?>
 
-				<div class="col-lg-4 mb-4">
+			</div>
+		</div>
 
-					<div class="card h-100 border-0 shadow-sm">
+	</div>
 
-						<div class="card-body text-center">
+	<!-- Progress -->
 
-							<i class="fas fa-user-shield fa-3x text-warning mb-3"></i>
+	<div class="card shadow mb-4">
 
-							<h5 class="font-weight-bold">
+		<div class="card-header bg-white">
 
-								Security
+			<h6 class="font-weight-bold text-primary mb-0">
 
-							</h5>
+				Progress Peserta
 
-							<p class="text-muted">
+			</h6>
 
-								Pelatihan Satpam dan Gada Pratama.
+		</div>
 
-							</p>
+		<div class="card-body">
 
-							<a
-								href="<?= url('/peserta/registrations') ?>"
-								class="btn btn-warning btn-sm">
+			<div class="row text-center">
 
-								Daftar
+				<div class="col">
 
-							</a>
+					<div class="text-success mb-2">
 
-						</div>
+						<i class="fas fa-check-circle fa-2x"></i>
 
 					</div>
 
+					<strong>Akun</strong>
+
+					<br>
+
+					<small class="text-success">
+
+						Selesai
+
+					</small>
+
+				</div>
+				<div class="col">
+
+					<div class="<?= $profileCompleted ? 'text-success' : 'text-warning' ?> mb-2">
+
+						<i class="fas <?= $profileCompleted ? 'fa-check-circle' : 'fa-user-edit' ?> fa-2x"></i>
+
+					</div>
+
+					<strong>Profil</strong>
+
+					<br>
+
+					<small class="<?= $profileCompleted ? 'text-success' : 'text-warning' ?>">
+
+						<?= $profileCompleted ? 'Selesai' : 'Belum Lengkap' ?>
+
+					</small>
+
 				</div>
 
+				<div class="col">
+
+					<div class="<?= $hasRegistration ? 'text-success' : 'text-muted' ?> mb-2">
+
+						<i class="fas <?= $hasRegistration ? 'fa-check-circle' : 'fa-clipboard-list' ?> fa-2x"></i>
+
+					</div>
+
+					<strong>Pendaftaran</strong>
+
+					<br>
+
+					<small class="<?= $hasRegistration ? 'text-success' : 'text-muted' ?>">
+
+						<?= $hasRegistration ? 'Sudah Mendaftar' : 'Belum' ?>
+
+					</small>
+
+				</div>
+				<div class="col">
+
+					<div class="<?= $hasTraining ? 'text-success' : 'text-muted' ?> mb-2">
+
+						<i class="fas <?= $hasTraining ? 'fa-check-circle' : 'fa-graduation-cap' ?> fa-2x"></i>
+
+					</div>
+
+					<strong>Pelatihan</strong>
+
+					<br>
+
+					<small class="<?= $hasTraining ? 'text-success' : 'text-muted' ?>">
+
+						<?= $hasTraining ? 'Sedang / Selesai' : 'Belum' ?>
+
+					</small>
+
+				</div>
+				<div class="col">
+
+					<div class="<?= $hasTraining ? 'text-success' : 'text-muted' ?> mb-2">
+
+						<i class="fas <?= $hasTraining ? 'fa-check-circle' : 'fa-graduation-cap' ?> fa-2x"></i>
+
+					</div>
+
+					<strong>Pelatihan</strong>
+
+					<br>
+
+					<small class="<?= $hasTraining ? 'text-success' : 'text-muted' ?>">
+
+						<?= $hasTraining ? 'Sedang / Selesai' : 'Belum' ?>
+
+					</small>
+
+				</div>
 			</div>
 
 		</div>
 
 	</div>
-
 </div>

@@ -2,69 +2,73 @@
 
 	<div class="row">
 
-        <div class="col-lg-4">
+		<div class="col-lg-4">
 
-            <div class="card shadow mb-4">
+			<div class="card shadow mb-4">
 
-                <div class="card-body text-center">
+				<div class="card-body text-center">
 
-                    <?php if (has_avatar()): ?>
+					<?php if (!empty($user->avatar)): ?>
 
-                        <img
-                                src="<?= avatar() ?>"
-                                alt="<?= user()['name'] ?>"
-                                class="rounded-circle shadow mb-3"
-                                style="
-                        width: 140px;
-                        height: 140px;
-                        object-fit: cover;
-                    ">
+						<img
+							src="<?= storage($user->avatar) ?>"
+							alt="<?= e($user->name) ?>"
+							class="rounded-circle shadow mb-3"
+							style="width:140px;height:140px;object-fit:cover;">
 
-                    <?php else: ?>
+					<?php else: ?>
 
-                        <div class="avatar-circle-lg mx-auto mb-3">
+						<div class="avatar-circle-lg mx-auto mb-3">
 
-                            <?= initials(user()['name']) ?>
+							<?= initials($user->name) ?>
 
-                        </div>
+						</div>
 
-                    <?php endif; ?>
+					<?php endif; ?>
 
-                    <h4 class="font-weight-bold">
+					<h4 class="font-weight-bold mb-1">
 
-                        <?= user()['name'] ?>
+						<?= e($user->name) ?>
 
-                    </h4>
+					</h4>
 
-                    <p class="text-muted mb-2">
+					<p class="text-muted mb-3">
 
-                        <?= ucfirst(user()['role']) ?>
+						<?= ucfirst($user->role) ?>
 
-                    </p>
+					</p>
 
-                    <?php if (user()['is_active']): ?>
+					<?php if ($user->status === 'active'): ?>
 
-                        <span class="badge badge-success">
+						<span class="badge badge-success px-3 py-2">
 
-                    Akun Aktif
+                            Aktif
 
-                </span>
+                        </span>
 
-                    <?php else: ?>
+					<?php elseif ($user->status === 'inactive'): ?>
 
-                        <span class="badge badge-danger">
+						<span class="badge badge-secondary px-3 py-2">
 
-                    Akun Nonaktif
+                            Tidak Aktif
 
-                </span>
+                        </span>
 
-                    <?php endif; ?>
+					<?php elseif ($user->status === 'banned'): ?>
 
-                </div>
+						<span class="badge badge-danger px-3 py-2">
 
-            </div>
+                            Diblokir
 
-        </div>
+                        </span>
+
+					<?php endif; ?>
+
+				</div>
+
+			</div>
+
+		</div>
 
 		<div class="col-lg-8">
 
@@ -85,74 +89,46 @@
 					<table class="table table-borderless mb-0">
 
 						<tr>
-
-							<th width="220">
-								Nama Lengkap
-							</th>
-
-							<td>
-								<?= auth()->user()['name'] ?>
-							</td>
-
+							<th width="220">Nama Lengkap</th>
+							<td><?= e($user->name) ?></td>
 						</tr>
 
 						<tr>
-
-							<th>
-								Username
-							</th>
-
-							<td>
-								<?= auth()->user()['username'] ?>
-							</td>
-
+							<th>Username</th>
+							<td><?= e($user->username) ?></td>
 						</tr>
-                        <tr>
 
-                            <th>
-                                Email
-                            </th>
+						<tr>
+							<th>Email</th>
+							<td>
 
-                            <td>
+								<a href="mailto:<?= e($user->email) ?>">
 
-                                <a href="mailto:<?= auth()->user()['email'] ?>">
+									<?= e($user->email) ?>
 
-                                    <?= auth()->user()['email'] ?>
+								</a>
 
-                                </a>
+							</td>
+						</tr>
 
-                            </td>
-
-                        </tr>
-
-
-                        <tr>
-
-							<th>
-								Role
-							</th>
-
+						<tr>
+							<th>Role</th>
 							<td>
 
                                 <span class="badge badge-primary">
 
-                                    <?= ucfirst(auth()->user()['role']) ?>
+                                    <?= ucfirst($user->role) ?>
 
                                 </span>
 
 							</td>
-
 						</tr>
 
 						<tr>
-
-							<th>
-								Status
-							</th>
-
+							<th>Status</th>
 							<td>
 
-								<?php if(auth()->user()['is_active']): ?>
+								<?php if ($user->status === 'active'): ?>
 
 									<span class="badge badge-success">
 
@@ -160,47 +136,40 @@
 
                                     </span>
 
-								<?php else: ?>
+								<?php elseif ($user->status === 'inactive'): ?>
+
+									<span class="badge badge-secondary">
+
+                                        Tidak Aktif
+
+                                    </span>
+
+								<?php elseif ($user->status === 'banned'): ?>
 
 									<span class="badge badge-danger">
 
-                                        Nonaktif
+                                        Diblokir
 
                                     </span>
 
 								<?php endif; ?>
 
 							</td>
-
 						</tr>
 
 						<tr>
-
-							<th>
-								Login Terakhir
-							</th>
-
+							<th>Login Terakhir</th>
 							<td>
 
-								<?= auth()->user()['last_login_at'] ?? '-' ?>
+								<?= $user->last_login_at
+									? date('d F Y H:i', strtotime($user->last_login_at))
+									: '-' ?>
 
 							</td>
-
 						</tr>
 
-						<tr>
 
-							<th>
-								Bergabung
-							</th>
 
-							<td>
-
-								<?= date('d F Y', strtotime(auth()->user()['created_at'])) ?>
-
-							</td>
-
-						</tr>
 
 					</table>
 
@@ -208,33 +177,33 @@
 
 			</div>
 
-            <div class="card shadow">
+			<div class="card shadow">
 
-                <div class="card-body d-flex justify-content-between">
+				<div class="card-body d-flex justify-content-between">
 
-                    <a
-                            href="<?= url('/profile/edit') ?>"
-                            class="btn btn-warning">
+					<a
+						href="<?= url('/profile/edit') ?>"
+						class="btn btn-warning">
 
-                        <i class="fas fa-user-edit mr-2"></i>
+						<i class="fas fa-user-edit mr-2"></i>
 
-                        Ubah Profil
+						Ubah Profil
 
-                    </a>
+					</a>
 
-                    <a
-                            href="<?= url('/profile/password') ?>"
-                            class="btn btn-primary">
+					<a
+						href="<?= url('/profile/password') ?>"
+						class="btn btn-primary">
 
-                        <i class="fas fa-key mr-2"></i>
+						<i class="fas fa-key mr-2"></i>
 
-                        Ubah Password
+						Ubah Password
 
-                    </a>
+					</a>
 
-                </div>
+				</div>
 
-            </div>
+			</div>
 
 		</div>
 

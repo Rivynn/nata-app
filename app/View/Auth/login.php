@@ -47,23 +47,23 @@
 									</p>
 
 								</div>
-                                <?php if (isset($_SESSION['success'])): ?>
+								<?php if ($message = flash('success')): ?>
 
                                     <div class="alert alert-success">
 
-                                        <?= $_SESSION['success']; ?>
+                                        <?= $message; ?>
 
                                     </div>
 
-                                    <?php unset($_SESSION['success']); ?>
 
                                 <?php endif; ?>
 
-								<?php if(isset($_SESSION['error'])): ?>
+								<?php if ($message = flash('error')): ?>
+
 
 									<div class="alert alert-danger">
 
-										<?= $_SESSION['error']; ?>
+										<?= $message ?>
 
 									</div>
 

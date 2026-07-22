@@ -10,129 +10,377 @@
 
 			</td>
 
+
 			<td width="20">
 
 				:
 
 			</td>
 
+
 			<td>
 
-				<?= count($participants) ?>
+				<?= $participants->count() ?>
+
+				Peserta
 
 			</td>
 
+
 		</tr>
+
+
+
+		<tr>
+
+			<td>
+
+				Tanggal Cetak
+
+			</td>
+
+
+			<td>
+
+				:
+
+			</td>
+
+
+			<td>
+
+				<?= $printed_at ?? date('d M Y H:i') ?>
+
+			</td>
+
+
+		</tr>
+
 
 	</table>
 
 </div>
 
+
+
+
+
 <table>
+
 
 	<thead>
 
+
 	<tr>
 
-		<th width="40">No</th>
 
-		<th>Nama Peserta</th>
+		<th width="40">
 
-		<th>Email</th>
+			No
 
-		<th>No. HP</th>
+		</th>
 
-		<th>Bidang</th>
 
-		<th>Pelatihan</th>
+		<th>
 
-		<th>Status Registrasi</th>
+			Nama Peserta
 
-		<th>Status Akun</th>
+		</th>
 
-		<th>Tanggal Daftar</th>
+
+		<th>
+
+			Email
+
+		</th>
+
+
+		<th>
+
+			No. HP
+
+		</th>
+
+
+		<th>
+
+			Pelatihan
+
+		</th>
+
+
+		<th>
+
+			Bidang
+
+		</th>
+
+
+		<th>
+
+			Status Registrasi
+
+		</th>
+
+
+		<th>
+
+			Status Profil
+
+		</th>
+
+
+		<th>
+
+			Tanggal Daftar
+
+		</th>
+
 
 	</tr>
 
+
 	</thead>
+
+
+
+
 
 	<tbody>
 
+
 	<?php foreach($participants as $i => $participant): ?>
+
+
+		<?php
+
+		$registrations = $participant->registrations;
+
+		?>
+
+
 
 		<tr>
 
+
 			<td class="text-center">
+
 
 				<?= $i + 1 ?>
 
+
 			</td>
+
+
+
+
 
 			<td>
 
-				<?= $participant['name'] ?>
+
+				<?= $participant->user?->name ?? '-' ?>
+
 
 			</td>
+
+
+
+
 
 			<td>
 
-				<?= $participant['email'] ?>
+
+				<?= $participant->user?->email ?? '-' ?>
+
 
 			</td>
+
+
+
+
 
 			<td>
 
-				<?= $participant['phone'] ?: '-' ?>
+
+				<?= $participant->phone ?: '-' ?>
+
 
 			</td>
+
+
+
+
 
 			<td>
 
-				<?= $participant['field_name'] ?: '-' ?>
+
+				<?php if($registrations->count()): ?>
+
+
+					<?php foreach($registrations as $registration): ?>
+
+
+						<div>
+
+
+							<?= $registration->training?->name ?? '-' ?>
+
+
+						</div>
+
+
+					<?php endforeach; ?>
+
+
+				<?php else: ?>
+
+
+					-
+
+
+				<?php endif; ?>
+
 
 			</td>
+
+
+
+
 
 			<td>
 
-				<?= $participant['training_name'] ?: '-' ?>
+
+				<?php if($registrations->count()): ?>
+
+
+					<?php foreach($registrations as $registration): ?>
+
+
+						<div>
+
+
+							<?= $registration
+								->training
+								?->trainingField
+								?->name ?? '-' ?>
+
+
+						</div>
+
+
+					<?php endforeach; ?>
+
+
+				<?php else: ?>
+
+
+					-
+
+
+				<?php endif; ?>
+
 
 			</td>
+
+
+
+
 
 			<td class="text-center">
 
-				<?= match($participant['status']){
 
-					'pending'   => 'Pending',
-					'approved'  => 'Disetujui',
-					'rejected'  => 'Ditolak',
-					'completed' => 'Selesai',
-					default     => '-',
+				<?php if($registrations->count()): ?>
 
-				} ?>
+
+					<?php foreach($registrations as $registration): ?>
+
+
+						<div>
+
+
+							<?= match($registration->status){
+
+
+								'pending' =>
+								'Pending',
+
+
+								'approved' =>
+								'Disetujui',
+
+
+								'rejected' =>
+								'Ditolak',
+
+
+								'completed' =>
+								'Selesai',
+
+
+								default =>
+								'-',
+
+
+							} ?>
+
+
+						</div>
+
+
+					<?php endforeach; ?>
+
+
+				<?php else: ?>
+
+
+					-
+
+
+				<?php endif; ?>
+
 
 			</td>
+
+
+
+
+
+			<td class="text-center">
+
+
+				<?= $participant->profile?->is_completed
+
+					? 'Lengkap'
+
+					: 'Belum Lengkap'
+
+				?>
+
+
+			</td>
+
+
+
+
+
 			<td>
 
-				<?= match($participant['account_status']){
 
-					'active'   => 'Aktif',
-					'inactive' => 'Belum Aktif',
-					'disabled' => 'Nonaktif',
-					default    => '-',
+				<?= $participant->created_at?->format('d/m/Y') ?>
 
-				} ?>
 
 			</td>
 
-			<td>
 
-				<?= date('d/m/Y', strtotime($participant['created_at'])) ?>
 
-			</td>
 		</tr>
+
+
 
 	<?php endforeach; ?>
 
+
 	</tbody>
+
 
 </table>

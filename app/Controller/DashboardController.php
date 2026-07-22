@@ -31,6 +31,10 @@
 					$this->redirect('/peserta');
 					break;
 
+				case 'pelatih':
+					$this->redirect('/pelatih');
+					break;
+
 				default:
 
 					auth()->logout();

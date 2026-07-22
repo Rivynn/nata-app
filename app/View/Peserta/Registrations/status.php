@@ -1,7 +1,5 @@
 <div class="container-fluid">
 
-	<!-- Header -->
-
 	<div class="card shadow border-0 mb-4 bg-gradient-primary text-white">
 
 		<div class="card-body py-4">
@@ -18,16 +16,16 @@
 
 					<p class="mb-0 text-white-50">
 
-						Pantau seluruh proses pendaftaran pelatihan Anda secara realtime.
+						Pantau perkembangan pendaftaran pelatihan Anda secara realtime.
 
 					</p>
 
 				</div>
 
-				<div class="col-auto text-center">
+				<div class="col-auto">
 
 					<div
-						class="rounded-circle bg-white text-primary d-flex align-items-center justify-content-center shadow"
+						class="rounded-circle bg-white text-primary d-flex justify-content-center align-items-center shadow"
 						style="width:70px;height:70px;">
 
 						<i class="fas fa-clipboard-check fa-2x"></i>
@@ -42,7 +40,7 @@
 
 	</div>
 
-	<?php if(empty($registrations)): ?>
+	<?php if ($registrations->isEmpty()): ?>
 
 		<div class="card shadow border-0">
 
@@ -56,9 +54,9 @@
 
 				</h4>
 
-				<p class="text-muted">
+				<p class="text-muted mb-4">
 
-					Anda belum mengikuti pelatihan apapun.
+					Anda belum mengikuti pelatihan apa pun.
 
 				</p>
 
@@ -68,7 +66,7 @@
 
 					<i class="fas fa-plus mr-2"></i>
 
-					Daftar Sekarang
+					Daftar Pelatihan
 
 				</a>
 
@@ -78,70 +76,76 @@
 
 	<?php else: ?>
 
-		<?php foreach($registrations as $registration): ?>
+	<?php foreach ($registrations as $registration): ?>
 
-			<?php
+	<?php
 
-			switch($registration['status']){
+		$training = $registration->training;
 
-				case 'approved':
+		$schedule = $training->schedules->sortBy('schedule_date')->first();
 
-					$color='success';
-					$icon='check-circle';
-					$status='Disetujui';
-					$progress=100;
-					break;
+		switch ($registration->status) {
 
-				case 'completed':
+			case 'approved':
+				$color = 'success';
+				$icon = 'check-circle';
+				$status = 'Disetujui';
+				$progress = 75;
+				break;
 
-					$color='primary';
-					$icon='award';
-					$status='Selesai';
-					$progress=100;
-					break;
+			case 'completed':
+				$color = 'primary';
+				$icon = 'award';
+				$status = 'Selesai';
+				$progress = 100;
+				break;
 
-				case 'rejected':
+			case 'running':
+				$color = 'info';
+				$icon = 'play-circle';
+				$status = 'Berlangsung';
+				$progress = 90;
+				break;
 
-					$color='danger';
-					$icon='times-circle';
-					$status='Ditolak';
-					$progress=100;
-					break;
+			case 'rejected':
+				$color = 'danger';
+				$icon = 'times-circle';
+				$status = 'Ditolak';
+				$progress = 100;
+				break;
 
-				default:
+			default:
+				$color = 'warning';
+				$icon = 'clock';
+				$status = 'Menunggu Verifikasi';
+				$progress = 35;
+		}
 
-					$color='warning';
-					$icon='clock';
-					$status='Pending';
-					$progress=45;
+	?>
 
-			}
+	<div class="card shadow border-0 mb-4">
 
-			?>
+		<div class="card-body">
 
-			<div class="card shadow border-0 mb-4">
+			<div class="d-flex justify-content-between align-items-center">
 
-				<div class="card-body">
+				<div>
 
-					<div class="d-flex justify-content-between align-items-center">
+					<h4 class="font-weight-bold mb-1">
 
-						<div>
+						<?= e($training->name) ?>
 
-							<h4 class="font-weight-bold mb-1">
+					</h4>
 
-								<?= $registration['training_name'] ?>
+					<small class="text-muted">
 
-							</h4>
+						<?= e($training->trainingField?->name ?? '-') ?>
 
-							<small class="text-muted">
+					</small>
 
-								<?= $registration['field_name'] ?>
+				</div>
 
-							</small>
-
-						</div>
-
-						<span class="badge badge-<?= $color ?> px-3 py-2">
+				<span class="badge badge-<?= $color ?> px-3 py-2">
 
                             <i class="fas fa-<?= $icon ?> mr-2"></i>
 
@@ -149,189 +153,290 @@
 
                         </span>
 
-					</div>
+			</div>
 
-					<hr>
+			<hr>
+			<div class="row">
 
-					<div class="row">
+				<div class="col-md-3">
 
-						<div class="col-md-4">
+					<small class="text-muted d-block">
 
-							<small class="text-muted d-block">
+						Lokasi
 
-								Lokasi
+					</small>
 
-							</small>
+					<strong>
 
-							<strong>
+						<?= e($training->location ?: '-') ?>
 
-								<?= $registration['location'] ?>
+					</strong>
 
-							</strong>
+				</div>
 
-						</div>
+				<div class="col-md-3">
 
-						<div class="col-md-4">
+					<small class="text-muted d-block">
 
-							<small class="text-muted d-block">
+						Pelatih
 
-								Durasi
+					</small>
 
-							</small>
+					<strong>
 
-							<strong>
+						<?= e($training->trainer?->getDisplayName() ?? '-') ?>
 
-								<?= $registration['duration'] ?>
+					</strong>
 
-								Hari
+				</div>
 
-							</strong>
+				<div class="col-md-3">
 
-						</div>
+					<small class="text-muted d-block">
 
-						<div class="col-md-4">
+						Jadwal
 
-							<small class="text-muted d-block">
+					</small>
 
-								Tanggal Daftar
+					<strong>
 
-							</small>
+						<?= $schedule?->schedule_date?->format('d M Y') ?? '-' ?>
 
-							<strong>
+					</strong>
 
-								<?= date('d F Y',strtotime($registration['created_at'])) ?>
+				</div>
 
-							</strong>
+				<div class="col-md-3">
 
-						</div>
+					<small class="text-muted d-block">
 
-					</div>
+						Durasi
 
-					<hr>
+					</small>
 
-					<div class="d-flex justify-content-between mb-2">
+					<strong>
 
-						<small>
+						<?= $training->duration ?>
 
-							Progress Verifikasi
+						Hari
 
-						</small>
+					</strong>
 
-						<strong class="text-<?= $color ?>">
+				</div>
 
-							<?= $progress ?>%
+			</div>
 
-						</strong>
+			<hr>
 
-					</div>
+			<div class="d-flex justify-content-between align-items-center mb-2">
 
-					<div class="progress mb-4" style="height:10px;">
+				<small class="text-muted">
 
-						<div
-							class="progress-bar bg-<?= $color ?>"
-							style="width:<?= $progress ?>%">
+					Progress Pendaftaran
 
-						</div>
+				</small>
 
-					</div>
+				<strong class="text-<?= $color ?>">
 
-					<div class="row text-center">
+					<?= $progress ?>%
 
-						<div class="col">
+				</strong>
 
-							<div class="<?= $progress>=20?'text-success':'text-gray-400' ?>">
+			</div>
 
-								<i class="fas fa-file-import fa-lg"></i>
+			<div
+				class="progress mb-4"
+				style="height:10px;">
 
-								<br>
+				<div
+					class="progress-bar bg-<?= $color ?>"
+					role="progressbar"
+					style="width:<?= $progress ?>%">
 
-								<small>
+				</div>
 
-									Dikirim
+			</div>
 
-								</small>
+			<div class="row text-center">
 
-							</div>
+				<div class="col">
 
-						</div>
+					<div class="<?= $progress >= 25 ? 'text-success' : 'text-gray-400' ?>">
 
-						<div class="col">
+						<i class="fas fa-file-import fa-lg"></i>
 
-							<div class="<?= $progress>=50?'text-success':'text-gray-400' ?>">
+						<div class="small mt-2">
 
-								<i class="fas fa-user-check fa-lg"></i>
-
-								<br>
-
-								<small>
-
-									Diverifikasi
-
-								</small>
-
-							</div>
-
-						</div>
-
-						<div class="col">
-
-							<div class="<?= $registration['status']=='approved' || $registration['status']=='completed'?'text-success':'text-gray-400' ?>">
-
-								<i class="fas fa-check-circle fa-lg"></i>
-
-								<br>
-
-								<small>
-
-									Disetujui
-
-								</small>
-
-							</div>
-
-						</div>
-
-						<div class="col">
-
-							<div class="<?= $registration['status']=='completed'?'text-success':'text-gray-400' ?>">
-
-								<i class="fas fa-award fa-lg"></i>
-
-								<br>
-
-								<small>
-
-									Selesai
-
-								</small>
-
-							</div>
+							Dikirim
 
 						</div>
 
 					</div>
 
-					<?php if($registration['status']=='rejected'): ?>
+				</div>
 
-						<div class="alert alert-danger mt-4 mb-0">
+				<div class="col">
 
-							<strong>
+					<div class="<?= $progress >= 50 ? 'text-success' : 'text-gray-400' ?>">
 
-								Alasan Penolakan
+						<i class="fas fa-user-check fa-lg"></i>
 
-							</strong>
+						<div class="small mt-2">
 
-							<br>
-
-							<?= $registration['rejected_reason'] ?>
+							Diverifikasi
 
 						</div>
+
+					</div>
+
+				</div>
+
+				<div class="col">
+
+					<div class="<?= in_array($registration->status, ['approved', 'running', 'completed']) ? 'text-success' : 'text-gray-400' ?>">
+
+						<i class="fas fa-check-circle fa-lg"></i>
+
+						<div class="small mt-2">
+
+							Disetujui
+
+						</div>
+
+					</div>
+
+				</div>
+
+				<div class="col">
+
+					<div class="<?= $registration->status === 'completed' ? 'text-success' : 'text-gray-400' ?>">
+
+						<i class="fas fa-award fa-lg"></i>
+
+						<div class="small mt-2">
+
+							Selesai
+
+						</div>
+
+					</div>
+
+				</div>
+
+			</div>
+
+			<hr>
+
+			<div class="row">
+
+				<div class="col-md-6">
+
+					<a
+						href="<?= url('/peserta/trainings/show?id=' . $training->id) ?>"
+						class="btn btn-outline-primary btn-block">
+
+						<i class="fas fa-eye mr-2"></i>
+
+						Detail Pelatihan
+
+					</a>
+
+				</div>
+
+				<div class="col-md-6">
+
+					<?php if ($registration->certificate): ?>
+
+						<a
+							href="<?= url('/peserta/certificates/show?id=' . $registration->certificate->id) ?>"
+							class="btn btn-success btn-block">
+
+							<i class="fas fa-certificate mr-2"></i>
+
+							Sertifikat
+
+						</a>
+
+					<?php else: ?>
+
+						<button
+							class="btn btn-secondary btn-block"
+							disabled>
+
+							<i class="fas fa-certificate mr-2"></i>
+
+							Belum Tersedia
+
+						</button>
 
 					<?php endif; ?>
 
 				</div>
 
 			</div>
+			<?php if (
+				$registration->status === 'rejected'
+				&& ! empty($registration->rejected_reason)
+			): ?>
+
+				<div class="alert alert-danger mt-4 mb-0">
+
+					<h6 class="font-weight-bold">
+
+						<i class="fas fa-times-circle mr-2"></i>
+
+						Pendaftaran Ditolak
+
+					</h6>
+
+					<p class="mb-0">
+
+						<?= e($registration->rejected_reason) ?>
+
+					</p>
+
+				</div>
+
+			<?php endif; ?>
+
+			<?php if (
+				$registration->status === 'completed'
+				&& $registration->score
+			): ?>
+
+				<div class="card bg-light border mt-4">
+
+					<div class="card-body">
+
+						<div class="row text-center">
+
+							<div class="col">
+
+								<small class="text-muted d-block">
+
+									Nilai Akhir
+
+								</small>
+
+								<h2 class="font-weight-bold text-primary mb-0">
+
+									<?= number_format($registration->score->final_score, 0) ?>
+
+								</h2>
+
+							</div>
+
+						</div>
+
+					</div>
+
+				</div>
+
+			<?php endif; ?>
+
+		</div>
+
+	</div>
 
 		<?php endforeach; ?>
 

@@ -2,178 +2,299 @@
 
 	namespace Natasya\NataApp\Model;
 
+	use Illuminate\Database\Eloquent\Relations\BelongsTo;
 	use Natasya\NataApp\App\Model;
+
 
 	class Certificate extends Model
 	{
-		public function create(array $data): int
+
+		protected $table = 'certificates';
+
+
+
+		protected $fillable = [
+
+			'registration_id',
+
+			'certificate_number',
+
+			'verification_code',
+
+			'verification_url',
+
+			'file',
+
+			'status',
+
+			'issued_by',
+
+			'issued_at',
+
+		];
+
+
+
+		protected $casts = [
+
+			'issued_at' => 'datetime',
+
+		];
+
+
+
+		/*
+		|--------------------------------------------------------------------------
+		| Relationships
+		|--------------------------------------------------------------------------
+		*/
+
+
+		public function registration(): BelongsTo
 		{
-			$this->execute("
-        INSERT INTO certificates
-        (
-            registration_id,
-            certificate_number,
-            verification_code,
-            file,
-            issued_at
-        )
-        VALUES
-        (
-            ?,?,?,?,?
-        )
-    ", [
 
-				$data['registration_id'],
-				$data['certificate_number'],
-				$data['verification_code'],
-				$data['file'],
-				$data['issued_at'],
+			return $this->belongsTo(
+				Registration::class
+			);
 
-			]);
-
-			return (int) $this->lastInsertId();
-		}
-		public function byUser(int $userId): array
-		{
-			return $this->fetchAll("
-        SELECT
-
-            c.id,
-
-            c.registration_id,
-
-            c.certificate_number,
-
-            c.verification_code,
-
-            c.file,
-
-            c.issued_at,
-
-            t.name AS training_name,
-
-            tf.name AS field_name
-
-        FROM certificates c
-
-        INNER JOIN registrations r
-            ON r.id = c.registration_id
-
-        INNER JOIN trainings t
-            ON t.id = r.training_id
-
-        INNER JOIN training_fields tf
-            ON tf.id = t.training_field_id
-
-        WHERE r.user_id = ?
-
-        ORDER BY c.issued_at DESC
-    ", [
-				$userId
-			]);
 		}
 
-		public function find(int $id): ?array
+
+
+		public function issuer(): BelongsTo
 		{
-			return $this->fetch("
-        SELECT
 
-            c.id,
+			return $this->belongsTo(
+				User::class,
+				'issued_by'
+			);
 
-            c.registration_id,
-
-            c.certificate_number,
-
-            c.verification_code,
-
-            c.file,
-
-            c.issued_at,
-
-            c.created_at,
-
-            c.updated_at,
-
-            r.user_id,
-
-            r.training_id,
-
-            u.name,
-
-            u.email,
-
-            u.avatar,
-
-            t.name AS training_name,
-
-            tf.name AS field_name
-
-        FROM certificates c
-
-        INNER JOIN registrations r
-            ON r.id = c.registration_id
-
-        INNER JOIN users u
-            ON u.id = r.user_id
-
-        INNER JOIN trainings t
-            ON t.id = r.training_id
-
-        INNER JOIN training_fields tf
-            ON tf.id = t.training_field_id
-
-        WHERE c.id = ?
-
-        LIMIT 1
-    ", [
-				$id
-			]);
 		}
 
-		public function exists(int $registrationId): bool
+
+
+		/*
+		|--------------------------------------------------------------------------
+		| Certificate Status
+		|--------------------------------------------------------------------------
+		*/
+
+
+		public function isActive(): bool
 		{
-			return $this->fetch("
-		SELECT id
-		FROM certificates
-		WHERE registration_id = ?
-		LIMIT 1
-	", [
-					$registrationId
-				]) !== null;
+
+			return $this->status === 'active';
+
 		}
 
-		public function existsByNumber(string $number): bool
-		{
-			$result = $this->fetch("
-            SELECT id
-            FROM certificates
-            WHERE certificate_number = ?
-            LIMIT 1
-        ", [$number]);
 
-			return !empty($result);
-		}
-		public function existsByRegistration(int $registrationId): bool
-		{
-			$result = $this->fetch("
-        SELECT id
-        FROM certificates
-        WHERE registration_id = ?
-        LIMIT 1
-    ", [$registrationId]);
 
-			return !empty($result);
+		public function isRevoked(): bool
+		{
+
+			return $this->status === 'revoked';
+
 		}
 
-		public function findByRegistration(int $registrationId): ?array
+
+
+		public function isExpired(): bool
 		{
-			return $this->fetch("
-		SELECT *
-		FROM certificates
-		WHERE registration_id = ?
-		LIMIT 1
-	", [
-				$registrationId
-			]);
+
+			return $this->status === 'expired';
+
 		}
+
+
+
+		public function isIssued(): bool
+		{
+
+			return $this->issued_at !== null;
+
+		}
+
+
+
+		public function canVerify(): bool
+		{
+
+			return $this->isActive()
+				&&
+				$this->verification_code !== null;
+
+		}
+
+
+
+		/*
+		|--------------------------------------------------------------------------
+		| Generate Check
+		|--------------------------------------------------------------------------
+		*/
+
+
+		public function hasFile(): bool
+		{
+
+			return !empty(
+			$this->file
+			);
+
+		}
+
+
+
+		public function hasVerificationUrl(): bool
+		{
+
+			return !empty(
+			$this->verification_url
+			);
+
+		}
+
+
+
+		/*
+		|--------------------------------------------------------------------------
+		| Helpers
+		|--------------------------------------------------------------------------
+		*/
+
+
+		public function getParticipantName(): string
+		{
+
+			return $this->registration
+				?->participant
+				?->user
+				?->getDisplayName()
+			?? '-';
+
+	}
+
+
+
+		public function getTrainingName(): string
+		{
+
+			return $this->registration
+				?->training
+				?->name
+			?? '-';
+
+	}
+
+
+
+		public function getFieldName(): string
+		{
+
+			return $this->registration
+				?->training
+				?->trainingField
+				?->name
+				?? '-';
+
+	}
+
+
+
+		public function getIssuerName(): string
+		{
+
+			return $this->issuer?->getDisplayName()
+			?? '-';
+
+	}
+
+
+
+		public function getCertificateNumber(): string
+		{
+
+			return $this->certificate_number;
+
+		}
+
+
+
+		public function getVerificationUrl(): string
+		{
+
+			return $this->verification_url
+				?? url(
+					'/verify/certificate?code='
+					.$this->verification_code
+				);
+
+		}
+
+
+
+		/*
+		|--------------------------------------------------------------------------
+		| Factory Helpers
+		|--------------------------------------------------------------------------
+		*/
+
+
+		public static function generateCertificateNumber(): string
+		{
+
+			$last = self::latest('id')->first();
+
+
+
+			$number = $last
+
+				? $last->id + 1
+
+				: 1;
+
+
+
+			return sprintf(
+
+				'CERT-%s-%05d',
+
+				now()->format('Ymd'),
+
+				$number
+
+			);
+
+		}
+
+
+
+		public static function generateVerificationCode(): string
+		{
+
+			do {
+
+
+				$code = strtoupper(
+					str()->random(8)
+				);
+
+
+
+			} while (
+
+				self::where(
+					'verification_code',
+					$code
+				)->exists()
+
+			);
+
+
+
+			return $code;
+
+		}
+
+
 	}
