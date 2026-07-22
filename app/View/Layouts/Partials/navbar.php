@@ -40,13 +40,13 @@
 
                     <div class="font-weight-bold text-gray-800">
 
-                        <?= $user['name'] ?>
+                        <?= $user->name ?>
 
                     </div>
 
                     <small class="text-muted">
 
-                        <?= ucfirst($user['role']) ?>
+                        <?= ucfirst($user->role) ?>
 
                     </small>
 
@@ -56,7 +56,7 @@
 
                     <img
                             src="<?= avatar() ?>"
-                            alt="<?= $user['name'] ?>"
+                            alt="<?= $user->name ?>"
                             class="img-profile rounded-circle shadow"
                             style="
                             width:40px;
@@ -68,7 +68,7 @@
 
                     <div class="avatar-circle">
 
-                        <?= initials($user['name']) ?>
+                        <?= initials($user->name) ?>
 
                     </div>
 

@@ -4,41 +4,51 @@
 
 		<div class="col-lg-4">
 
-			<div class="card shadow mb-4">
+			<div class="card shadow border-0 mb-4">
 
 				<div class="card-body text-center">
 
 					<div
 						class="rounded-circle bg-primary text-white d-inline-flex align-items-center justify-content-center shadow mb-3"
-						style="width:110px;height:110px;font-size:42px;">
+						style="width:110px;height:110px;font-size:38px;font-weight:700;">
 
-						<i class="fas fa-chalkboard-teacher"></i>
+						<?= e($trainer->user->getInitials()) ?>
 
 					</div>
 
 					<h4 class="font-weight-bold mb-1">
 
-						<?= $trainer['name'] ?>
+						<?= e($trainer->getDisplayName()) ?>
 
 					</h4>
 
 					<p class="text-muted mb-3">
 
-						<?= $trainer['expertise'] ?: '-' ?>
+						<?= e($trainer->getExpertise()) ?>
 
 					</p>
 
-					<span class="badge badge-<?= $trainer['color'] ?> px-3 py-2">
+					<?php if ($trainer->trainingField): ?>
 
-						<i class="<?= $trainer['icon'] ?> mr-1"></i>
+						<span class="badge badge-info px-3 py-2">
 
-						<?= $trainer['field_name'] ?>
+							<?= e($trainer->trainingField->name) ?>
 
-					</span>
+						</span>
+
+					<?php else: ?>
+
+						<span class="badge badge-secondary px-3 py-2">
+
+							Belum Memiliki Bidang
+
+						</span>
+
+					<?php endif; ?>
 
 					<hr>
 
-					<?php if($trainer['status'] === 'active'): ?>
+					<?php if ($trainer->user->isActive()): ?>
 
 						<span class="badge badge-success px-3 py-2">
 
@@ -64,11 +74,11 @@
 
 			</div>
 
-		</div>
 
+		</div>
 		<div class="col-lg-8">
 
-			<div class="card shadow mb-4">
+			<div class="card shadow border-0 mb-4">
 
 				<div class="card-header bg-white">
 
@@ -83,17 +93,18 @@
 				<div class="card-body">
 
 					<div class="row">
+
 						<div class="col-md-6 mb-4">
 
 							<label class="text-muted small mb-1">
 
-								Nama Pelatih
+								Nama Lengkap
 
 							</label>
 
 							<div class="font-weight-bold">
 
-								<?= $trainer['name'] ?>
+								<?= e($trainer->getDisplayName()) ?>
 
 							</div>
 
@@ -103,19 +114,13 @@
 
 							<label class="text-muted small mb-1">
 
-								Bidang Pelatihan
+								Username
 
 							</label>
 
 							<div>
 
-								<span class="badge badge-<?= $trainer['color'] ?> px-3 py-2">
-
-									<i class="<?= $trainer['icon'] ?> mr-1"></i>
-
-									<?= $trainer['field_name'] ?>
-
-								</span>
+								@<?= e($trainer->user->username) ?>
 
 							</div>
 
@@ -133,7 +138,71 @@
 
 								<i class="fas fa-envelope text-primary mr-2"></i>
 
-								<?= $trainer['email'] ?: '-' ?>
+								<?= e($trainer->user->email) ?>
+
+							</div>
+
+						</div>
+
+						<div class="col-md-6 mb-4">
+
+							<label class="text-muted small mb-1">
+
+								Nomor Induk Pelatih
+
+							</label>
+
+							<div>
+
+								<?= e($trainer->employee_number ?: '-') ?>
+
+							</div>
+
+						</div>
+
+						<div class="col-md-6 mb-4">
+
+							<label class="text-muted small mb-1">
+
+								Bidang Pelatihan
+
+							</label>
+
+							<div>
+
+								<?php if ($trainer->trainingField): ?>
+
+									<span class="badge badge-info px-3 py-2">
+
+										<?= e($trainer->trainingField->name) ?>
+
+									</span>
+
+								<?php else: ?>
+
+									<span class="text-muted">
+
+										-
+
+									</span>
+
+								<?php endif; ?>
+
+							</div>
+
+						</div>
+
+						<div class="col-md-6 mb-4">
+
+							<label class="text-muted small mb-1">
+
+								Pengalaman
+
+							</label>
+
+							<div>
+
+								<?= e($trainer->getExperienceLabel()) ?>
 
 							</div>
 
@@ -151,7 +220,7 @@
 
 								<i class="fas fa-phone text-success mr-2"></i>
 
-								<?= $trainer['phone'] ?: '-' ?>
+								<?= e($trainer->phone ?: '-') ?>
 
 							</div>
 
@@ -169,7 +238,7 @@
 
 								<i class="fas fa-building text-info mr-2"></i>
 
-								<?= $trainer['institution'] ?: '-' ?>
+								<?= e($trainer->getInstitution()) ?>
 
 							</div>
 
@@ -187,29 +256,29 @@
 
 								<i class="fas fa-award text-warning mr-2"></i>
 
-								<?= $trainer['expertise'] ?: '-' ?>
+								<?= e($trainer->getExpertise()) ?>
 
 							</div>
 
 						</div>
 
-						<div class="col-md-12 mb-4">
+						<div class="col-md-6 mb-4">
 
 							<label class="text-muted small mb-1">
 
-								Sertifikat / Kualifikasi
+								Spesialisasi
 
 							</label>
 
 							<div>
 
-								<?= $trainer['certificate'] ?: '-' ?>
+								<?= e($trainer->getSpecialization()) ?>
 
 							</div>
 
 						</div>
 
-						<div class="col-md-12">
+						<div class="col-12">
 
 							<label class="text-muted small mb-1">
 
@@ -217,10 +286,9 @@
 
 							</label>
 
-							<div
-								class="border rounded p-3 bg-light">
+							<div class="border rounded bg-light p-3">
 
-								<?= nl2br($trainer['biography'] ?: '-') ?>
+								<?= nl2br(e($trainer->biography ?: '-')) ?>
 
 							</div>
 
@@ -231,7 +299,7 @@
 				</div>
 
 			</div>
-			<div class="card shadow">
+			<div class="card shadow border-0">
 
 				<div class="card-header bg-white">
 
@@ -257,7 +325,7 @@
 
 							<div class="font-weight-bold">
 
-								TRL-<?= str_pad($trainer['id'], 4, '0', STR_PAD_LEFT) ?>
+								TRL-<?= str_pad($trainer->id, 4, '0', STR_PAD_LEFT) ?>
 
 							</div>
 
@@ -267,13 +335,13 @@
 
 							<label class="text-muted small mb-1">
 
-								Status
+								Status Akun
 
 							</label>
 
 							<div>
 
-								<?php if($trainer['status'] === 'active'): ?>
+								<?php if ($trainer->user->isActive()): ?>
 
 									<span class="badge badge-success px-3 py-2">
 
@@ -299,7 +367,7 @@
 
 						</div>
 
-						<div class="col-md-6">
+						<div class="col-md-6 mb-4">
 
 							<label class="text-muted small mb-1">
 
@@ -309,16 +377,13 @@
 
 							<div>
 
-								<?= date(
-									'd F Y H:i',
-									strtotime($trainer['created_at'])
-								) ?>
+								<?= date('d F Y H:i', strtotime($trainer->created_at)) ?>
 
 							</div>
 
 						</div>
 
-						<div class="col-md-6">
+						<div class="col-md-6 mb-4">
 
 							<label class="text-muted small mb-1">
 
@@ -328,10 +393,58 @@
 
 							<div>
 
-								<?= date(
-									'd F Y H:i',
-									strtotime($trainer['updated_at'])
-								) ?>
+								<?= date('d F Y H:i', strtotime($trainer->updated_at)) ?>
+
+							</div>
+
+						</div>
+
+						<div class="col-md-6">
+
+							<label class="text-muted small mb-1">
+
+								Role
+
+							</label>
+
+							<div>
+
+								<span class="badge badge-primary px-3 py-2">
+
+									<?= strtoupper($trainer->user->role) ?>
+
+								</span>
+
+							</div>
+
+						</div>
+
+						<div class="col-md-6">
+
+							<label class="text-muted small mb-1">
+
+								Terakhir Login
+
+							</label>
+
+							<div>
+
+								<?php if ($trainer->user->last_login_at): ?>
+
+									<?= date(
+										'd F Y H:i',
+										strtotime($trainer->user->last_login_at)
+									) ?>
+
+								<?php else: ?>
+
+									<span class="text-muted">
+
+										Belum Pernah Login
+
+									</span>
+
+								<?php endif; ?>
 
 							</div>
 
@@ -358,7 +471,7 @@
 						<div>
 
 							<a
-								href="<?= url('/admin/trainers/edit?id=' . $trainer['id']) ?>"
+								href="<?= url('/admin/trainers/edit?id=' . $trainer->id) ?>"
 								class="btn btn-warning">
 
 								<i class="fas fa-edit mr-2"></i>
@@ -375,7 +488,7 @@
 								<input
 									type="hidden"
 									name="id"
-									value="<?= $trainer['id'] ?>">
+									value="<?= $trainer->id ?>">
 
 								<button
 									type="submit"
@@ -399,7 +512,5 @@
 			</div>
 
 		</div>
-
 	</div>
-
 </div>

@@ -1,7 +1,5 @@
 <div class="container-fluid">
 
-	<!-- Header -->
-
 	<div class="card shadow border-0 mb-4">
 
 		<div class="card-header bg-white py-3">
@@ -18,7 +16,7 @@
 
 					<p class="text-muted mb-0">
 
-						Kelola seluruh peserta yang telah terdaftar pada sistem pelatihan.
+						Kelola seluruh peserta pelatihan yang telah terdaftar pada sistem.
 
 					</p>
 
@@ -26,7 +24,7 @@
 
 				<span class="badge badge-primary px-3 py-2">
 
-					<?= $total ?> Peserta
+					<?= $participants->count() ?> Peserta
 
 				</span>
 
@@ -36,11 +34,9 @@
 
 	</div>
 
-	<!-- Statistik -->
-
 	<div class="row">
 
-		<div class="col-lg-3 col-md-6 mb-4">
+		<div class="col-lg-4 col-md-6 mb-4">
 
 			<div class="card border-left-primary shadow h-100">
 
@@ -50,7 +46,7 @@
 
 						<div>
 
-							<div class="text-xs text-primary font-weight-bold text-uppercase">
+							<div class="text-xs text-primary font-weight-bold text-uppercase mb-1">
 
 								Total Peserta
 
@@ -58,7 +54,7 @@
 
 							<h2 class="font-weight-bold mb-0">
 
-								<?= $total ?>
+								<?= $participants->count() ?>
 
 							</h2>
 
@@ -74,7 +70,7 @@
 
 		</div>
 
-		<div class="col-lg-3 col-md-6 mb-4">
+		<div class="col-lg-4 col-md-6 mb-4">
 
 			<div class="card border-left-success shadow h-100">
 
@@ -84,15 +80,15 @@
 
 						<div>
 
-							<div class="text-xs text-success font-weight-bold text-uppercase">
+							<div class="text-xs text-success font-weight-bold text-uppercase mb-1">
 
-								Aktif
+								Profile Lengkap
 
 							</div>
 
 							<h2 class="font-weight-bold mb-0">
 
-								<?= count(array_filter($participants, fn($p) => $p['status'] == 'active')) ?>
+								<?= $participants->filter(fn ($participant) => $participant->isProfileCompleted())->count() ?>
 
 							</h2>
 
@@ -108,7 +104,7 @@
 
 		</div>
 
-		<div class="col-lg-3 col-md-6 mb-4">
+		<div class="col-lg-4 col-md-6 mb-4">
 
 			<div class="card border-left-warning shadow h-100">
 
@@ -118,55 +114,21 @@
 
 						<div>
 
-							<div class="text-xs text-warning font-weight-bold text-uppercase">
+							<div class="text-xs text-warning font-weight-bold text-uppercase mb-1">
 
-								Belum Aktif
-
-							</div>
-
-							<h2 class="font-weight-bold mb-0">
-
-								<?= count(array_filter($participants, fn($p) => $p['status'] == 'inactive')) ?>
-
-							</h2>
-
-						</div>
-
-						<i class="fas fa-user-clock fa-2x text-gray-300"></i>
-
-					</div>
-
-				</div>
-
-			</div>
-
-		</div>
-
-		<div class="col-lg-3 col-md-6 mb-4">
-
-			<div class="card border-left-danger shadow h-100">
-
-				<div class="card-body">
-
-					<div class="d-flex justify-content-between align-items-center">
-
-						<div>
-
-							<div class="text-xs text-danger font-weight-bold text-uppercase">
-
-								Nonaktif
+								Profile Belum Lengkap
 
 							</div>
 
 							<h2 class="font-weight-bold mb-0">
 
-								<?= count(array_filter($participants, fn($p) => $p['status'] == 'disabled')) ?>
+								<?= $participants->filter(fn ($participant) => ! $participant->isProfileCompleted())->count() ?>
 
 							</h2>
 
 						</div>
 
-						<i class="fas fa-user-slash fa-2x text-gray-300"></i>
+						<i class="fas fa-user-edit fa-2x text-gray-300"></i>
 
 					</div>
 
@@ -177,8 +139,6 @@
 		</div>
 
 	</div>
-
-	<!-- Table -->
 
 	<div class="card shadow">
 
@@ -196,7 +156,7 @@
 
 					<small class="text-muted">
 
-						Seluruh peserta yang telah memiliki akun.
+						Seluruh peserta yang telah memiliki akun pada sistem.
 
 					</small>
 
@@ -204,7 +164,7 @@
 
 				<span class="badge badge-primary px-3 py-2">
 
-					<?= count($participants) ?> Data
+					<?= $participants->count() ?> Data
 
 				</span>
 
@@ -214,7 +174,7 @@
 
 		<div class="card-body">
 
-			<?php if(empty($participants)): ?>
+			<?php if ($participants->isEmpty()): ?>
 
 				<div class="text-center py-5">
 
@@ -226,9 +186,9 @@
 
 					</h5>
 
-					<p class="text-muted">
+					<p class="text-muted mb-0">
 
-						Belum terdapat peserta yang terdaftar.
+						Belum terdapat peserta yang terdaftar pada sistem.
 
 					</p>
 
@@ -236,186 +196,187 @@
 
 			<?php else: ?>
 
-				<div class="table-responsive">
+			<div class="table-responsive">
 
-					<table
-						id="participantTable"
-						class="table table-hover align-middle">
+				<table
+					id="participantTable"
+					class="table table-hover align-middle">
 
-						<thead class="thead-light">
+					<thead class="thead-light">
 
-						<tr>
+					<tr>
 
-							<th width="60">#</th>
+						<th width="60">#</th>
 
-							<th>Peserta</th>
+						<th>Peserta</th>
 
-							<th>Kontak</th>
+						<th>Institusi</th>
 
-							<th>No. HP</th>
+						<th>No. HP</th>
 
-							<th>Bergabung</th>
+						<th>Profile</th>
 
-							<th>Status</th>
+						<th>Bergabung</th>
 
-							<th width="150">Aksi</th>
+						<th width="140">Aksi</th>
 
-						</tr>
+					</tr>
 
-						</thead>
+					</thead>
 
-						<tbody>
+					<tbody>
+					<?php foreach ($participants as $index => $participant): ?>
 
-						<?php foreach($participants as $i => $participant): ?>
+					<tr>
 
-							<tr>
+						<td>
 
-								<td>
+							<?= $index + 1 ?>
 
-									<?= $i + 1 ?>
+						</td>
 
-								</td>
+						<td>
 
-								<td>
+							<div class="d-flex align-items-center">
 
-									<div class="d-flex align-items-center">
+								<?php if ($participant->user->hasAvatar()): ?>
 
-										<?php if(has_avatar($participant)): ?>
+									<img
+										src="<?= avatar($participant->user) ?>"
+										class="rounded-circle shadow mr-3"
+										width="50"
+										height="50"
+										style="object-fit: cover;">
 
-											<img
-												src="<?= avatar($participant) ?>"
-												class="rounded-circle shadow mr-3"
-												width="50"
-												height="50"
-												style="object-fit:cover;">
+								<?php else: ?>
 
-										<?php else: ?>
+									<div class="avatar-circle mr-3">
 
-											<div class="avatar-circle mr-3">
-
-												<?= initials($participant['name']) ?>
-
-											</div>
-
-										<?php endif; ?>
-
-										<div>
-
-											<div class="font-weight-bold">
-
-												<?= $participant['name'] ?>
-
-											</div>
-
-											<small class="text-muted">
-
-												ID #<?= $participant['id'] ?>
-
-											</small>
-
-										</div>
+										<?= e($participant->user->getInitials()) ?>
 
 									</div>
 
-								</td>
+								<?php endif; ?>
 
-								<td>
+								<div>
 
-									<?= $participant['email'] ?>
+									<div class="font-weight-bold">
 
-								</td>
-
-								<td>
-
-									<?= $participant['phone'] ?>
-
-								</td>
-
-								<td>
-
-									<?= date(
-										'd M Y',
-										strtotime($participant['created_at'])
-									) ?>
-
-								</td>
-
-								<td>
-
-									<?php if($participant['status'] == 'active'): ?>
-
-										<span class="badge badge-success">
-
-											Aktif
-
-										</span>
-
-									<?php elseif($participant['status'] == 'inactive'): ?>
-
-										<span class="badge badge-warning">
-
-											Belum Aktif
-
-										</span>
-
-									<?php else: ?>
-
-										<span class="badge badge-danger">
-
-											Nonaktif
-
-										</span>
-
-									<?php endif; ?>
-
-								</td>
-
-								<td>
-
-									<div class="btn-group shadow-sm">
-
-										<a
-											href="<?= url('/admin/participants/show?id=' . $participant['id']) ?>"
-											class="btn btn-outline-primary btn-sm">
-
-											<i class="fas fa-eye"></i>
-
-										</a>
-
-										<form
-											method="POST"
-											action="<?= url('/admin/participants/delete') ?>"
-											class="d-inline">
-
-											<input
-												type="hidden"
-												name="id"
-												value="<?= $participant['id'] ?>">
-
-											<button
-												type="submit"
-												class="btn btn-outline-danger btn-sm"
-												onclick="return confirm('Yakin ingin menghapus peserta ini?')">
-
-												<i class="fas fa-trash"></i>
-
-											</button>
-
-										</form>
+										<?= e($participant->user->getDisplayName()) ?>
 
 									</div>
 
-								</td>
+									<small class="text-muted">
 
-							</tr>
+										<?= e($participant->user->email) ?>
 
-						<?php endforeach; ?>
+									</small>
 
-						</tbody>
+								</div>
 
-					</table>
+							</div>
 
-				</div>
+						</td>
+
+						<td>
+
+							<?= e($participant->institution ?: '-') ?>
+
+						</td>
+
+						<td>
+
+							<?= e($participant->phone ?: '-') ?>
+
+						</td>
+
+						<td>
+
+							<?php if ($participant->isProfileCompleted()): ?>
+
+								<span class="badge badge-success">
+
+											<i class="fas fa-check-circle mr-1"></i>
+
+											Lengkap
+
+										</span>
+
+							<?php else: ?>
+
+								<span class="badge badge-warning">
+
+											<i class="fas fa-exclamation-circle mr-1"></i>
+
+											Belum Lengkap
+
+										</span>
+
+							<?php endif; ?>
+
+						</td>
+
+						<td>
+
+							<?= $participant->created_at->format('d M Y') ?>
+
+							<br>
+
+							<small class="text-muted">
+
+								<?= $participant->created_at->format('H:i') ?>
+
+							</small>
+
+						</td>
+
+						<td>
+
+							<div class="btn-group shadow-sm">
+
+								<a
+									href="<?= url('/admin/participants/show?id=' . $participant->id) ?>"
+									class="btn btn-outline-primary btn-sm"
+									title="Detail">
+
+									<i class="fas fa-eye"></i>
+
+								</a>
+
+								<form
+									method="POST"
+									action="<?= url('/admin/participants/delete') ?>"
+									class="d-inline">
+
+									<input
+										type="hidden"
+										name="id"
+										value="<?= $participant->id ?>">
+
+									<button
+										type="submit"
+										class="btn btn-outline-danger btn-sm"
+										title="Hapus"
+										onclick="return confirm('Yakin ingin menghapus peserta ini?')">
+
+										<i class="fas fa-trash"></i>
+
+									</button>
+
+								</form>
+
+							</div>
+
+						</td>
+
+					</tr>
+
+<?php endforeach; ?>
+					</tbody>
+
+				</table>
+
+			</div>
 
 			<?php endif; ?>
 
@@ -424,3 +385,52 @@
 	</div>
 
 </div>
+
+<style>
+
+	.avatar-circle {
+
+		width: 50px;
+
+		height: 50px;
+
+		border-radius: 50%;
+
+		background: #4e73df;
+
+		color: #fff;
+
+		display: flex;
+
+		align-items: center;
+
+		justify-content: center;
+
+		font-weight: 700;
+
+		font-size: 16px;
+
+		text-transform: uppercase;
+
+		flex-shrink: 0;
+
+	}
+
+	.table td,
+	.table th {
+
+		vertical-align: middle;
+
+	}
+
+	.badge {
+
+		font-size: .75rem;
+
+		padding: .45rem .65rem;
+
+	}
+
+</style>
+
+

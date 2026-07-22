@@ -2,146 +2,160 @@
 
 	namespace Natasya\NataApp\Model;
 
+	use Illuminate\Database\Eloquent\Relations\BelongsTo;
+	use Illuminate\Database\Eloquent\Relations\HasMany;
+	use Illuminate\Database\Eloquent\Relations\HasManyThrough;
 	use Natasya\NataApp\App\Model;
 
 	class Training extends Model
 	{
-		public function count(): int
-		{
-			$result = $this->fetch("
-		SELECT COUNT(*) AS total
-		FROM trainings
-	");
+		protected $table = 'trainings';
 
-			return (int) $result['total'];
-		}
-		public function all(): array
-		{
-			return $this->fetchAll("
-            SELECT
-                t.*,
-                tf.name AS field_name,
-                tf.icon,
-                tf.color
-            FROM trainings t
-            INNER JOIN training_fields tf
-                ON tf.id = t.training_field_id
-            ORDER BY t.created_at DESC
-        ");
-		}
+		protected $fillable = [
+			'training_field_id',
+			'trainer_id',
+			'code',
+			'name',
+			'slug',
+			'thumbnail',
+			'description',
+			'objective',
+			'requirement',
+			'benefit',
+			'quota',
+			'duration',
+			'location',
+			'registration_open',
+			'registration_close',
+			'training_start',
+			'training_end',
+			'status',
+			'published_at',
+			'created_by',
+			'updated_by',
+		];
 
-		public function opened(): array
-		{
-			return $this->fetchAll("
-            SELECT
-                t.*,
-                tf.name AS field_name,
-                tf.icon,
-                tf.color
-            FROM trainings t
-            INNER JOIN training_fields tf
-                ON tf.id = t.training_field_id
-            WHERE t.status = 'open'
-            ORDER BY t.registration_open DESC
-        ");
-		}
+		protected $casts = [
+			'registration_open' => 'date',
+			'registration_close' => 'date',
+			'training_start' => 'date',
+			'training_end' => 'date',
+			'published_at' => 'datetime',
+		];
 
-		public function find(int $id): ?array
+		/*
+		|--------------------------------------------------------------------------
+		| Relationships
+		|--------------------------------------------------------------------------
+		*/
+
+		public function trainingField(): BelongsTo
 		{
-			return $this->fetch("
-            SELECT
-                t.*,
-                tf.name AS field_name,
-                tf.icon,
-                tf.color
-            FROM trainings t
-            INNER JOIN training_fields tf
-                ON tf.id = t.training_field_id
-            WHERE t.id = ?
-            LIMIT 1
-        ", [
-				$id
-			]);
+			return $this->belongsTo(TrainingField::class);
 		}
 
-		public function create(array $data): int
+		public function trainer(): BelongsTo
 		{
-			$this->execute("
-            INSERT INTO trainings
-            (
-                training_field_id,
-                name,
-                description,
-                quota,
-                duration,
-                location,
-                registration_open,
-                registration_close,
-                status
-            )
-            VALUES
-            (
-                ?,?,?,?,?,?,?,?,?
-            )
-        ", [
-
-				$data['training_field_id'],
-				$data['name'],
-				$data['description'],
-				$data['quota'],
-				$data['duration'],
-				$data['location'],
-				$data['registration_open'],
-				$data['registration_close'],
-				$data['status'],
-
-			]);
-
-			return (int) $this->db->lastInsertId();
+			return $this->belongsTo(Trainer::class);
 		}
 
-		public function update(
-			int $id,
-			array $data
-		): bool
+		public function creator(): BelongsTo
 		{
-			return $this->execute("
-            UPDATE trainings
-            SET
-                training_field_id = ?,
-                name = ?,
-                description = ?,
-                quota = ?,
-                duration = ?,
-                location = ?,
-                registration_open = ?,
-                registration_close = ?,
-                status = ?
-            WHERE id = ?
-        ", [
-
-				$data['training_field_id'],
-				$data['name'],
-				$data['description'],
-				$data['quota'],
-				$data['duration'],
-				$data['location'],
-				$data['registration_open'],
-				$data['registration_close'],
-				$data['status'],
-				$id
-
-			]);
+			return $this->belongsTo(User::class, 'created_by');
 		}
 
-		public function delete(int $id): bool
+		public function updater(): BelongsTo
 		{
-			return $this->execute("
-            DELETE
-            FROM trainings
-            WHERE id = ?
-        ", [
-				$id
-			]);
+			return $this->belongsTo(User::class, 'updated_by');
+		}
+
+		public function schedules(): HasMany
+		{
+			return $this->hasMany(
+				TrainingSchedule::class,
+				'training_id'
+			);
+		}
+		public function scores(): HasManyThrough
+		{
+			return $this->hasManyThrough(
+				TrainingScore::class,
+				Registration::class,
+				'training_id',
+				'registration_id',
+				'id',
+				'id'
+			);
+		}
+
+		public function registrations(): HasMany
+		{
+			return $this->hasMany(Registration::class);
+		}
+
+		public function announcements(): HasMany
+		{
+			return $this->hasMany(TrainingAnnouncement::class);
+		}
+
+		/*
+		|--------------------------------------------------------------------------
+		| Helpers
+		|--------------------------------------------------------------------------
+		*/
+
+		public function isDraft(): bool
+		{
+			return $this->status === 'draft';
+		}
+
+		public function isOpen(): bool
+		{
+			return $this->status === 'open';
+		}
+
+		public function isClosed(): bool
+		{
+			return $this->status === 'closed';
+		}
+
+		public function isRunning(): bool
+		{
+			return $this->status === 'running';
+		}
+
+		public function isCompleted(): bool
+		{
+			return $this->status === 'completed';
+		}
+
+		public function isCancelled(): bool
+		{
+			return $this->status === 'cancelled';
+		}
+
+		public function isPublished(): bool
+		{
+			return $this->published_at !== null;
+		}
+
+		public function hasThumbnail(): bool
+		{
+			return ! empty($this->thumbnail);
+		}
+
+		public function getLocation(): string
+		{
+			return $this->location ?: '-';
+		}
+
+		public function getDurationLabel(): string
+		{
+			return $this->duration . ' Hari';
+		}
+
+		public function getQuotaLabel(): string
+		{
+			return $this->quota . ' Peserta';
 		}
 	}

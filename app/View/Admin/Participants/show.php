@@ -1,44 +1,34 @@
 <div class="container-fluid">
 
-	<!-- Header -->
+	<div class="d-sm-flex align-items-center justify-content-between mb-4">
 
-	<div class="card shadow border-0 mb-4">
+		<div>
 
-		<div class="card-header bg-white py-3">
+			<h1 class="h3 mb-1 text-gray-800">
 
-			<div class="d-flex justify-content-between align-items-center">
+				Detail Peserta
 
-				<div>
+			</h1>
 
-					<h4 class="font-weight-bold text-primary mb-1">
+			<p class="mb-0 text-muted">
 
-						Detail Peserta
+				Informasi lengkap mengenai data peserta pelatihan.
 
-					</h4>
+			</p>
 
-					<p class="text-muted mb-0">
+		</div>
 
-						Informasi lengkap peserta pelatihan.
+		<div>
 
-					</p>
+			<a
+				href="<?= url('/admin/participants') ?>"
+				class="btn btn-secondary shadow-sm">
 
-				</div>
+				<i class="fas fa-arrow-left mr-1"></i>
 
-				<div>
+				Kembali
 
-					<a
-						href="<?= url('/admin/participants') ?>"
-						class="btn btn-secondary">
-
-						<i class="fas fa-arrow-left mr-2"></i>
-
-						Kembali
-
-					</a>
-
-				</div>
-
-			</div>
+			</a>
 
 		</div>
 
@@ -46,108 +36,147 @@
 
 	<div class="row">
 
-		<!-- Profile -->
+		<div class="col-lg-4 mb-4">
 
-		<div class="col-lg-4">
-
-			<div class="card shadow">
+			<div class="card shadow border-0">
 
 				<div class="card-body text-center">
 
-					<?php if(has_avatar($participant)): ?>
+					<?php if ($participant->user->hasAvatar()): ?>
 
 						<img
-							src="<?= avatar($participant) ?>"
-							class="rounded-circle shadow mb-4"
-							width="150"
-							height="150"
+							src="<?= avatar($participant->user) ?>"
+							class="rounded-circle shadow mb-3"
+							width="130"
+							height="130"
 							style="object-fit:cover;">
 
 					<?php else: ?>
 
 						<div
-							class="avatar-circle mx-auto mb-4"
-							style="
-								width:150px;
-								height:150px;
-								font-size:50px;
-							">
+							class="avatar-circle mx-auto mb-3">
 
-							<?= initials($participant['name']) ?>
+							<?= e($participant->user->getInitials()) ?>
 
 						</div>
 
 					<?php endif; ?>
 
-					<h3 class="font-weight-bold">
+					<h4 class="font-weight-bold mb-1">
 
-						<?= $participant['name'] ?>
+						<?= e($participant->user->getDisplayName()) ?>
 
-					</h3>
+					</h4>
 
-					<p class="text-muted">
+					<p class="text-muted mb-3">
 
-						<?= $participant['email'] ?>
+						Peserta Pelatihan
 
 					</p>
 
+					<?php if ($participant->isProfileCompleted()): ?>
+
+						<span class="badge badge-success px-3 py-2">
+
+							<i class="fas fa-check-circle mr-1"></i>
+
+							Profile Lengkap
+
+						</span>
+
+					<?php else: ?>
+
+						<span class="badge badge-warning px-3 py-2">
+
+							<i class="fas fa-exclamation-circle mr-1"></i>
+
+							Profile Belum Lengkap
+
+						</span>
+
+					<?php endif; ?>
+
 					<hr>
 
-					<div class="row">
+					<div class="text-left">
 
-						<div class="col-6">
+						<div class="mb-3">
 
-							<small class="text-muted">
+							<small class="text-muted d-block">
 
-								Status
+								Email
 
 							</small>
 
-							<h5>
+							<div class="font-weight-bold">
 
-								<?php if($participant['status'] == 'active'): ?>
+								<?= e($participant->user->email) ?>
 
-									<span class="badge badge-success">
-
-										Aktif
-
-									</span>
-
-								<?php elseif($participant['status'] == 'inactive'): ?>
-
-									<span class="badge badge-warning">
-
-										Belum Aktif
-
-									</span>
-
-								<?php else: ?>
-
-									<span class="badge badge-danger">
-
-										Nonaktif
-
-									</span>
-
-								<?php endif; ?>
-
-							</h5>
+							</div>
 
 						</div>
 
-						<div class="col-6">
+						<div class="mb-3">
 
-							<small class="text-muted">
+							<small class="text-muted d-block">
 
-								Role
+								Nomor HP
 
 							</small>
 
-							<h5>
+							<div class="font-weight-bold">
 
-								Peserta
+								<?= e($participant->phone ?: '-') ?>
 
-							</h5>
+							</div>
+
+						</div>
+
+						<div class="mb-3">
+
+							<small class="text-muted d-block">
+
+								Institusi
+
+							</small>
+
+							<div class="font-weight-bold">
+
+								<?= e($participant->institution ?: '-') ?>
+
+							</div>
+
+						</div>
+
+						<div class="mb-3">
+
+							<small class="text-muted d-block">
+
+								Terdaftar
+
+							</small>
+
+							<div class="font-weight-bold">
+
+								<?= $participant->created_at->format('d F Y') ?>
+
+							</div>
+
+						</div>
+
+						<div>
+
+							<small class="text-muted d-block">
+
+								ID Peserta
+
+							</small>
+
+							<div class="font-weight-bold">
+
+								#<?= $participant->id ?>
+
+							</div>
 
 						</div>
 
@@ -159,17 +188,17 @@
 
 		</div>
 
-		<!-- Detail -->
-
 		<div class="col-lg-8">
 
-			<div class="card shadow">
+			<div class="card shadow border-0 mb-4">
 
 				<div class="card-header bg-white">
 
 					<h5 class="font-weight-bold text-primary mb-0">
 
-						Informasi Peserta
+						<i class="fas fa-user mr-2"></i>
+
+						Informasi Pribadi
 
 					</h5>
 
@@ -177,115 +206,983 @@
 
 				<div class="card-body">
 
-					<table class="table table-borderless">
+					<div class="row">
 
-						<tr>
+						<div class="col-md-6 mb-4">
 
-							<th width="220">
+							<label class="text-muted">
 
-								Nama
+								Nama Lengkap
 
-							</th>
+							</label>
 
-							<td>
+							<div class="font-weight-bold">
 
-								<?= $participant['name'] ?>
+								<?= e($participant->user->getDisplayName()) ?>
 
-							</td>
+							</div>
 
-						</tr>
+						</div>
 
-						<tr>
+						<div class="col-md-6 mb-4">
 
-							<th>
+							<label class="text-muted">
 
-								Username
+								NIK
 
-							</th>
+							</label>
 
-							<td>
+							<div class="font-weight-bold">
 
-								<?= $participant['username'] ?>
+								<?= e(optional($participant->profile)->nik ?: '-') ?>
 
-							</td>
+							</div>
 
-						</tr>
+						</div>
 
-						<tr>
+						<div class="col-md-6 mb-4">
 
-							<th>
+							<label class="text-muted">
 
-								Email
+								Jenis Kelamin
 
-							</th>
+							</label>
 
-							<td>
+							<div class="font-weight-bold">
 
-								<?= $participant['email'] ?>
+								<?= e($participant->getGenderLabel()) ?>
 
-							</td>
+							</div>
 
-						</tr>
+						</div>
 
-						<tr>
+						<div class="col-md-6 mb-4">
 
-							<th>
+							<label class="text-muted">
 
-								Nomor HP
+								Tanggal Lahir
 
-							</th>
+							</label>
 
-							<td>
+							<div class="font-weight-bold">
+								<div class="font-weight-bold">
 
-								<?= $participant['phone'] ?>
+									<?php if ($participant->birth_date): ?>
 
-							</td>
+										<?= $participant->birth_date->format('d F Y') ?>
 
-						</tr>
+									<?php else: ?>
 
-						<tr>
+										-
 
-							<th>
+									<?php endif; ?>
 
-								Bergabung
+								</div>
 
-							</th>
+							</div>
 
-							<td>
+							<div class="col-md-6 mb-4">
 
-								<?= date(
-									'd F Y H:i',
-									strtotime($participant['created_at'])
-								) ?>
+								<label class="text-muted">
 
-							</td>
+									Umur
 
-						</tr>
+								</label>
 
-						<tr>
+								<div class="font-weight-bold">
 
-							<th>
+									<?= $participant->getAge() ? $participant->getAge() . ' Tahun' : '-' ?>
 
-								Status Akun
+								</div>
 
-							</th>
+							</div>
 
-							<td>
+							<div class="col-md-6 mb-4">
 
-								<?= ucfirst($participant['status']) ?>
+								<label class="text-muted">
 
-							</td>
+									Tempat Lahir
 
-						</tr>
+								</label>
 
-					</table>
+								<div class="font-weight-bold">
+
+									<?= e(optional($participant->profile)->birth_place ?: '-') ?>
+
+								</div>
+
+							</div>
+
+							<div class="col-md-6 mb-4">
+
+								<label class="text-muted">
+
+									Agama
+
+								</label>
+
+								<div class="font-weight-bold">
+
+									<?= e(optional($participant->profile)->religion ?: '-') ?>
+
+								</div>
+
+							</div>
+
+							<div class="col-md-6">
+
+								<label class="text-muted">
+
+									Status Pernikahan
+
+								</label>
+
+								<div class="font-weight-bold">
+
+									<?= e(optional($participant->profile)?->getMaritalStatusLabel() ?: '-') ?>
+
+								</div>
+
+							</div>
+
+						</div>
+
+					</div>
+
+				</div>
+
+				<div class="card shadow border-0 mb-4">
+
+					<div class="card-header bg-white">
+
+						<h5 class="font-weight-bold text-primary mb-0">
+
+							<i class="fas fa-map-marker-alt mr-2"></i>
+
+							Alamat
+
+						</h5>
+
+					</div>
+
+					<div class="card-body">
+
+						<div class="row">
+
+							<div class="col-12 mb-4">
+
+								<label class="text-muted">
+
+									Alamat Lengkap
+
+								</label>
+
+								<div class="font-weight-bold">
+
+									<?= e($participant->address ?: '-') ?>
+
+								</div>
+
+							</div>
+
+							<div class="col-md-6 mb-4">
+
+								<label class="text-muted">
+
+									Provinsi
+
+								</label>
+
+								<div class="font-weight-bold">
+
+									<?= e(optional($participant->profile)->province ?: '-') ?>
+
+								</div>
+
+							</div>
+
+							<div class="col-md-6 mb-4">
+
+								<label class="text-muted">
+
+									Kabupaten / Kota
+
+								</label>
+
+								<div class="font-weight-bold">
+
+									<?= e(optional($participant->profile)->city ?: '-') ?>
+
+								</div>
+
+							</div>
+
+							<div class="col-md-6 mb-4">
+
+								<label class="text-muted">
+
+									Kecamatan
+
+								</label>
+
+								<div class="font-weight-bold">
+
+									<?= e(optional($participant->profile)->district ?: '-') ?>
+
+								</div>
+
+							</div>
+
+							<div class="col-md-6 mb-4">
+
+								<label class="text-muted">
+
+									Kelurahan / Desa
+
+								</label>
+
+								<div class="font-weight-bold">
+
+									<?= e(optional($participant->profile)->village ?: '-') ?>
+
+								</div>
+
+							</div>
+
+							<div class="col-md-6">
+
+								<label class="text-muted">
+
+									Kode Pos
+
+								</label>
+
+								<div class="font-weight-bold">
+
+									<?= e(optional($participant->profile)->postal_code ?: '-') ?>
+
+								</div>
+
+							</div>
+
+						</div>
+
+					</div>
+
+				</div>
+				<div class="card shadow border-0 mb-4">
+
+					<div class="card-header bg-white">
+
+						<h5 class="font-weight-bold text-primary mb-0">
+
+							<i class="fas fa-graduation-cap mr-2"></i>
+
+							Pendidikan
+
+						</h5>
+
+					</div>
+
+					<div class="card-body">
+
+						<div class="row">
+
+							<div class="col-md-6 mb-4">
+
+								<label class="text-muted">
+
+									Pendidikan Terakhir
+
+								</label>
+
+								<div class="font-weight-bold">
+
+									<?= e($participant->education ?: '-') ?>
+
+								</div>
+
+							</div>
+
+							<div class="col-md-6 mb-4">
+
+								<label class="text-muted">
+
+									Institusi
+
+								</label>
+
+								<div class="font-weight-bold">
+
+									<?= e($participant->institution ?: '-') ?>
+
+								</div>
+
+							</div>
+
+							<div class="col-md-6 mb-4">
+
+								<label class="text-muted">
+
+									Jurusan
+
+								</label>
+
+								<div class="font-weight-bold">
+
+									<?= e(optional($participant->profile)->major ?: '-') ?>
+
+								</div>
+
+							</div>
+
+							<div class="col-md-6 mb-4">
+
+								<label class="text-muted">
+
+									Tahun Lulus
+
+								</label>
+
+								<div class="font-weight-bold">
+
+									<?= e(optional($participant->profile)->graduation_year ?: '-') ?>
+
+								</div>
+
+							</div>
+
+						</div>
+
+					</div>
+
+				</div>
+
+				<div class="card shadow border-0 mb-4">
+
+					<div class="card-header bg-white">
+
+						<h5 class="font-weight-bold text-primary mb-0">
+
+							<i class="fas fa-briefcase mr-2"></i>
+
+							Pekerjaan
+
+						</h5>
+
+					</div>
+
+					<div class="card-body">
+
+						<div class="row">
+
+							<div class="col-md-6 mb-4">
+
+								<label class="text-muted">
+
+									Status Pekerjaan
+
+								</label>
+
+								<div class="font-weight-bold">
+
+									<?= e(optional($participant->profile)?->getEmploymentStatusLabel() ?: '-') ?>
+
+								</div>
+
+							</div>
+
+							<div class="col-md-6 mb-4">
+
+								<label class="text-muted">
+
+									Pekerjaan
+
+								</label>
+
+								<div class="font-weight-bold">
+
+									<?= e(optional($participant->profile)->occupation ?: '-') ?>
+
+								</div>
+
+							</div>
+
+							<div class="col-md-12">
+
+								<label class="text-muted">
+
+									Instansi / Perusahaan
+
+								</label>
+
+								<div class="font-weight-bold">
+
+									<?= e(optional($participant->profile)->company_name ?: '-') ?>
+
+								</div>
+
+							</div>
+
+						</div>
+
+					</div>
+
+				</div>
+
+				<div class="card shadow border-0 mb-4">
+
+					<div class="card-header bg-white">
+
+						<h5 class="font-weight-bold text-primary mb-0">
+
+							<i class="fas fa-bullseye mr-2"></i>
+
+							Tujuan Mengikuti Pelatihan
+
+						</h5>
+
+					</div>
+
+					<div class="card-body">
+
+						<div class="mb-4">
+
+							<label class="text-muted">
+
+								Tujuan Pelatihan
+
+							</label>
+
+							<div class="font-weight-bold">
+
+								<?= nl2br(e(optional($participant->profile)->training_goal ?: '-')) ?>
+
+							</div>
+
+						</div>
+
+						<div>
+
+							<label class="text-muted">
+
+								Keahlian / Skill
+
+							</label>
+
+							<div class="font-weight-bold">
+
+								<?= nl2br(e(optional($participant->profile)->skill ?: '-')) ?>
+
+							</div>
+
+						</div>
+
+					</div>
+
+				</div>
+				<div class="card shadow border-0 mb-4">
+
+					<div class="card-header bg-white">
+
+						<h5 class="font-weight-bold text-primary mb-0">
+
+							<i class="fas fa-phone-alt mr-2"></i>
+
+							Kontak Darurat
+
+						</h5>
+
+					</div>
+
+					<div class="card-body">
+
+						<div class="row">
+
+							<div class="col-md-6 mb-4">
+
+								<label class="text-muted">
+
+									Nama Kontak
+
+								</label>
+
+								<div class="font-weight-bold">
+
+									<?= e(optional($participant->profile)->emergency_contact_name ?: '-') ?>
+
+								</div>
+
+							</div>
+
+							<div class="col-md-6 mb-4">
+
+								<label class="text-muted">
+
+									Nomor Telepon
+
+								</label>
+
+								<div class="font-weight-bold">
+
+									<?= e(optional($participant->profile)->emergency_contact_phone ?: '-') ?>
+
+								</div>
+
+							</div>
+
+						</div>
+
+					</div>
+
+				</div>
+
+				<div class="card shadow border-0 mb-4">
+
+					<div class="card-header bg-white">
+
+						<h5 class="font-weight-bold text-primary mb-0">
+
+							<i class="fas fa-folder-open mr-2"></i>
+
+							Dokumen Peserta
+
+						</h5>
+
+					</div>
+
+					<div class="card-body">
+
+						<div class="table-responsive">
+
+							<table class="table table-bordered align-middle">
+
+								<thead class="thead-light">
+
+								<tr>
+
+									<th width="220">
+
+										Dokumen
+
+									</th>
+
+									<th width="160">
+
+										Status
+
+									</th>
+
+									<th>
+
+										Aksi
+
+									</th>
+
+								</tr>
+
+								</thead>
+
+								<tbody>
+
+								<tr>
+
+									<td>
+
+										Foto Peserta
+
+									</td>
+
+									<td>
+
+										<?php if (optional($participant->profile)->hasPhoto()): ?>
+
+											<span class="badge badge-success">
+
+												Tersedia
+
+											</span>
+
+										<?php else: ?>
+
+											<span class="badge badge-secondary">
+
+												Belum Upload
+
+											</span>
+
+										<?php endif; ?>
+
+									</td>
+
+									<td>
+
+										<?php if (optional($participant->profile)->hasPhoto()): ?>
+
+											<a
+												href="<?= asset($participant->profile->photo) ?>"
+												target="_blank"
+												class="btn btn-outline-primary btn-sm">
+
+												<i class="fas fa-eye mr-1"></i>
+
+												Lihat
+
+											</a>
+
+										<?php else: ?>
+
+											-
+
+										<?php endif; ?>
+
+									</td>
+
+								</tr>
+
+								<tr>
+
+									<td>
+
+										KTP
+
+									</td>
+
+									<td>
+
+										<?php if (optional($participant->profile)->hasKtp()): ?>
+
+											<span class="badge badge-success">
+
+												Tersedia
+
+											</span>
+
+										<?php else: ?>
+
+											<span class="badge badge-secondary">
+
+												Belum Upload
+
+											</span>
+
+										<?php endif; ?>
+
+									</td>
+
+									<td>
+
+										<?php if (optional($participant->profile)->hasKtp()): ?>
+
+											<a
+												href="<?= asset($participant->profile->ktp_file) ?>"
+												target="_blank"
+												class="btn btn-outline-primary btn-sm">
+
+												<i class="fas fa-download mr-1"></i>
+
+												Lihat
+
+											</a>
+
+										<?php else: ?>
+
+											-
+
+										<?php endif; ?>
+
+									</td>
+
+								</tr>
+
+
+								</tbody>
+
+							</table>
+
+						</div>
+
+					</div>
+
+				</div>
+				<div class="card shadow border-0 mb-4">
+
+					<div class="card-header bg-white">
+
+						<h5 class="font-weight-bold text-primary mb-0">
+
+							<i class="fas fa-chart-pie mr-2"></i>
+
+							Ringkasan Profil
+
+						</h5>
+
+					</div>
+
+					<div class="card-body">
+
+						<div class="row">
+
+							<div class="col-md-4 mb-4">
+
+								<div class="border rounded p-3 text-center h-100">
+
+									<i class="fas fa-user-check fa-2x text-success mb-3"></i>
+
+									<h6 class="font-weight-bold">
+
+										Status Profil
+
+									</h6>
+
+									<?php if ($participant->isProfileCompleted()): ?>
+
+										<span class="badge badge-success px-3 py-2">
+
+										Lengkap
+
+									</span>
+
+									<?php else: ?>
+
+										<span class="badge badge-warning px-3 py-2">
+
+										Belum Lengkap
+
+									</span>
+
+									<?php endif; ?>
+
+								</div>
+
+							</div>
+
+							<div class="col-md-4 mb-4">
+
+								<div class="border rounded p-3 text-center h-100">
+
+									<i class="fas fa-file-alt fa-2x text-primary mb-3"></i>
+
+									<h6 class="font-weight-bold">
+
+										Dokumen
+
+									</h6>
+
+									<p class="mb-0 text-muted">
+
+										<?= collect([
+											optional($participant->profile)->hasPhoto(),
+											optional($participant->profile)->hasKtp(),
+
+										])->filter()->count() ?>
+
+										/
+
+										2 Dokumen
+
+									</p>
+
+								</div>
+
+							</div>
+
+							<div class="col-md-4 mb-4">
+
+								<div class="border rounded p-3 text-center h-100">
+
+									<i class="fas fa-calendar-alt fa-2x text-info mb-3"></i>
+
+									<h6 class="font-weight-bold">
+
+										Usia Akun
+
+									</h6>
+
+									<p class="mb-0 text-muted">
+
+										<?= $participant->created_at->diffForHumans() ?>
+
+									</p>
+
+								</div>
+
+							</div>
+
+						</div>
+
+					</div>
+
+				</div>
+
+				<div class="card shadow border-0">
+
+					<div class="card-header bg-white">
+
+						<h5 class="font-weight-bold text-primary mb-0">
+
+							<i class="fas fa-info-circle mr-2"></i>
+
+							Informasi Sistem
+
+						</h5>
+
+					</div>
+
+					<div class="card-body">
+
+						<div class="row">
+
+							<div class="col-md-6 mb-4">
+
+								<label class="text-muted">
+
+									ID Peserta
+
+								</label>
+
+								<div class="font-weight-bold">
+
+									#<?= $participant->id ?>
+
+								</div>
+
+							</div>
+
+							<div class="col-md-6 mb-4">
+
+								<label class="text-muted">
+
+									ID User
+
+								</label>
+
+								<div class="font-weight-bold">
+
+									#<?= $participant->user->id ?>
+
+								</div>
+
+							</div>
+
+							<div class="col-md-6 mb-4">
+
+								<label class="text-muted">
+
+									Dibuat Pada
+
+								</label>
+
+								<div class="font-weight-bold">
+
+									<?= $participant->created_at->format('d F Y H:i') ?>
+
+								</div>
+
+							</div>
+
+							<div class="col-md-6 mb-4">
+
+								<label class="text-muted">
+
+									Terakhir Diperbarui
+
+								</label>
+
+								<div class="font-weight-bold">
+
+									<?= $participant->updated_at->format('d F Y H:i') ?>
+
+								</div>
+
+							</div>
+
+						</div>
+
+						<hr>
+
+						<div class="d-flex justify-content-between align-items-center">
+
+							<div>
+
+								<h6 class="font-weight-bold mb-1">
+
+									Aksi
+
+								</h6>
+
+								<small class="text-muted">
+
+									Kelola data peserta dari halaman ini.
+
+								</small>
+
+							</div>
+
+							<div>
+
+								<a
+									href="<?= url('/admin/participants') ?>"
+									class="btn btn-secondary">
+
+									<i class="fas fa-arrow-left mr-1"></i>
+
+									Kembali
+
+								</a>
+
+
+								<form
+									method="POST"
+									action="<?= url('/admin/participants/delete') ?>"
+									class="d-inline">
+
+									<input
+										type="hidden"
+										name="id"
+										value="<?= $participant->id ?>">
+
+									<button
+										type="submit"
+										class="btn btn-danger"
+										onclick="return confirm('Yakin ingin menghapus peserta ini?')">
+
+										<i class="fas fa-trash mr-1"></i>
+
+										Hapus
+
+									</button>
+
+								</form>
+
+							</div>
+
+						</div>
+
+					</div>
 
 				</div>
 
 			</div>
 
 		</div>
-
 	</div>
 
 </div>
+
+
+
+<script>
+
+	document.addEventListener('DOMContentLoaded', function () {
+
+
+		// tooltip bootstrap
+
+		$('[data-toggle="tooltip"]').tooltip();
+
+
+	});
+
+
+</script>

@@ -2,227 +2,107 @@
 
 	namespace Natasya\NataApp\Model;
 
+	use Illuminate\Database\Eloquent\Relations\BelongsTo;
+	use Illuminate\Database\Eloquent\Relations\HasMany;
 	use Natasya\NataApp\App\Model;
 
 	class Trainer extends Model
 	{
-		public function all(): array
+		protected $table = 'trainers';
+
+		protected $fillable = [
+			'user_id',
+			'training_field_id',
+			'employee_number',
+			'phone',
+			'email',
+			'institution',
+			'expertise',
+			'specialization',
+			'experience_year',
+			'biography',
+			'avatar',
+			'status',
+		];
+
+		/*
+		|--------------------------------------------------------------------------
+		| Relationships
+		|--------------------------------------------------------------------------
+		*/
+
+		public function user(): BelongsTo
 		{
-			return $this->fetchAll("
-			SELECT
-
-				t.*,
-
-				tf.name AS field_name,
-
-				tf.icon,
-
-				tf.color
-
-			FROM trainers t
-
-			INNER JOIN training_fields tf
-				ON tf.id = t.training_field_id
-
-			ORDER BY t.name ASC
-		");
+			return $this->belongsTo(User::class);
 		}
 
-		public function find(int $id): ?array
+		public function trainingField(): BelongsTo
 		{
-			return $this->fetch("
-			SELECT
-
-				t.*,
-
-				tf.name AS field_name,
-
-				tf.icon,
-
-				tf.color
-
-			FROM trainers t
-
-			INNER JOIN training_fields tf
-				ON tf.id = t.training_field_id
-
-			WHERE t.id = ?
-
-			LIMIT 1
-		", [
-				$id
-			]);
+			return $this->belongsTo(TrainingField::class);
 		}
 
-		public function create(array $data): int
+		public function trainings(): HasMany
 		{
-			$this->execute("
-			INSERT INTO trainers
-			(
-				training_field_id,
-				name,
-				phone,
-				email,
-				institution,
-				expertise,
-				certificate,
-				biography,
-				avatar,
-				status
-			)
-			VALUES
-			(
-				?,?,?,?,?,?,?,?,?,?
-			)
-		", [
-
-				$data['training_field_id'],
-				$data['name'],
-				$data['phone'],
-				$data['email'],
-				$data['institution'],
-				$data['expertise'],
-				$data['certificate'],
-				$data['biography'],
-				$data['avatar'] ?? null,
-				$data['status'],
-
-			]);
-
-			return (int) $this->db->lastInsertId();
+			return $this->hasMany(Training::class);
 		}
 
-		public function update(
-			int $id,
-			array $data
-		): bool
+		public function scores(): HasMany
 		{
-			return $this->execute("
-			UPDATE trainers
-			SET
-
-				training_field_id = ?,
-
-				name = ?,
-
-				phone = ?,
-
-				email = ?,
-
-				institution = ?,
-
-				expertise = ?,
-
-				certificate = ?,
-
-				biography = ?,
-
-				avatar = ?,
-
-				status = ?
-
-			WHERE id = ?
-		", [
-
-				$data['training_field_id'],
-				$data['name'],
-				$data['phone'],
-				$data['email'],
-				$data['institution'],
-				$data['expertise'],
-				$data['certificate'],
-				$data['biography'],
-				$data['avatar'] ?? null,
-				$data['status'],
-				$id,
-
-			]);
+			return $this->hasMany(TrainingScore::class);
 		}
 
-		public function delete(int $id): bool
+		/*
+		|--------------------------------------------------------------------------
+		| Helpers
+		|--------------------------------------------------------------------------
+		*/
+
+		public function isActive(): bool
 		{
-			return $this->execute("
-			DELETE
-			FROM trainers
-			WHERE id = ?
-		", [
-				$id
-			]);
+			return $this->status === 'active';
 		}
 
-		public function count(): int
+		public function isInactive(): bool
 		{
-			$result = $this->fetch("
-			SELECT COUNT(*) AS total
-			FROM trainers
-		");
-
-			return (int) $result['total'];
+			return $this->status === 'inactive';
 		}
 
-		public function active(): int
+		public function hasAvatar(): bool
 		{
-			$result = $this->fetch("
-			SELECT COUNT(*) AS total
-			FROM trainers
-			WHERE status = 'active'
-		");
-
-			return (int) $result['total'];
+			return ! empty($this->avatar);
 		}
 
-		public function inactive(): int
+		public function hasEmployeeNumber(): bool
 		{
-			$result = $this->fetch("
-			SELECT COUNT(*) AS total
-			FROM trainers
-			WHERE status = 'inactive'
-		");
-
-			return (int) $result['total'];
+			return ! empty($this->employee_number);
 		}
 
-		public function countByField(): array
+		public function getDisplayName(): string
 		{
-			return $this->fetchAll("
-			SELECT
-
-				tf.id,
-
-				tf.name,
-
-				tf.icon,
-
-				tf.color,
-
-				COUNT(t.id) AS total
-
-			FROM training_fields tf
-
-			LEFT JOIN trainers t
-				ON t.training_field_id = tf.id
-
-			GROUP BY tf.id
-
-			ORDER BY tf.name
-		");
+			return $this->user?->getDisplayName() ?? '-';
 		}
-		public function activeList(): array
+
+		public function getInstitution(): string
 		{
-			return $this->fetchAll("
-		SELECT
+			return $this->institution ?: '-';
+		}
 
-			id,
+		public function getExpertise(): string
+		{
+			return $this->expertise ?: '-';
+		}
 
-			name,
+		public function getSpecialization(): string
+		{
+			return $this->specialization ?: '-';
+		}
 
-			expertise
+		public function getExperienceLabel(): string
+		{
+			if (! $this->experience_year) {
+				return '-';
+			}
 
-		FROM trainers
-
-		WHERE status = 'active'
-
-		ORDER BY name
-	");
+			return $this->experience_year . ' Tahun';
 		}
 	}

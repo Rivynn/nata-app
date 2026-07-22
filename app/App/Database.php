@@ -2,43 +2,56 @@
 
 	namespace Natasya\NataApp\App;
 
+	use Illuminate\Database\Capsule\Manager as Capsule;
 	use PDO;
 
 	class Database
 	{
-		private static ?\PDO $connection = null;
+		private static ?Capsule $capsule = null;
+
+
+		public static function boot(): void
+		{
+			if (self::$capsule !== null) {
+				return;
+			}
+
+			$config = require dirname(__DIR__, 2) . '/config/database.php';
+
+			$capsule = new Capsule();
+
+
+			$capsule->addConnection([
+				'driver'    => 'mysql',
+				'host'      => $config['host'],
+				'port'      => $config['port'],
+				'database'  => $config['database'],
+				'username'  => $config['username'],
+				'password'  => $config['password'],
+				'charset'   => $config['charset'],
+				'collation' => 'utf8mb4_unicode_ci',
+				'prefix'    => '',
+			]);
+
+			$capsule->setAsGlobal();
+			$capsule->bootEloquent();
+
+			self::$capsule = $capsule;
+		}
 
 		public static function connection(): PDO
 		{
-			if (self::$connection === null) {
+			self::boot();
 
-				$config = require dirname(__DIR__, 2) . '/config/database.php';
+			return self::$capsule
+				->getConnection()
+				->getPdo();
+		}
 
-				try {
+		public static function capsule(): Capsule
+		{
+			self::boot();
 
-					self::$connection = new PDO(
-						"mysql:host={$config['host']};port={$config['port']};dbname={$config['database']};charset={$config['charset']}",
-						$config['username'],
-						$config['password']
-					);
-
-					self::$connection->setAttribute(
-						PDO::ATTR_ERRMODE,
-						PDO::ERRMODE_EXCEPTION
-					);
-
-					self::$connection->setAttribute(
-						PDO::ATTR_DEFAULT_FETCH_MODE,
-						PDO::FETCH_ASSOC
-					);
-
-				} catch (\PDOException $e) {
-
-					die("Database Error : " . $e->getMessage());
-
-				}
-			}
-
-			return self::$connection;
+			return self::$capsule;
 		}
 	}

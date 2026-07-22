@@ -46,7 +46,10 @@ jobs:
                         --optimize-autoloader
 
                       echo ""
-             
+
+                    echo "🗄️ Refresh Database"
+
+                      php database/fresh.php
 
 
                       echo ""

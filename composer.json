@@ -5,7 +5,8 @@
   "license": "proprietary",
   "autoload": {
     "psr-4": {
-      "Natasya\\NataApp\\": "app/"
+      "Natasya\\NataApp\\": "app/",
+      "Database\\": "database/"
     },
     "files": [
       "app/Helpers/helper.php"
@@ -28,7 +29,8 @@
     "simplesoftwareio/simple-qrcode": "^4.2",
     "endroid/qr-code": "^5.0",
     "dragonmantank/cron-expression": "^3.6",
-    "phpmailer/phpmailer": "^7.1"
+    "phpmailer/phpmailer": "^7.1",
+    "illuminate/database": "12"
   },
   "require-dev": {
     "phpunit/phpunit": "^12",

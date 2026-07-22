@@ -6,6 +6,7 @@
 	use Natasya\NataApp\App\Controller;
 	use Natasya\NataApp\App\Request;
 	use Natasya\NataApp\Model\Certificate;
+	use Natasya\NataApp\Model\Participant;
 
 	class CertificateController extends Controller
 	{
@@ -14,16 +15,32 @@
 		 */
 		public function index(): void
 		{
-			$certificate = new Certificate();
+			$participant = Participant::where(
+				'user_id',
+				auth()->id()
+			)->firstOrFail();
+
+			$certificates = Certificate::with([
+				'registration.training.trainingField',
+				'registration.score',
+			])
+				->whereHas('registration', function ($query) use ($participant) {
+
+					$query->where(
+						'participant_id',
+						$participant->id
+					);
+
+				})
+				->latest()
+				->get();
 
 			$this->view(
 				'Peserta/Certificates/index',
 				[
 					'title' => 'Sertifikat Saya',
 
-					'certificates' => $certificate->byUser(
-						auth()->id()
-					),
+					'certificates' => $certificates,
 				]
 			);
 		}
@@ -34,32 +51,35 @@
 		public function show(): void
 		{
 			$this->document();
+
 			$id = (int) Request::get('id');
 
-			$certificate = new Certificate();
+			$participant = Participant::where(
+				'user_id',
+				auth()->id()
+			)->firstOrFail();
 
-			$data = $certificate->find($id);
+			$certificate = Certificate::with([
+				'registration.training.trainingField',
+				'registration.training.trainer.user',
+				'registration.score',
+			])
+				->whereKey($id)
+				->whereHas('registration', function ($query) use ($participant) {
 
-			if (!$data) {
+					$query->where(
+						'participant_id',
+						$participant->id
+					);
+
+				})
+				->first();
+
+			if (! $certificate) {
 
 				http_response_code(404);
 
 				exit('Sertifikat tidak ditemukan.');
-
-			}
-
-			/*
-			|--------------------------------------------------------------------------
-			| Keamanan
-			|--------------------------------------------------------------------------
-			*/
-
-			if ($data['user_id'] != auth()->id()) {
-
-				http_response_code(403);
-
-				exit('Akses ditolak.');
-
 			}
 
 			$this->view(
@@ -67,7 +87,7 @@
 				[
 					'title' => 'Sertifikat',
 
-					'certificate' => $data,
+					'certificate' => $certificate,
 				]
 			);
 		}

@@ -10,137 +10,214 @@
 	{
 		public function index(): void
 		{
-			$field = new TrainingField();
+			$fields = TrainingField::query()
+				->latest()
+				->get();
 
-			$this->view(
-				'Admin/TrainingFields/index',
-				[
-					'title' => 'Jenis Pelatihan',
-
-					'fields' => $field->all(),
-
-					'total' => $field->count(),
-				]
-			);
+			$this->view('Admin/TrainingFields/index', [
+				'title'  => 'Jenis Pelatihan',
+				'fields' => $fields,
+				'total'  => $fields->count(),
+			]);
 		}
 
 		public function show(): void
 		{
-			$id = (int) Request::get('id');
+			try {
 
-			$field = new TrainingField();
+				$field = TrainingField::query()->findOrFail(
+					(int) Request::get('id')
+				);
 
-			$data = $field->find($id);
-
-			if (!$data) {
-
-				$_SESSION['error'] = 'Jenis pelatihan tidak ditemukan.';
-
-				$this->redirect('/admin/training-fields');
-
-			}
-
-			$this->view(
-				'Admin/TrainingFields/show',
-				[
+				$this->view('Admin/TrainingFields/show', [
 					'title' => 'Detail Jenis Pelatihan',
+					'field' => $field,
+				]);
 
-					'field' => $data,
-				]
-			);
+			} catch (Exception) {
+
+				error(
+					'Jenis pelatihan yang diminta tidak ditemukan.'
+				);
+
+				redirect('/admin/training-fields');
+			}
 		}
 
 		public function create(): void
 		{
-			$this->view(
-				'Admin/TrainingFields/create',
-				[
-					'title' => 'Tambah Jenis Pelatihan',
-				]
-			);
+			$this->view('Admin/TrainingFields/create', [
+				'title' => 'Tambah Jenis Pelatihan',
+			]);
 		}
 
 		public function store(): void
 		{
-			$field = new TrainingField();
+			try {
 
-			$field->create([
+				$name = trim(Request::post('name'));
 
-				'name' => Request::post('name'),
+				if ($name === '') {
 
-				'description' => Request::post('description'),
+					error(
 
-				'icon' => Request::post('icon'),
+						'Nama jenis pelatihan wajib diisi.'
+					);
 
-				'color' => Request::post('color'),
+					redirect('/admin/training-fields/create');
+				}
 
-				'is_active' => Request::post('is_active') ?? 1,
+				$exists = TrainingField::query()
+					->where('name', $name)
+					->exists();
 
-			]);
+				if ($exists) {
 
-			$_SESSION['success'] = 'Jenis pelatihan berhasil ditambahkan.';
+					error(
 
-			$this->redirect('/admin/training-fields');
+						'Nama jenis pelatihan sudah digunakan.'
+					);
+
+					redirect('/admin/training-fields/create');
+				}
+
+				TrainingField::query()->create([
+
+					'name' => $name,
+
+					'description' => trim(Request::post('description')),
+
+					'icon' => trim(Request::post('icon')),
+
+					'color' => Request::post('color'),
+
+					'is_active' => Request::post('is_active') ?? 1,
+
+				]);
+
+				success(
+					'Jenis pelatihan berhasil ditambahkan.'
+				);
+
+			} catch (Exception) {
+
+				error(
+					'Terjadi kesalahan saat menambahkan jenis pelatihan.'
+				);
+			}
+
+			redirect('/admin/training-fields');
 		}
 
 		public function edit(): void
 		{
-			$id = (int) Request::get('id');
+			try {
 
-			$field = new TrainingField();
+				$field = TrainingField::query()->findOrFail(
+					(int) Request::get('id')
+				);
 
-			$data = $field->find($id);
-
-			if (!$data) {
-
-				$_SESSION['error'] = 'Jenis pelatihan tidak ditemukan.';
-
-				$this->redirect('/admin/training-fields');
-
-			}
-
-			$this->view(
-				'Admin/TrainingFields/edit',
-				[
+				$this->view('Admin/TrainingFields/edit', [
 					'title' => 'Edit Jenis Pelatihan',
+					'field' => $field,
+				]);
 
-					'field' => $data,
-				]
-			);
+			} catch (Exception) {
+
+				error(
+
+					'Jenis pelatihan yang diminta tidak ditemukan.'
+				);
+
+				redirect('/admin/training-fields');
+			}
 		}
 
 		public function update(): void
 		{
-			$field = new TrainingField();
+			try {
 
-			$field->update(
-				(int) Request::post('id'),
-				[
-					'name' => Request::post('name'),
+				$field = TrainingField::query()->findOrFail(
+					(int) Request::post('id')
+				);
 
-					'description' => Request::post('description'),
+				$name = trim(Request::post('name'));
 
-					'icon' => Request::post('icon'),
+				if ($name === '') {
+
+					error(
+
+						'Nama jenis pelatihan wajib diisi.'
+					);
+
+					redirect('/admin/training-fields/edit?id=' . $field->id);
+				}
+
+				$exists = TrainingField::query()
+					->where('name', $name)
+					->where('id', '!=', $field->id)
+					->exists();
+
+				if ($exists) {
+
+					error(
+
+						'Nama jenis pelatihan sudah digunakan.'
+					);
+
+					redirect('/admin/training-fields/edit?id=' . $field->id);
+				}
+
+				$field->update([
+
+					'name' => $name,
+
+					'description' => trim(Request::post('description')),
+
+					'icon' => trim(Request::post('icon')),
 
 					'color' => Request::post('color'),
 
 					'is_active' => Request::post('is_active'),
-				]
-			);
 
-			$_SESSION['success'] = 'Jenis pelatihan berhasil diperbarui.';
+				]);
 
-			$this->redirect('/admin/training-fields');
+				success(
+					'Jenis pelatihan berhasil diperbarui.'
+				);
+
+			} catch (Exception) {
+
+				error(
+
+					'Terjadi kesalahan saat memperbarui jenis pelatihan.'
+				);
+			}
+
+			redirect('/admin/training-fields');
 		}
 
 		public function delete(): void
 		{
-			(new TrainingField())->delete(
-				(int) Request::post('id')
-			);
+			try {
 
-			$_SESSION['success'] = 'Jenis pelatihan berhasil dihapus.';
+				$field = TrainingField::query()->findOrFail(
+					(int) Request::post('id')
+				);
 
-			$this->redirect('/admin/training-fields');
+				$field->delete();
+
+				success(
+					'Jenis pelatihan berhasil dihapus.'
+				);
+
+			} catch (Exception) {
+
+				error(
+					'Terjadi kesalahan saat menghapus jenis pelatihan.'
+				);
+			}
+
+			redirect('/admin/training-fields');
 		}
 	}

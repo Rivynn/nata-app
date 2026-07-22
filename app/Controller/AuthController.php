@@ -7,6 +7,7 @@
 	use Natasya\NataApp\Model\Participant;
 	use Natasya\NataApp\Model\User;
 	use Natasya\NataApp\Services\NotificationService;
+	use function Illuminate\Support\now;
 
 	class AuthController extends Controller
 	{
@@ -39,51 +40,45 @@
 
 			if ($password !== $confirmation) {
 
-				$_SESSION['error'] = 'Konfirmasi password tidak sama.';
+				error('Konfirmasi password tidak sama.');
 
 				$this->redirect('/register');
 			}
 
-			$userModel = new User();
+			if (User::where('username', $username)->exists()) {
 
-			if ($userModel->findByUsername($username)) {
-
-				$_SESSION['error'] = 'Username sudah digunakan.';
+				error('Username sudah digunakan.');
 
 				$this->redirect('/register');
 			}
 
-			if ($userModel->findByEmail($email)) {
+			if (User::where('email', $email)->exists()) {
 
-				$_SESSION['error'] = 'Email sudah digunakan.';
+				error('Email sudah digunakan.');
 
 				$this->redirect('/register');
 			}
 
-			$userId = $userModel->create([
+			$user = User::create([
 				'name' => $name,
 				'username' => $username,
 				'email' => $email,
 				'password' => password_hash($password, PASSWORD_DEFAULT),
-				'role' => 'peserta'
+				'role' => 'peserta',
+				'status' => 'active',
 			]);
 
-			$participant = new Participant();
-
-			$participant->create([
-				'user_id' => $userId,
-				'phone' => $phone
+			Participant::create([
+				'user_id' => $user->id,
+				'phone' => $phone,
 			]);
 
-			(new NotificationService())
-				->registration([
-					'name'  => $name,
-					'email' => $email,
-					'phone' => $phone
-				]);
-
-
-			$_SESSION['success'] = 'Registrasi berhasil. Silakan login.';
+//			(new NotificationService())->registration([
+//				'name' => $name,
+//				'email' => $email,
+//				'phone' => $phone,
+//			]);
+			success('Registrasi berhasil. Silakan login.');
 
 			$this->redirect('/login');
 		}
@@ -91,49 +86,55 @@
 		public function login(): void
 		{
 			$login = trim(Request::post('login'));
-
 			$password = Request::post('password');
 
-			$userModel = new User();
+			$user = User::where('username', $login)
+				->orWhere('email', $login)
+				->first();
 
-			$user = $userModel->findByLogin($login);
+			if (! $user || ! password_verify($password, $user->password)) {
 
-			if (!$user) {
-
-				$_SESSION['error'] = 'Username/Email atau Password salah.';
-
-				$this->redirect('/login');
-			}
-
-			if (!password_verify($password, $user['password'])) {
-
-				$_SESSION['error'] = 'Username/Email atau Password salah.';
+				error('Username/Email atau Password salah.');
 
 				$this->redirect('/login');
 			}
 
-			if ($user['status'] !== 'active') {
+			if ($user->status !== 'active') {
 
-				$_SESSION['error'] = 'Akun telah dinonaktifkan.';
+				error('Akun telah dinonaktifkan.');
 
 				$this->redirect('/login');
 			}
-			$userModel->updateLastLogin($user['id']);
+
+			$user->update([
+				'last_login_at' => now(),
+			]);
 
 			auth()->login($user);
 
-			switch ($user['role']) {
+
+
+			switch ($user->role) {
 
 				case 'admin':
+
 					$this->redirect('/admin');
+					break;
 
 				case 'pegawai':
 					$this->redirect('/pegawai');
+					break;
 
 				case 'peserta':
 					$this->redirect('/peserta');
+					break;
+
+				case 'pelatih':
+					$this->redirect('/pelatih');
+					break;
 
 				default:
+					auth()->logout();
 					$this->redirect('/login');
 			}
 		}

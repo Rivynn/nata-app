@@ -10,66 +10,76 @@
 	{
 		public function index(): void
 		{
-			$participant = new Participant();
+			$participants = Participant::query()
+				->with([
+					'user',
+					'profile',
+				])
+				->latest()
+				->get();
 
 			$this->view(
 				'Admin/Participants/index',
 				[
 					'title' => 'Data Peserta',
 
-					'participants' => $participant->all(),
+					'participants' => $participants,
 
-					'total' => $participant->count(),
+					'total' => $participants->count(),
 				]
 			);
 		}
 
 		public function show(): void
 		{
-			$id = (int) Request::get('id');
+			try {
 
-			$participant = new Participant();
+				$participant = Participant::query()
+					->with([
+						'user',
+						'profile',
+						'registrations',
+					])
+					->findOrFail(
+						(int) Request::get('id')
+					);
 
-			$data = $participant->find($id);
+				$this->view(
+					'Admin/Participants/show',
+					[
+						'title' => 'Detail Peserta',
 
-			if (!$data) {
+						'participant' => $participant,
+					]
+				);
 
-				$_SESSION['error'] = 'Peserta tidak ditemukan.';
+			} catch (\Exception) {
 
-				$this->redirect('/admin/participants');
+				error('Peserta tidak ditemukan.');
+
+				redirect('/admin/participants');
 
 			}
-
-			$this->view(
-				'Admin/Participants/show',
-				[
-					'title' => 'Detail Peserta',
-
-					'participant' => $data,
-				]
-			);
 		}
 
 		public function delete(): void
 		{
-			$participant = new Participant();
+			try {
 
-			$id = (int) Request::post('id');
+				$participant = Participant::query()->findOrFail(
+					(int) Request::post('id')
+				);
 
-			$data = $participant->find($id);
+				$participant->delete();
 
-			if (!$data) {
+				success('Peserta berhasil dihapus.');
 
-				$_SESSION['error'] = 'Peserta tidak ditemukan.';
+			} catch (Exception) {
 
-				$this->redirect('/admin/participants');
+				error('Peserta tidak ditemukan.');
 
 			}
 
-			$participant->delete($id);
-
-			$_SESSION['success'] = 'Peserta berhasil dihapus.';
-
-			$this->redirect('/admin/participants');
+			redirect('/admin/participants');
 		}
 	}

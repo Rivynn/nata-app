@@ -18,27 +18,19 @@
 
 				<div class="card-body">
 
-					<?php if (isset($_SESSION['success'])): ?>
+					<?php if ($message = flash('success')): ?>
 
 						<div class="alert alert-success">
-
-							<?= $_SESSION['success'] ?>
-
+							<?= $message ?>
 						</div>
-
-						<?php unset($_SESSION['success']); ?>
 
 					<?php endif; ?>
 
-					<?php if (isset($_SESSION['error'])): ?>
+					<?php if ($message = flash('error')): ?>
 
 						<div class="alert alert-danger">
-
-							<?= $_SESSION['error'] ?>
-
+							<?= $message ?>
 						</div>
-
-						<?php unset($_SESSION['error']); ?>
 
 					<?php endif; ?>
 
@@ -55,26 +47,26 @@
                                     class="mx-auto mb-3"
                                     style="width:140px;height:140px;">
 
-                                <?php if (has_avatar()): ?>
+								<?php if (!empty($user->avatar)): ?>
 
-                                    <img
-                                            src="<?= avatar() ?>"
-                                            id="avatarImage"
-                                            class="rounded-circle shadow"
-                                            style="width:140px;height:140px;object-fit:cover;"
-                                            alt="Avatar">
+									<img
+										src="<?= asset('assets/uploads/avatars/' . $user->avatar) ?>"
+										id="avatarImage"
+										class="rounded-circle shadow"
+										style="width:140px;height:140px;object-fit:cover;"
+										alt="Avatar">
 
-                                <?php else: ?>
+								<?php else: ?>
 
-                                    <div
-                                            id="avatarInitial"
-                                            class="avatar-circle-lg mx-auto">
+									<div
+										id="avatarInitial"
+										class="avatar-circle-lg mx-auto">
 
-                                        <?= initials(user()['name']) ?>
+										<?= initials($user->name) ?>
 
-                                    </div>
+									</div>
 
-                                <?php endif; ?>
+								<?php endif; ?>
 
                             </div>
 
@@ -108,14 +100,13 @@
 
                             <h4 class="font-weight-bold mb-1">
 
-                                <?= user()['name'] ?>
+								<?= e($user->name) ?>
 
                             </h4>
 
                             <span class="badge badge-primary">
 
-        <?= ucfirst(user()['role']) ?>
-
+    <?= ucfirst($user->role) ?>
     </span>
 
                         </div>
@@ -139,7 +130,7 @@
 									type="text"
 									name="name"
 									class="form-control"
-									value="<?= user()['name'] ?>"
+									value="<?= e($user->name) ?>"
 									required>
 
 							</div>
@@ -165,7 +156,7 @@
 								<input
 									type="text"
 									class="form-control"
-									value="<?= user()['username'] ?>"
+									value="<?= e($user->username) ?>"
 									readonly>
 
 							</div>
@@ -198,7 +189,7 @@
 									type="email"
 									name="email"
 									class="form-control"
-									value="<?= user()['email'] ?>"
+									value="<?= e($user->email) ?>"
 									required>
 
 							</div>
@@ -225,7 +216,7 @@
 									type="text"
 									name="phone"
 									class="form-control"
-									value="<?= $participant['phone'] ?? '' ?>">
+									value="<?= e($participant?->phone ?? '') ?>">
 
 							</div>
 
@@ -250,7 +241,7 @@
 								<input
 									type="text"
 									class="form-control"
-									value="<?= ucfirst(user()['role']) ?>"
+									value="<?= ucfirst($user->role) ?>"
 									readonly>
 
 							</div>

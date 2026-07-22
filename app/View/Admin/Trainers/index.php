@@ -1,46 +1,94 @@
 <div class="container-fluid">
 
-	<!-- Header -->
+	<?php if ($message = flash('success')): ?>
+
+		<div class="alert alert-success alert-dismissible fade show shadow-sm">
+
+			<i class="fas fa-check-circle mr-2"></i>
+
+			<?= $message ?>
+
+			<button
+				type="button"
+				class="close"
+				data-dismiss="alert">
+
+				<span>&times;</span>
+
+			</button>
+
+		</div>
+
+	<?php endif; ?>
+
+	<?php if ($message = flash('error')): ?>
+
+		<div class="alert alert-danger alert-dismissible fade show shadow-sm">
+
+			<i class="fas fa-times-circle mr-2"></i>
+
+			<?= $message ?>
+
+			<button
+				type="button"
+				class="close"
+				data-dismiss="alert">
+
+				<span>&times;</span>
+
+			</button>
+
+		</div>
+
+	<?php endif; ?>
 
 	<div class="card shadow border-0 mb-4">
 
-		<div class="card-header bg-white py-3">
+		<div class="card-body">
 
 			<div class="d-flex justify-content-between align-items-center">
 
 				<div>
 
-					<h4 class="font-weight-bold text-primary mb-1">
+					<span class="badge badge-primary px-3 py-2 mb-3">
+
+						Master Data
+
+					</span>
+
+					<h3 class="font-weight-bold text-gray-800 mb-2">
 
 						Data Pelatih
 
-					</h4>
+					</h3>
 
 					<p class="text-muted mb-0">
 
-						Kelola seluruh data pelatih yang tersedia untuk mendukung pelaksanaan program pelatihan.
+						Kelola seluruh data pelatih yang terdaftar pada sistem pelatihan.
 
 					</p>
 
 				</div>
 
-				<a
-					href="<?= url('/admin/trainers/create') ?>"
-					class="btn btn-primary">
+				<div>
 
-					<i class="fas fa-plus-circle mr-2"></i>
+					<a
+						href="<?= url('/admin/trainers/create') ?>"
+						class="btn btn-primary">
 
-					Tambah Pelatih
+						<i class="fas fa-plus-circle mr-2"></i>
 
-				</a>
+						Tambah Pelatih
+
+					</a>
+
+				</div>
 
 			</div>
 
 		</div>
 
 	</div>
-
-	<!-- Statistik -->
 
 	<div class="row">
 
@@ -50,11 +98,11 @@
 
 				<div class="card-body">
 
-					<div class="d-flex justify-content-between align-items-center">
+					<div class="d-flex justify-content-between">
 
 						<div>
 
-							<div class="text-xs text-primary font-weight-bold text-uppercase">
+							<div class="text-xs text-primary text-uppercase font-weight-bold">
 
 								Total Pelatih
 
@@ -84,11 +132,11 @@
 
 				<div class="card-body">
 
-					<div class="d-flex justify-content-between align-items-center">
+					<div class="d-flex justify-content-between">
 
 						<div>
 
-							<div class="text-xs text-success font-weight-bold text-uppercase">
+							<div class="text-xs text-success text-uppercase font-weight-bold">
 
 								Pelatih Aktif
 
@@ -118,11 +166,11 @@
 
 				<div class="card-body">
 
-					<div class="d-flex justify-content-between align-items-center">
+					<div class="d-flex justify-content-between">
 
 						<div>
 
-							<div class="text-xs text-danger font-weight-bold text-uppercase">
+							<div class="text-xs text-danger text-uppercase font-weight-bold">
 
 								Pelatih Nonaktif
 
@@ -152,19 +200,19 @@
 
 				<div class="card-body">
 
-					<div class="d-flex justify-content-between align-items-center">
+					<div class="d-flex justify-content-between">
 
 						<div>
 
-							<div class="text-xs text-info font-weight-bold text-uppercase">
+							<div class="text-xs text-info text-uppercase font-weight-bold">
 
-								Bidang Keahlian
+								Bidang Pelatihan
 
 							</div>
 
 							<h2 class="font-weight-bold mb-0">
 
-								<?= count($fields) ?>
+								<?= $fields->count() ?>
 
 							</h2>
 
@@ -181,9 +229,7 @@
 		</div>
 
 	</div>
-	<!-- Table -->
-
-	<div class="card shadow">
+	<div class="card shadow border-0">
 
 		<div class="card-header bg-white">
 
@@ -199,7 +245,7 @@
 
 					<small class="text-muted">
 
-						Seluruh pelatih yang terdaftar pada sistem.
+						Seluruh pelatih yang telah terdaftar pada sistem.
 
 					</small>
 
@@ -207,9 +253,9 @@
 
 				<span class="badge badge-primary px-3 py-2">
 
-					<?= count($trainers) ?> Pelatih
+				<?= $trainers->count() ?> Pelatih
 
-				</span>
+			</span>
 
 			</div>
 
@@ -217,23 +263,37 @@
 
 		<div class="card-body">
 
-			<?php if(empty($trainers)): ?>
+			<?php if ($trainers->isEmpty()): ?>
 
 				<div class="text-center py-5">
 
-					<i class="fas fa-chalkboard-teacher fa-5x text-gray-300 mb-3"></i>
+					<div class="mb-4">
 
-					<h5 class="font-weight-bold">
+						<i class="fas fa-chalkboard-teacher fa-5x text-gray-300"></i>
 
-						Belum Ada Pelatih
+					</div>
 
-					</h5>
+					<h4 class="font-weight-bold text-gray-700">
 
-					<p class="text-muted">
+						Belum Ada Data Pelatih
 
-						Silahkan tambahkan data pelatih terlebih dahulu.
+					</h4>
+
+					<p class="text-muted mb-4">
+
+						Saat ini belum terdapat data pelatih yang terdaftar pada sistem.
 
 					</p>
+
+					<a
+						href="<?= url('/admin/trainers/create') ?>"
+						class="btn btn-primary">
+
+						<i class="fas fa-plus-circle mr-2"></i>
+
+						Tambah Pelatih
+
+					</a>
 
 				</div>
 
@@ -269,7 +329,7 @@
 
 						<th>
 
-							Bidang
+							Bidang Pelatihan
 
 						</th>
 
@@ -291,7 +351,7 @@
 
 						</th>
 
-						<th width="160">
+						<th width="170">
 
 							Aksi
 
@@ -302,150 +362,194 @@
 					</thead>
 
 					<tbody>
+					<?php foreach ($trainers as $i => $trainer): ?>
 
-					<?php foreach($trainers as $i => $trainer): ?>
+						<tr>
 
-					<tr>
+							<td>
 
-						<td>
+								<?= $i + 1 ?>
 
-							<?= $i + 1 ?>
+							</td>
 
-						</td>
+							<td>
 
-						<td>
+								<div class="d-flex align-items-center">
 
-							<div class="font-weight-bold">
+									<div
+										class="rounded-circle bg-primary text-white d-flex align-items-center justify-content-center mr-3"
+										style="width:45px;height:45px;font-weight:700;">
 
-								<?= $trainer['name'] ?>
+										<?= e($trainer->user->getInitials()) ?>
 
-							</div>
+									</div>
 
-							<small class="text-muted">
+									<div>
 
-								TRL-<?= str_pad($trainer['id'], 4, '0', STR_PAD_LEFT) ?>
+										<div class="font-weight-bold">
 
-							</small>
+											<?= e($trainer->getDisplayName()) ?>
 
-						</td>
+										</div>
 
-						<td>
+										<small class="text-muted">
 
-							<div>
+											@<?= e($trainer->user->username) ?>
 
-								<i class="fas fa-envelope text-primary mr-2"></i>
+										</small>
 
-								<?= $trainer['email'] ?: '-' ?>
+										<br>
 
-							</div>
+										<small class="text-muted">
 
-							<small class="text-muted">
+											TRL-<?= str_pad($trainer->id, 4, '0', STR_PAD_LEFT) ?>
 
-								<i class="fas fa-phone mr-2"></i>
+										</small>
 
-								<?= $trainer['phone'] ?: '-' ?>
+									</div>
 
-							</small>
+								</div>
 
-						</td>
+							</td>
 
-						<td>
+							<td>
 
-									<span class="badge badge-<?= $trainer['color'] ?>">
+								<div>
 
-										<i class="<?= $trainer['icon'] ?> mr-1"></i>
+									<i class="fas fa-envelope text-primary mr-2"></i>
 
-										<?= $trainer['field_name'] ?>
+									<?= e($trainer->user->email) ?>
 
-									</span>
+								</div>
 
-						</td>
+								<small class="text-muted">
 
-						<td>
+									<i class="fas fa-phone mr-2"></i>
 
-							<?= $trainer['institution'] ?: '-' ?>
+									<?= e($trainer->phone ?: '-') ?>
 
-						</td>
+								</small>
 
-						<td>
+							</td>
 
-							<?= $trainer['expertise'] ?: '-' ?>
+							<td>
 
-						</td>
-						<td>
+								<?php if ($trainer->trainingField): ?>
 
-							<?php if($trainer['status'] === 'active'): ?>
+									<span class="badge badge-info px-3 py-2">
 
-								<span class="badge badge-success px-3 py-2">
+				<?= e($trainer->trainingField->name) ?>
 
-											<i class="fas fa-check-circle mr-1"></i>
+			</span>
 
-											Aktif
+								<?php else: ?>
 
-										</span>
+									<span class="badge badge-secondary px-3 py-2">
 
-							<?php else: ?>
+				-
 
-								<span class="badge badge-danger px-3 py-2">
+			</span>
 
-											<i class="fas fa-times-circle mr-1"></i>
+								<?php endif; ?>
 
-											Nonaktif
+							</td>
 
-										</span>
+							<td>
 
-							<?php endif; ?>
+								<?= e($trainer->getInstitution()) ?>
 
-						</td>
+							</td>
 
-						<td>
+							<td>
 
-							<div class="btn-group shadow-sm">
+								<div class="font-weight-bold">
 
-								<a
-									href="<?= url('/admin/trainers/show?id=' . $trainer['id']) ?>"
-									class="btn btn-outline-primary btn-sm"
-									title="Detail">
+									<?= e($trainer->getExpertise()) ?>
 
-									<i class="fas fa-eye"></i>
+								</div>
 
-								</a>
+								<small class="text-muted">
 
-								<a
-									href="<?= url('/admin/trainers/edit?id=' . $trainer['id']) ?>"
-									class="btn btn-outline-warning btn-sm"
-									title="Edit">
+									<?= e($trainer->getSpecialization()) ?>
 
-									<i class="fas fa-edit"></i>
+								</small>
 
-								</a>
+							</td>
 
-								<form
-									method="POST"
-									action="<?= url('/admin/trainers/delete') ?>"
-									class="d-inline">
+							<td>
 
-									<input
-										type="hidden"
-										name="id"
-										value="<?= $trainer['id'] ?>">
+								<?php if ($trainer->user->isActive()): ?>
 
-									<button
-										type="submit"
-										class="btn btn-outline-danger btn-sm"
-										onclick="return confirm('Yakin ingin menghapus pelatih ini?')">
+									<span class="badge badge-success px-3 py-2">
 
-										<i class="fas fa-trash"></i>
+				<i class="fas fa-check-circle mr-1"></i>
 
-									</button>
+				Aktif
 
-								</form>
+			</span>
 
-							</div>
+								<?php else: ?>
 
-						</td>
+									<span class="badge badge-danger px-3 py-2">
 
-					</tr>
+				<i class="fas fa-times-circle mr-1"></i>
+
+				Nonaktif
+
+			</span>
+
+								<?php endif; ?>
+
+							</td>
+
+							<td>
+
+								<div class="btn-group shadow-sm">
+
+									<a
+										href="<?= url('/admin/trainers/show?id=' . $trainer->id) ?>"
+										class="btn btn-outline-primary btn-sm"
+										title="Detail">
+
+										<i class="fas fa-eye"></i>
+
+									</a>
+
+									<a
+										href="<?= url('/admin/trainers/edit?id=' . $trainer->id) ?>"
+										class="btn btn-outline-warning btn-sm"
+										title="Edit">
+
+										<i class="fas fa-edit"></i>
+
+									</a>
+
+									<form
+										method="POST"
+										action="<?= url('/admin/trainers/delete') ?>"
+										class="d-inline">
+
+										<input
+											type="hidden"
+											name="id"
+											value="<?= $trainer->id ?>">
+
+										<button
+											type="submit"
+											class="btn btn-outline-danger btn-sm"
+											onclick="return confirm('Yakin ingin menghapus pelatih ini?')">
+
+											<i class="fas fa-trash"></i>
+
+										</button>
+
+									</form>
+
+								</div>
+
+							</td>
+
+						</tr>
 
 					<?php endforeach; ?>
 
@@ -460,5 +564,83 @@
 		</div>
 
 	</div>
+	<script>
 
+		$(function () {
+
+			$('#trainersTable').DataTable({
+
+				responsive: true,
+
+				autoWidth: false,
+
+				pageLength: 10,
+
+				lengthMenu: [
+					[10, 25, 50, 100],
+					[10, 25, 50, 100]
+				],
+
+				order: [
+					[1, 'asc']
+				],
+
+				columnDefs: [
+
+					{
+						orderable: false,
+						targets: [7]
+					},
+
+				],
+
+				language: {
+
+					search: "Cari Pelatih :",
+
+					searchPlaceholder: "Nama, email, instansi...",
+
+					lengthMenu: "Tampilkan _MENU_ data",
+
+					info: "Menampilkan _START_ - _END_ dari _TOTAL_ pelatih",
+
+					infoEmpty: "Tidak ada data",
+
+					zeroRecords: "Pelatih tidak ditemukan",
+
+					emptyTable: "Belum ada data pelatih",
+
+					infoFiltered: "(difilter dari _MAX_ data)",
+
+					paginate: {
+
+						first: "Awal",
+
+						last: "Akhir",
+
+						next: '<i class="fas fa-angle-right"></i>',
+
+						previous: '<i class="fas fa-angle-left"></i>',
+
+					}
+
+				}
+
+			});
+
+			/*
+			|--------------------------------------------------------------------------
+			| Auto Hide Flash
+			|--------------------------------------------------------------------------
+			*/
+
+			setTimeout(function () {
+
+				$('.alert').alert('close');
+
+			}, 5000);
+
+		});
+
+	</script>
 </div>
